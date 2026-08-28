@@ -1,4 +1,4 @@
-import type {ReactNode} from 'react';
+import {Fragment, type ReactNode} from 'react';
 import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
 
@@ -11,6 +11,13 @@ type SectionItem = {
   description: string;
   to: string;
   action: string;
+};
+
+type WorkflowNode = {
+  index: string;
+  title: string;
+  detail: string;
+  tone: 'blue' | 'red' | 'gold' | 'ink';
 };
 
 const sectionItems: SectionItem[] = [
@@ -40,10 +47,43 @@ const sectionItems: SectionItem[] = [
   },
 ];
 
+const workflowNodes: WorkflowNode[] = [
+  {index: '01', title: '加载模型', detail: 'MODEL', tone: 'blue'},
+  {index: '02', title: '编码文本', detail: 'ENCODER', tone: 'gold'},
+  {index: '03', title: '配置提示词', detail: 'PROMPT', tone: 'red'},
+  {index: '04', title: '图片绘制', detail: 'SAMPLER', tone: 'ink'},
+  {index: '05', title: '图片保存', detail: 'OUTPUT', tone: 'blue'},
+];
+
 export default function HomepageFeatures(): ReactNode {
   return (
     <section className={styles.features}>
       <div className="container">
+        <div className={styles.workflowBand}>
+          <div className={styles.workflowHeader}>
+            <span className={styles.workflowKicker}>WORKFLOW / SIGNAL PATH</span>
+            <span className={styles.workflowMeta}>COMFYUI + ANIMA / 05 NODES</span>
+          </div>
+          <div className={styles.workflowTrack}>
+            {workflowNodes.map((node, index) => (
+              <Fragment key={node.index}>
+                <div className={`${styles.workflowNode} ${styles[`tone${node.tone}`]}`}>
+                  <span className={styles.workflowNodeIndex}>{node.index}</span>
+                  <span className={styles.workflowNodeTitle}>{node.title}</span>
+                  <span className={styles.workflowNodeDetail}>{node.detail}</span>
+                </div>
+                {index < workflowNodes.length - 1 ? (
+                  <span className={styles.workflowConnector} aria-hidden="true" />
+                ) : null}
+              </Fragment>
+            ))}
+          </div>
+          <div className={styles.workflowFooter}>
+            <span>TEXT CONDITION</span>
+            <span className={styles.workflowFooterLine} aria-hidden="true" />
+            <span>IMAGE RESULT</span>
+          </div>
+        </div>
         <div className={styles.sectionHeader}>
           <p className={styles.sectionKicker}>READING PATH / 00</p>
           <Heading as="h2">从工作流的骨架开始。</Heading>

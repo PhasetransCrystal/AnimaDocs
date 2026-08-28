@@ -35,6 +35,175 @@
   width: min(22vw, 18rem);
 }
 
+.workflowBand {
+  background:
+    linear-gradient(135deg, transparent 0 76%, color-mix(in srgb, var(--anima-blue) 18%, transparent) 76% 100%),
+    var(--anima-surface);
+  border: 1px solid var(--anima-line-strong);
+  margin-bottom: 4.5rem;
+  overflow: hidden;
+  padding: 1.25rem 1.35rem 1.1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.workflowBand::before {
+  background: var(--anima-blue);
+  content: "";
+  height: 100%;
+  left: 0;
+  opacity: 0.9;
+  position: absolute;
+  top: 0;
+  width: 0.35rem;
+}
+
+.workflowBand::after {
+  border: 1px solid var(--anima-line);
+  content: "";
+  height: 11rem;
+  pointer-events: none;
+  position: absolute;
+  right: -4rem;
+  top: -5rem;
+  transform: rotate(24deg);
+  width: 11rem;
+}
+
+.workflowHeader,
+.workflowFooter {
+  align-items: center;
+  color: var(--anima-ink-soft);
+  display: flex;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.65rem;
+  gap: 1rem;
+  justify-content: space-between;
+  letter-spacing: 0.1em;
+  position: relative;
+  text-transform: uppercase;
+  z-index: 1;
+}
+
+.workflowKicker {
+  color: var(--anima-blue);
+  font-weight: 700;
+}
+
+.workflowMeta {
+  text-align: right;
+}
+
+.workflowTrack {
+  align-items: center;
+  display: flex;
+  margin: 1.25rem 0 1.1rem;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.workflowNode {
+  background: var(--anima-paper);
+  border: 1px solid var(--anima-line-strong);
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-height: 7rem;
+  min-width: 0;
+  padding: 0.8rem 0.85rem;
+  position: relative;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.workflowNode:hover {
+  border-color: var(--anima-blue);
+  box-shadow: 0 10px 22px var(--anima-shadow);
+  transform: translateY(-4px);
+  z-index: 2;
+}
+
+.workflowNodeIndex {
+  color: var(--anima-ink-soft);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.66rem;
+}
+
+.workflowNodeTitle {
+  color: var(--anima-ink);
+  font-family: var(--ifm-heading-font-family);
+  font-size: 1.05rem;
+  font-weight: 750;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.workflowNodeDetail {
+  color: var(--anima-ink-soft);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  margin-top: auto;
+}
+
+.workflowNode::after {
+  background: var(--anima-blue);
+  content: "";
+  height: 0.3rem;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 36%;
+}
+
+.toneblue::after {
+  background: var(--anima-blue);
+}
+
+.tonered::after {
+  background: var(--anima-red);
+}
+
+.tonegold::after {
+  background: var(--anima-gold);
+}
+
+.toneink::after {
+  background: var(--anima-ink);
+}
+
+.workflowConnector {
+  background: var(--anima-line-strong);
+  flex: 0 0 1.35rem;
+  height: 1px;
+  position: relative;
+}
+
+.workflowConnector::after {
+  border-bottom: 1px solid var(--anima-line-strong);
+  border-right: 1px solid var(--anima-line-strong);
+  content: "";
+  height: 0.4rem;
+  position: absolute;
+  right: 0;
+  top: -0.2rem;
+  transform: rotate(-45deg);
+  width: 0.4rem;
+}
+
+.workflowFooter {
+  color: var(--anima-ink-soft);
+  justify-content: flex-start;
+}
+
+.workflowFooterLine {
+  background: var(--anima-line-strong);
+  flex: 1;
+  height: 1px;
+  max-width: 20rem;
+}
+
 .sectionHeader {
   border-left: 4px solid var(--anima-blue);
   background: color-mix(in srgb, var(--anima-surface) 78%, transparent);
@@ -218,6 +387,60 @@
     var(--anima-paper);
 }
 
+:global([data-theme='dark']) .workflowBand {
+  background:
+    radial-gradient(circle at 88% 35%, color-mix(in srgb, var(--anima-red) 18%, transparent), transparent 24%),
+    var(--anima-surface);
+  border-color: var(--anima-line);
+  border-radius: var(--anima-radius);
+  box-shadow: 0 16px 32px var(--anima-shadow);
+}
+
+:global([data-theme='dark']) .workflowBand::before {
+  background: var(--anima-red);
+  border-radius: 0 4px 4px 0;
+}
+
+:global([data-theme='dark']) .workflowBand::after {
+  border-color: color-mix(in srgb, var(--anima-red) 48%, transparent);
+  border-radius: 50%;
+}
+
+:global([data-theme='dark']) .workflowKicker {
+  color: var(--anima-red);
+}
+
+:global([data-theme='dark']) .workflowNode {
+  background: color-mix(in srgb, var(--anima-ink) 5%, var(--anima-paper));
+  border-color: var(--anima-line);
+  border-radius: calc(var(--anima-radius) - 4px);
+}
+
+:global([data-theme='dark']) .workflowNode:hover {
+  border-color: var(--anima-red);
+  box-shadow: 0 12px 26px var(--anima-shadow);
+}
+
+:global([data-theme='dark']) .workflowNode::after {
+  border-radius: 999px;
+}
+
+:global([data-theme='dark']) .toneblue::after {
+  background: var(--anima-blue);
+}
+
+:global([data-theme='dark']) .tonered::after {
+  background: var(--anima-red);
+}
+
+:global([data-theme='dark']) .tonegold::after {
+  background: var(--anima-gold);
+}
+
+:global([data-theme='dark']) .toneink::after {
+  background: var(--anima-gray);
+}
+
 :global([data-theme='dark']) .features::before {
   background-image:
     radial-gradient(circle, color-mix(in srgb, var(--anima-red) 34%, transparent) 0 1px, transparent 1.5px),
@@ -286,6 +509,57 @@
 }
 
 @media screen and (max-width: 640px) {
+  .workflowBand {
+    margin-bottom: 3.25rem;
+    padding: 1rem 0.85rem 0.9rem;
+  }
+
+  .workflowHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .workflowMeta {
+    text-align: left;
+  }
+
+  .workflowTrack {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .workflowNode {
+    min-height: 4.75rem;
+  }
+
+  .workflowConnector {
+    flex: 0 0 1.25rem;
+    height: 1.25rem;
+    margin-left: 1.25rem;
+    width: 1px;
+  }
+
+  .workflowConnector::after {
+    bottom: 0;
+    right: -0.2rem;
+    top: auto;
+    transform: rotate(45deg);
+  }
+
+  .workflowFooter {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .workflowFooterLine {
+    flex: 0 0 1px;
+    max-width: none;
+    width: 100%;
+  }
+
   .sectionList {
     margin-top: 3rem;
   }
