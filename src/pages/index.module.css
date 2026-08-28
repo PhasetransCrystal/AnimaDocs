@@ -20,8 +20,12 @@
 .atmosphereDisc,
 .atmosphereOrbit,
 .atmosphereSlash,
-.atmosphereBlock {
+.atmosphereBlock,
+.atmosphereFrame,
+.atmosphereTicks,
+.atmosphereLabel {
   display: block;
+  pointer-events: none;
   position: absolute;
 }
 
@@ -63,6 +67,63 @@
   right: 0;
   width: min(27vw, 25rem);
   clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%, 0 32%);
+}
+
+.atmosphereFrame {
+  border: 1px solid color-mix(in srgb, var(--anima-blue) 48%, transparent);
+  height: 23rem;
+  right: 4.5%;
+  top: 12%;
+  transform: rotate(-8deg);
+  width: min(42vw, 37rem);
+}
+
+.atmosphereFrame::before,
+.atmosphereFrame::after {
+  border: 1px solid color-mix(in srgb, var(--anima-ink) 34%, transparent);
+  content: "";
+  inset: 0.8rem;
+  position: absolute;
+}
+
+.atmosphereFrame::after {
+  border-color: color-mix(in srgb, var(--anima-gold) 52%, transparent);
+  inset: 1.6rem;
+  transform: rotate(5deg);
+}
+
+.atmosphereTicks {
+  border: 1px dashed color-mix(in srgb, var(--anima-blue) 62%, transparent);
+  border-radius: 50%;
+  height: 28rem;
+  right: -3rem;
+  top: 8rem;
+  transform: rotate(16deg);
+  width: 28rem;
+}
+
+.atmosphereTicks::before {
+  background: repeating-conic-gradient(
+    from 0deg,
+    var(--anima-blue) 0deg 1deg,
+    transparent 1deg 12deg
+  );
+  border-radius: 50%;
+  content: "";
+  inset: -0.55rem;
+  opacity: 0.5;
+  position: absolute;
+}
+
+.atmosphereLabel {
+  bottom: 1.2rem;
+  color: var(--anima-blue);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  right: 4.8%;
+  transform: rotate(-90deg);
+  transform-origin: right bottom;
 }
 
 .heroBanner::before,
@@ -260,6 +321,22 @@
   padding: 1.1rem 1.25rem 1.25rem;
   position: relative;
   z-index: 1;
+}
+
+.panelRibbon {
+  background: var(--anima-ink);
+  color: var(--anima-paper);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  padding: 0.35rem 0.75rem;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  text-transform: uppercase;
+  top: 0.65rem;
+  transform: rotate(3deg);
+  z-index: 2;
 }
 
 .panelTopline {
@@ -500,6 +577,37 @@
   opacity: 0.88;
 }
 
+:global([data-theme='dark']) .atmosphereFrame {
+  border-color: color-mix(in srgb, var(--anima-red) 56%, transparent);
+  border-radius: 18px;
+}
+
+:global([data-theme='dark']) .atmosphereFrame::before,
+:global([data-theme='dark']) .atmosphereFrame::after {
+  border-color: color-mix(in srgb, var(--anima-ink) 42%, transparent);
+  border-radius: 12px;
+}
+
+:global([data-theme='dark']) .atmosphereFrame::after {
+  border-color: color-mix(in srgb, var(--anima-red) 46%, transparent);
+}
+
+:global([data-theme='dark']) .atmosphereTicks {
+  border-color: color-mix(in srgb, var(--anima-red) 62%, transparent);
+}
+
+:global([data-theme='dark']) .atmosphereTicks::before {
+  background: repeating-conic-gradient(
+    from 0deg,
+    var(--anima-red) 0deg 1deg,
+    transparent 1deg 12deg
+  );
+}
+
+:global([data-theme='dark']) .atmosphereLabel {
+  color: var(--anima-red);
+}
+
 :global([data-theme='dark']) .heroBanner::before {
   background: transparent;
   border: 1px solid color-mix(in srgb, var(--anima-red) 60%, transparent);
@@ -557,6 +665,12 @@
   border-radius: var(--anima-radius);
   border-top-color: var(--anima-red);
   box-shadow: 0 18px 34px var(--anima-shadow);
+}
+
+:global([data-theme='dark']) .panelRibbon {
+  background: var(--anima-red);
+  color: var(--anima-paper);
+  border-radius: 0 0 0 8px;
 }
 
 :global([data-theme='dark']) .panelDiagram {
@@ -703,6 +817,25 @@
   .atmosphereBlock {
     height: 5rem;
     width: 12rem;
+  }
+
+  .atmosphereFrame {
+    height: 15rem;
+    right: -7rem;
+    top: 17rem;
+    width: 24rem;
+  }
+
+  .atmosphereTicks {
+    height: 19rem;
+    right: -8rem;
+    top: 18rem;
+    width: 19rem;
+  }
+
+  .atmosphereLabel {
+    bottom: 0.8rem;
+    right: 1.2rem;
   }
 
   .heroTitle {

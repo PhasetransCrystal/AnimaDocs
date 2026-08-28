@@ -47,6 +47,21 @@
   z-index: 1;
 }
 
+.workflowStamp {
+  border: 1px solid var(--anima-gold);
+  color: var(--anima-gold);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  padding: 0.3rem 0.5rem;
+  pointer-events: none;
+  position: absolute;
+  right: 1rem;
+  top: 2.7rem;
+  transform: rotate(-7deg);
+  z-index: 2;
+}
+
 .workflowBand::before {
   background: var(--anima-blue);
   content: "";
@@ -211,6 +226,18 @@
   padding: 1.3rem 1.5rem 1.35rem 1.25rem;
   position: relative;
   z-index: 1;
+}
+
+.sectionHeaderMark {
+  color: color-mix(in srgb, var(--anima-blue) 24%, transparent);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 7rem;
+  font-weight: 800;
+  line-height: 0.8;
+  pointer-events: none;
+  position: absolute;
+  right: 1rem;
+  top: 0.8rem;
 }
 
 .sectionKicker {
@@ -396,6 +423,12 @@
   box-shadow: 0 16px 32px var(--anima-shadow);
 }
 
+:global([data-theme='dark']) .workflowStamp {
+  border-color: var(--anima-red);
+  color: var(--anima-red);
+  border-radius: 8px;
+}
+
 :global([data-theme='dark']) .workflowBand::before {
   background: var(--anima-red);
   border-radius: 0 4px 4px 0;
@@ -461,6 +494,10 @@
   background: color-mix(in srgb, var(--anima-surface) 90%, transparent);
 }
 
+:global([data-theme='dark']) .sectionHeaderMark {
+  color: color-mix(in srgb, var(--anima-red) 28%, transparent);
+}
+
 :global([data-theme='dark']) .sectionKicker,
 :global([data-theme='dark']) .sectionLabel {
   color: var(--anima-gray);
@@ -514,6 +551,11 @@
     padding: 1rem 0.85rem 0.9rem;
   }
 
+  .workflowStamp {
+    right: 0.75rem;
+    top: 3.8rem;
+  }
+
   .workflowHeader {
     align-items: flex-start;
     flex-direction: column;
@@ -562,6 +604,12 @@
 
   .sectionList {
     margin-top: 3rem;
+  }
+
+  .sectionHeaderMark {
+    font-size: 5rem;
+    right: 0.6rem;
+    top: 0.7rem;
   }
 
   .sectionItem {

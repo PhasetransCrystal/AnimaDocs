@@ -17,6 +17,9 @@ function HomepageHeader(): ReactNode {
         <span className={styles.atmosphereOrbit} />
         <span className={styles.atmosphereSlash} />
         <span className={styles.atmosphereBlock} />
+        <span className={styles.atmosphereFrame} />
+        <span className={styles.atmosphereTicks} />
+        <span className={styles.atmosphereLabel}>FIELD 01 / CALIBRATION</span>
       </div>
       <div className={styles.heroGrid} aria-hidden="true" />
       <div className="container">
@@ -41,6 +44,7 @@ function HomepageHeader(): ReactNode {
           </div>
 
           <aside className={styles.signalPanel} aria-label="Documentation index">
+            <span className={styles.panelRibbon} aria-hidden="true">INDEX / 01</span>
             <div className={styles.panelTopline}>
               <span>NOW INDEXING</span>
               <span>01 / 03</span>

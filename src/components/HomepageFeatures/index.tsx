@@ -60,6 +60,7 @@ export default function HomepageFeatures(): ReactNode {
     <section className={styles.features}>
       <div className="container">
         <div className={styles.workflowBand}>
+          <span className={styles.workflowStamp} aria-hidden="true">A / 05</span>
           <div className={styles.workflowHeader}>
             <span className={styles.workflowKicker}>WORKFLOW / SIGNAL PATH</span>
             <span className={styles.workflowMeta}>COMFYUI + ANIMA / 05 NODES</span>
@@ -85,6 +86,7 @@ export default function HomepageFeatures(): ReactNode {
           </div>
         </div>
         <div className={styles.sectionHeader}>
+          <span className={styles.sectionHeaderMark} aria-hidden="true">02</span>
           <p className={styles.sectionKicker}>READING PATH / 00</p>
           <Heading as="h2">从工作流的骨架开始。</Heading>
           <p>
