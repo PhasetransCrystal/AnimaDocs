@@ -126,6 +126,79 @@
   transform-origin: right bottom;
 }
 
+/* Fourth-pass editorial collage: large registration blocks echo the poster
+ * references while remaining a non-interactive background layer. */
+.heroCollage {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.heroCollageBlock,
+.heroCollageGrid,
+.heroCollageLabel {
+  display: block;
+  pointer-events: none;
+  position: absolute;
+}
+
+.heroCollageBlue {
+  background: var(--anima-blue);
+  height: 17rem;
+  opacity: 0.96;
+  right: -3rem;
+  top: 4.8rem;
+  transform: rotate(13deg);
+  width: 24rem;
+  clip-path: polygon(14% 0, 100% 0, 86% 100%, 0 100%);
+}
+
+.heroCollageInk {
+  background: var(--anima-ink);
+  height: 7rem;
+  opacity: 0.96;
+  right: 15%;
+  top: 20.5rem;
+  transform: rotate(-16deg);
+  width: 30rem;
+  clip-path: polygon(0 18%, 100% 0, 92% 82%, 4% 100%);
+}
+
+.heroCollageGold {
+  background: var(--anima-gold);
+  height: 3rem;
+  opacity: 0.96;
+  right: 8%;
+  top: 17rem;
+  transform: rotate(13deg);
+  width: 8rem;
+  clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+}
+
+.heroCollageGrid {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--anima-paper) 76%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--anima-paper) 76%, transparent) 1px, transparent 1px);
+  background-size: 1.4rem 1.4rem;
+  height: 12rem;
+  opacity: 0.46;
+  right: 4.5rem;
+  top: 7rem;
+  transform: rotate(13deg);
+  width: 16rem;
+}
+
+.heroCollageLabel {
+  color: var(--anima-paper);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  right: 5.5rem;
+  top: 10rem;
+  transform: rotate(13deg);
+}
+
 .heroBanner::before,
 .heroBanner::after {
   content: "";
@@ -608,6 +681,26 @@
   color: var(--anima-red);
 }
 
+:global([data-theme='dark']) .heroCollage {
+  opacity: 0.14;
+}
+
+:global([data-theme='dark']) .heroCollageBlue {
+  background: var(--anima-red);
+}
+
+:global([data-theme='dark']) .heroCollageInk {
+  background: var(--anima-ink);
+}
+
+:global([data-theme='dark']) .heroCollageGold {
+  background: var(--anima-red);
+}
+
+:global([data-theme='dark']) .heroCollageGrid {
+  opacity: 0.2;
+}
+
 :global([data-theme='dark']) .heroBanner::before {
   background: transparent;
   border: 1px solid color-mix(in srgb, var(--anima-red) 60%, transparent);
@@ -836,6 +929,39 @@
   .atmosphereLabel {
     bottom: 0.8rem;
     right: 1.2rem;
+  }
+
+  .heroCollageBlue {
+    height: 12rem;
+    right: -8rem;
+    top: 8rem;
+    width: 17rem;
+  }
+
+  .heroCollageInk {
+    height: 4rem;
+    right: -2rem;
+    top: 19rem;
+    width: 18rem;
+  }
+
+  .heroCollageGold {
+    height: 2rem;
+    right: 1rem;
+    top: 16rem;
+    width: 5rem;
+  }
+
+  .heroCollageGrid {
+    height: 10rem;
+    right: -2rem;
+    top: 9rem;
+    width: 13rem;
+  }
+
+  .heroCollageLabel {
+    right: 1.4rem;
+    top: 12rem;
   }
 
   .heroTitle {
