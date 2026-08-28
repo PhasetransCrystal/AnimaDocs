@@ -162,7 +162,7 @@
 }
 
 .tonered::after {
-  background: var(--anima-red);
+  background: var(--anima-gold);
 }
 
 .tonegold::after {
@@ -310,7 +310,7 @@
 }
 
 .sectionSignal::after {
-  background: var(--anima-red);
+  background: var(--anima-gold);
   content: "";
   height: 0.45rem;
   left: -0.25rem;
@@ -361,7 +361,7 @@
 }
 
 .sectionItem:hover .sectionAction {
-  color: var(--anima-red);
+  color: var(--anima-gold);
 }
 
 .sectionFootnote {

@@ -46,7 +46,7 @@
 }
 
 .atmosphereSlash {
-  background: var(--anima-red);
+  background: var(--anima-blue);
   height: 5.2rem;
   opacity: 0.9;
   right: 11%;
@@ -290,7 +290,7 @@
 }
 
 .panelDiagramDisc {
-  background: var(--anima-red);
+  background: var(--anima-blue);
   border-radius: 50%;
   height: 9.5rem;
   left: 50%;
@@ -457,7 +457,7 @@
 }
 
 .signalBarMarker {
-  background: var(--anima-red);
+  background: var(--anima-gold);
   display: inline-block;
   height: 0.55rem;
   width: 0.55rem;

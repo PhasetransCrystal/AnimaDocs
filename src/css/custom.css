@@ -97,8 +97,60 @@
 html,
 body,
 .main-wrapper {
-  background: var(--anima-paper);
+  background:
+    linear-gradient(118deg, color-mix(in srgb, var(--anima-blue) 5%, transparent) 0 18%, transparent 18% 100%),
+    repeating-linear-gradient(90deg, transparent 0 7.5rem, color-mix(in srgb, var(--anima-ink) 4%, transparent) 7.5rem 7.55rem),
+    var(--anima-paper);
   color: var(--anima-ink);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Keep decorative layers from creating a sideways scrollbar without locking
+ * the document's vertical scroll root. */
+html {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.main-wrapper {
+  /* Clip off-canvas decoration while leaving the document scroll root intact. */
+  overflow: clip;
+}
+
+.main-wrapper::before,
+.main-wrapper::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+.main-wrapper::before {
+  border: 1px solid color-mix(in srgb, var(--anima-blue) 20%, transparent);
+  height: 34rem;
+  right: -17rem;
+  top: 7rem;
+  transform: rotate(-18deg);
+  width: 34rem;
+}
+
+.main-wrapper::after {
+  background: var(--anima-blue);
+  height: 0.45rem;
+  left: 0;
+  opacity: 0.95;
+  top: 0;
+  width: min(28vw, 20rem);
+}
+
+.main-wrapper > * {
+  position: relative;
+  z-index: 1;
 }
 
 body {
@@ -119,6 +171,28 @@ a:hover {
   border-bottom: 1px solid var(--anima-line);
   box-shadow: none;
   backdrop-filter: blur(10px);
+  position: relative;
+}
+
+.navbar::before {
+  background: var(--anima-blue);
+  content: "";
+  height: 0.2rem;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.navbar::after {
+  border-right: 1px solid var(--anima-line);
+  content: "";
+  height: 100%;
+  opacity: 0.7;
+  position: absolute;
+  right: 14%;
+  top: 0;
+  transform: skewX(-18deg);
 }
 
 .navbar__brand {
@@ -151,7 +225,7 @@ a:hover {
 }
 
 .navbar__link--active::after {
-  background: var(--anima-red);
+  background: var(--anima-blue);
   bottom: 0.35rem;
   content: "";
   height: 2px;
@@ -162,6 +236,11 @@ a:hover {
 
 .navbar__logo img {
   border-radius: var(--anima-radius);
+}
+
+.navbar__logo {
+  background: var(--anima-surface);
+  padding: 0.15rem;
 }
 
 .container {
@@ -179,6 +258,29 @@ a:hover {
 .theme-doc-sidebar-container {
   background: var(--anima-surface-strong);
   border-right: 1px solid var(--anima-line);
+  overflow: hidden;
+  position: relative;
+}
+
+.theme-doc-sidebar-container::before {
+  background:
+    linear-gradient(to right, var(--anima-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--anima-grid) 1px, transparent 1px);
+  background-size: 2.25rem 2.25rem;
+  content: "";
+  height: 14rem;
+  opacity: 0.45;
+  pointer-events: none;
+  position: absolute;
+  right: -4rem;
+  top: 4.5rem;
+  transform: rotate(-9deg);
+  width: 18rem;
+}
+
+.theme-doc-sidebar-container > * {
+  position: relative;
+  z-index: 1;
 }
 
 .theme-doc-sidebar-menu {
@@ -199,10 +301,22 @@ a:hover {
 }
 
 .menu__link--active {
-  background: color-mix(in srgb, var(--anima-red) 14%, transparent);
-  border-left-color: var(--anima-red);
-  color: var(--anima-red);
+  background: color-mix(in srgb, var(--anima-blue) 14%, transparent);
+  border-left-color: var(--anima-blue);
+  color: var(--anima-blue);
   font-weight: 750;
+  position: relative;
+}
+
+.menu__link--active::after {
+  background: var(--anima-gold);
+  content: "";
+  height: 0.35rem;
+  position: absolute;
+  right: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0.35rem;
 }
 
 .menu__list .menu__list {
@@ -212,15 +326,54 @@ a:hover {
 
 .theme-doc-markdown {
   max-width: 900px;
+  position: relative;
+}
+
+.theme-doc-markdown::before,
+.theme-doc-markdown::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+}
+
+.theme-doc-markdown::before {
+  border: 1px solid color-mix(in srgb, var(--anima-blue) 28%, transparent);
+  border-radius: 50%;
+  height: 18rem;
+  right: -8rem;
+  top: -5rem;
+  width: 18rem;
+}
+
+.theme-doc-markdown::after {
+  background: var(--anima-blue);
+  height: 3.5rem;
+  opacity: 0.14;
+  right: -2rem;
+  top: 3.2rem;
+  transform: rotate(-12deg);
+  width: 12rem;
 }
 
 .theme-doc-markdown h1 {
-  border-bottom: 3px solid var(--anima-red);
+  border-bottom: 3px solid var(--anima-blue);
   font-size: clamp(2.25rem, 3.7vw, 3.25rem);
   font-weight: 650;
   letter-spacing: 0;
   line-height: 1.08;
   padding-bottom: 1.1rem;
+  position: relative;
+}
+
+.theme-doc-markdown h1::before {
+  background: var(--anima-blue);
+  content: "";
+  height: 0.55rem;
+  left: 0;
+  position: absolute;
+  top: -0.85rem;
+  width: 4.5rem;
 }
 
 .theme-doc-markdown h2,
@@ -229,23 +382,51 @@ a:hover {
   font-weight: 650;
   letter-spacing: 0;
   padding-top: 0.85rem;
+  position: relative;
 }
 
 .theme-doc-markdown h2::before,
 .theme-doc-markdown h3::before {
-  color: var(--anima-blue);
-  content: "/";
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 0.75em;
-  margin-right: 0.45rem;
+  background: var(--anima-blue);
+  content: "";
+  display: inline-block;
+  height: 0.7em;
+  margin-right: 0.55rem;
+  vertical-align: -0.04em;
+  width: 0.34em;
+}
+
+.theme-doc-markdown h3::before {
+  background: var(--anima-gold);
+  height: 0.55em;
+  width: 0.55em;
+}
+
+.theme-doc-markdown > h1 + p {
+  border-left: 0.3rem solid var(--anima-gold);
+  background: color-mix(in srgb, var(--anima-gold) 8%, transparent);
+  padding: 0.85rem 1rem;
 }
 
 .theme-doc-markdown blockquote {
-  background: color-mix(in srgb, var(--anima-red) 8%, transparent);
-  border-left: 3px solid var(--anima-red);
+  background: color-mix(in srgb, var(--anima-gold) 10%, transparent);
+  border-left: 3px solid var(--anima-gold);
   border-radius: var(--anima-radius);
   color: var(--anima-ink-soft);
   padding: 0.8rem 1rem;
+  position: relative;
+}
+
+.theme-doc-markdown blockquote::after {
+  border: 1px solid var(--anima-blue);
+  content: "";
+  height: 1.4rem;
+  opacity: 0.6;
+  position: absolute;
+  right: 0.8rem;
+  top: 0.8rem;
+  transform: rotate(45deg);
+  width: 1.4rem;
 }
 
 .theme-doc-markdown table {
@@ -269,11 +450,38 @@ a:hover {
   background: color-mix(in srgb, var(--anima-blue) 7%, transparent);
 }
 
+.theme-doc-markdown table tbody tr {
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.theme-doc-markdown table tbody tr:hover {
+  background: color-mix(in srgb, var(--anima-blue) 12%, transparent);
+  transform: translateX(0.2rem);
+}
+
 .alert {
   border: 1px solid var(--anima-line);
   border-left-width: 4px;
   border-radius: var(--anima-radius);
   box-shadow: none;
+  overflow: hidden;
+  position: relative;
+}
+
+.alert::before {
+  background: var(--ifm-alert-border-color, var(--anima-blue));
+  content: "";
+  height: 0.3rem;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.alert .admonitionHeading {
+  font-family: var(--ifm-heading-font-family);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .alert--info {
@@ -304,6 +512,18 @@ a:hover {
 .theme-code-block {
   border-left: 3px solid var(--anima-blue);
   box-shadow: 0 8px 22px var(--anima-shadow);
+  position: relative;
+}
+
+.theme-code-block::before {
+  background: repeating-linear-gradient(90deg, var(--anima-blue) 0 0.35rem, transparent 0.35rem 0.7rem);
+  content: "";
+  height: 0.22rem;
+  left: 0;
+  opacity: 0.75;
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 
 .table-of-contents {
@@ -327,12 +547,30 @@ a:hover {
 }
 
 .footer {
-  border-top: 4px solid var(--anima-red);
+  border-top: 4px solid var(--anima-blue);
   color: var(--anima-surface-strong);
+  overflow: hidden;
+  position: relative;
+}
+
+.footer::before {
+  border: 1px solid color-mix(in srgb, var(--anima-blue) 40%, transparent);
+  border-radius: 50%;
+  content: "";
+  height: 24rem;
+  position: absolute;
+  right: -10rem;
+  top: -12rem;
+  width: 24rem;
+}
+
+.footer > * {
+  position: relative;
+  z-index: 1;
 }
 
 .footer__title {
-  color: var(--anima-red-bright);
+  color: var(--anima-blue-bright);
   font-family: var(--ifm-heading-font-family);
   font-size: 0.78rem;
   font-weight: 800;
@@ -378,6 +616,110 @@ a:hover {
 [data-theme='dark'] .alert,
 [data-theme='dark'] .theme-doc-markdown table {
   box-shadow: 0 14px 34px var(--anima-shadow);
+}
+
+[data-theme='dark'] .main-wrapper {
+  background:
+    radial-gradient(circle at 88% 8%, color-mix(in srgb, var(--anima-red) 18%, transparent), transparent 20%),
+    repeating-linear-gradient(90deg, transparent 0 8rem, color-mix(in srgb, var(--anima-ink) 4%, transparent) 8rem 8.06rem),
+    var(--anima-paper);
+}
+
+[data-theme='dark'] .main-wrapper::before {
+  border-color: color-mix(in srgb, var(--anima-red) 34%, transparent);
+  border-radius: 50%;
+  height: 38rem;
+  right: -20rem;
+  top: 5rem;
+  transform: rotate(12deg);
+  width: 38rem;
+}
+
+[data-theme='dark'] .main-wrapper::after {
+  background: var(--anima-red);
+}
+
+[data-theme='dark'] .navbar::before {
+  background: var(--anima-red);
+}
+
+[data-theme='dark'] .navbar__link--active::after {
+  background: var(--anima-red);
+}
+
+[data-theme='dark'] .menu__link--active {
+  background: color-mix(in srgb, var(--anima-red) 14%, transparent);
+  border-left-color: var(--anima-red);
+  color: var(--anima-red);
+}
+
+[data-theme='dark'] .menu__link--active::after {
+  background: var(--anima-blue);
+}
+
+[data-theme='dark'] .theme-doc-sidebar-container::before {
+  background-image:
+    radial-gradient(circle, color-mix(in srgb, var(--anima-red) 42%, transparent) 0 1px, transparent 1.4px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--anima-ink) 17%, transparent) 1px, transparent 1px);
+  background-size: 1.4rem 1.4rem, 2.2rem 2.2rem;
+  border: 1px solid color-mix(in srgb, var(--anima-red) 35%, transparent);
+  border-radius: 50%;
+}
+
+[data-theme='dark'] .theme-doc-markdown::before {
+  border-color: color-mix(in srgb, var(--anima-red) 45%, transparent);
+}
+
+[data-theme='dark'] .theme-doc-markdown::after {
+  background: var(--anima-red);
+  opacity: 0.2;
+}
+
+[data-theme='dark'] .theme-doc-markdown h1 {
+  border-bottom-color: var(--anima-red);
+}
+
+[data-theme='dark'] .theme-doc-markdown h1::before,
+[data-theme='dark'] .theme-doc-markdown h2::before,
+[data-theme='dark'] .theme-doc-markdown h3::before {
+  background: var(--anima-red);
+}
+
+[data-theme='dark'] .theme-doc-markdown > h1 + p {
+  background: color-mix(in srgb, var(--anima-red) 10%, transparent);
+}
+
+[data-theme='dark'] .theme-doc-markdown blockquote {
+  background: color-mix(in srgb, var(--anima-red) 8%, transparent);
+  border-left-color: var(--anima-red);
+}
+
+[data-theme='dark'] .theme-doc-markdown blockquote::after {
+  border-color: var(--anima-red);
+}
+
+[data-theme='dark'] .theme-doc-markdown table tbody tr:hover {
+  background: color-mix(in srgb, var(--anima-red) 16%, transparent);
+}
+
+[data-theme='dark'] .theme-code-block::before {
+  background: repeating-linear-gradient(90deg, var(--anima-red) 0 0.35rem, transparent 0.35rem 0.7rem);
+}
+
+[data-theme='dark'] .theme-code-block {
+  border-left-color: var(--anima-red);
+}
+
+[data-theme='dark'] .footer {
+  border-top-color: var(--anima-red);
+}
+
+[data-theme='dark'] .footer::before {
+  border-color: color-mix(in srgb, var(--anima-red) 40%, transparent);
+}
+
+[data-theme='dark'] .footer__title {
+  color: var(--anima-red-bright);
 }
 
 @media screen and (max-width: 996px) {
