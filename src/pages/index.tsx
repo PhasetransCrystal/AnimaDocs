@@ -12,6 +12,12 @@ function HomepageHeader(): ReactNode {
 
   return (
     <header className={styles.heroBanner}>
+      <div className={styles.heroAtmosphere} aria-hidden="true">
+        <span className={styles.atmosphereDisc} />
+        <span className={styles.atmosphereOrbit} />
+        <span className={styles.atmosphereSlash} />
+        <span className={styles.atmosphereBlock} />
+      </div>
       <div className={styles.heroGrid} aria-hidden="true" />
       <div className="container">
         <div className={styles.heroLayout}>
@@ -39,6 +45,14 @@ function HomepageHeader(): ReactNode {
               <span>NOW INDEXING</span>
               <span>01 / 03</span>
             </div>
+            <div className={styles.panelDiagram} aria-hidden="true">
+              <span className={styles.panelDiagramDisc} />
+              <span className={styles.panelDiagramOrbit} />
+              <span className={styles.panelDiagramOrbitSecondary} />
+              <span className={styles.panelDiagramCore}>A</span>
+              <span className={styles.panelDiagramAxis} />
+              <span className={styles.panelDiagramCaption}>MODEL / 2B</span>
+            </div>
             <p className={styles.panelTitle}>ANIMA / COMFYUI</p>
             <ol className={styles.indexList}>
               <li className={styles.indexItemActive}>
@@ -54,6 +68,11 @@ function HomepageHeader(): ReactNode {
                 <span>实验记录与更新</span>
               </li>
             </ol>
+            <div className={styles.panelStats} aria-label="Current index status">
+              <span><strong>02B</strong><small>MODEL</small></span>
+              <span><strong>24</strong><small>NODES</small></span>
+              <span><strong>OPEN</strong><small>STATE</small></span>
+            </div>
             <div className={styles.panelFooter}>
               <span>STATUS</span>
               <strong>OPEN / READING</strong>
@@ -62,6 +81,7 @@ function HomepageHeader(): ReactNode {
         </div>
 
         <div className={styles.signalBar} aria-label="Site sections">
+          <span className={styles.signalBarMarker} aria-hidden="true" />
           <span>DOCS</span>
           <span>THEORY</span>
           <span>NOTES</span>

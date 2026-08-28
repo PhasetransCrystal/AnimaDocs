@@ -56,6 +56,7 @@ export default function HomepageFeatures(): ReactNode {
           {sectionItems.map((item) => (
             <Link className={styles.sectionItem} key={item.index} to={item.to}>
               <span className={styles.sectionIndex}>{item.index}</span>
+              <span className={styles.sectionSignal} aria-hidden="true" />
               <span className={styles.sectionBody}>
                 <span className={styles.sectionLabel}>{item.label}</span>
                 <span className={styles.sectionTitle}>{item.title}</span>

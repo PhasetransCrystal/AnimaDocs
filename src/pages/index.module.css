@@ -1,10 +1,68 @@
 .heroBanner {
-  background: var(--anima-paper);
+  background:
+    linear-gradient(135deg, transparent 0 62%, color-mix(in srgb, var(--anima-blue) 8%, transparent) 62% 100%),
+    var(--anima-paper);
   border-bottom: 1px solid var(--anima-line-strong);
   color: var(--anima-ink);
-  min-height: 680px;
+  min-height: 720px;
   overflow: hidden;
   position: relative;
+}
+
+.heroAtmosphere {
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+.atmosphereDisc,
+.atmosphereOrbit,
+.atmosphereSlash,
+.atmosphereBlock {
+  display: block;
+  position: absolute;
+}
+
+.atmosphereDisc {
+  background: var(--anima-blue);
+  border-radius: 50%;
+  height: 32rem;
+  opacity: 0.2;
+  right: -8rem;
+  top: 5.5rem;
+  width: 32rem;
+}
+
+.atmosphereOrbit {
+  border: 1px solid color-mix(in srgb, var(--anima-ink) 34%, transparent);
+  border-radius: 50%;
+  height: 42rem;
+  right: -12rem;
+  top: 0.5rem;
+  transform: rotate(-18deg);
+  width: 42rem;
+}
+
+.atmosphereSlash {
+  background: var(--anima-red);
+  height: 5.2rem;
+  opacity: 0.9;
+  right: 11%;
+  top: 20%;
+  transform: rotate(-17deg);
+  width: 22rem;
+}
+
+.atmosphereBlock {
+  background: var(--anima-ink);
+  bottom: 0;
+  height: 8rem;
+  opacity: 0.96;
+  right: 0;
+  width: min(27vw, 25rem);
+  clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%, 0 32%);
 }
 
 .heroBanner::before,
@@ -47,6 +105,7 @@
   position: absolute;
   top: 0;
   width: 28%;
+  z-index: 0;
 }
 
 .heroGrid::before,
@@ -82,6 +141,12 @@
   min-height: 600px;
   padding: 8.5rem 0 3.25rem;
   position: relative;
+  z-index: 1;
+}
+
+.heroBanner > .container {
+  position: relative;
+  z-index: 1;
 }
 
 .heroCopy {
@@ -190,7 +255,8 @@
   border-top: 5px solid var(--anima-blue);
   color: var(--anima-ink);
   margin-bottom: 1rem;
-  max-width: 380px;
+  max-width: 430px;
+  overflow: hidden;
   padding: 1.1rem 1.25rem 1.25rem;
   position: relative;
   z-index: 1;
@@ -202,13 +268,99 @@
   justify-content: space-between;
 }
 
+.panelDiagram {
+  background:
+    linear-gradient(to right, color-mix(in srgb, var(--anima-ink) 18%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--anima-ink) 18%, transparent) 1px, transparent 1px),
+    color-mix(in srgb, var(--anima-blue) 8%, var(--anima-surface));
+  background-size: 2.5rem 2.5rem;
+  height: 10.5rem;
+  margin: 1.1rem -1.25rem 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.panelDiagramDisc,
+.panelDiagramOrbit,
+.panelDiagramOrbitSecondary,
+.panelDiagramCore,
+.panelDiagramAxis,
+.panelDiagramCaption {
+  position: absolute;
+}
+
+.panelDiagramDisc {
+  background: var(--anima-red);
+  border-radius: 50%;
+  height: 9.5rem;
+  left: 50%;
+  opacity: 0.88;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 9.5rem;
+}
+
+.panelDiagramOrbit,
+.panelDiagramOrbitSecondary {
+  border: 1px solid var(--anima-ink);
+  border-radius: 50%;
+  height: 13rem;
+  left: 50%;
+  opacity: 0.62;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-24deg);
+  width: 23rem;
+}
+
+.panelDiagramOrbitSecondary {
+  height: 16rem;
+  transform: translate(-50%, -50%) rotate(28deg);
+  width: 8rem;
+}
+
+.panelDiagramCore {
+  align-items: center;
+  background: var(--anima-ink);
+  border: 4px solid var(--anima-surface);
+  border-radius: 50%;
+  color: var(--anima-paper);
+  display: flex;
+  font-family: var(--ifm-heading-font-family);
+  font-size: 2.8rem;
+  font-weight: 800;
+  height: 4.6rem;
+  justify-content: center;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 4.6rem;
+}
+
+.panelDiagramAxis {
+  background: var(--anima-ink);
+  height: 1px;
+  left: 8%;
+  opacity: 0.65;
+  top: 50%;
+  width: 84%;
+}
+
+.panelDiagramCaption {
+  bottom: 0.7rem;
+  color: var(--anima-ink);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.62rem;
+  left: 0.85rem;
+  letter-spacing: 0.12em;
+}
+
 .panelTitle {
   color: var(--anima-ink);
   font-family: var(--ifm-heading-font-family);
   font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: 0.04em;
-  margin: 2.5rem 0 1.35rem;
+  margin: 1.3rem 0 1.1rem;
 }
 
 .indexList {
@@ -240,6 +392,43 @@
   font-weight: 700;
 }
 
+.panelStats {
+  border-bottom: 1px solid var(--anima-line);
+  border-top: 1px solid var(--anima-line);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 1rem;
+}
+
+.panelStats span {
+  border-right: 1px solid var(--anima-line);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  padding: 0.75rem 0.5rem;
+}
+
+.panelStats span:last-child {
+  border-right: 0;
+}
+
+.panelStats strong {
+  color: var(--anima-blue);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panelStats small {
+  color: var(--anima-ink-soft);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+}
+
 .panelFooter {
   align-items: center;
   color: var(--anima-ink-soft);
@@ -267,6 +456,13 @@
   z-index: 1;
 }
 
+.signalBarMarker {
+  background: var(--anima-red);
+  display: inline-block;
+  height: 0.55rem;
+  width: 0.55rem;
+}
+
 .signalBarLine {
   background: var(--anima-line-strong);
   flex: 1;
@@ -280,7 +476,28 @@
 
 /* Night mode keeps the same information hierarchy but changes the material. */
 :global([data-theme='dark']) .heroBanner {
-  background: var(--anima-paper);
+  background:
+    radial-gradient(circle at 84% 31%, color-mix(in srgb, var(--anima-red) 20%, transparent), transparent 28%),
+    var(--anima-paper);
+}
+
+:global([data-theme='dark']) .atmosphereDisc {
+  background: var(--anima-red);
+  opacity: 0.38;
+}
+
+:global([data-theme='dark']) .atmosphereOrbit {
+  border-color: color-mix(in srgb, var(--anima-ink) 38%, transparent);
+}
+
+:global([data-theme='dark']) .atmosphereSlash {
+  background: var(--anima-red);
+  opacity: 0.95;
+}
+
+:global([data-theme='dark']) .atmosphereBlock {
+  background: var(--anima-red);
+  opacity: 0.88;
 }
 
 :global([data-theme='dark']) .heroBanner::before {
@@ -340,6 +557,26 @@
   border-radius: var(--anima-radius);
   border-top-color: var(--anima-red);
   box-shadow: 0 18px 34px var(--anima-shadow);
+}
+
+:global([data-theme='dark']) .panelDiagram {
+  background:
+    linear-gradient(to right, color-mix(in srgb, var(--anima-ink) 16%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--anima-ink) 16%, transparent) 1px, transparent 1px),
+    color-mix(in srgb, var(--anima-red) 10%, var(--anima-surface));
+  background-size: 2.5rem 2.5rem;
+}
+
+:global([data-theme='dark']) .panelDiagramDisc {
+  background: var(--anima-red);
+}
+
+:global([data-theme='dark']) .panelDiagramCore {
+  border-color: var(--anima-surface);
+}
+
+:global([data-theme='dark']) .panelStats strong {
+  color: var(--anima-red);
 }
 
 :global([data-theme='dark']) .panelTopline,
@@ -412,6 +649,11 @@
     width: 100%;
   }
 
+  .atmosphereSlash {
+    right: 2%;
+    top: 38%;
+  }
+
   .heroGrid {
     left: 68%;
     width: 32%;
@@ -435,6 +677,32 @@
 
   .heroCopy h1 {
     font-size: 3.35rem;
+  }
+
+  .atmosphereDisc {
+    height: 22rem;
+    right: -11rem;
+    top: 11rem;
+    width: 22rem;
+  }
+
+  .atmosphereOrbit {
+    height: 29rem;
+    right: -15rem;
+    top: 8rem;
+    width: 29rem;
+  }
+
+  .atmosphereSlash {
+    height: 3.5rem;
+    right: -3rem;
+    top: 47%;
+    width: 14rem;
+  }
+
+  .atmosphereBlock {
+    height: 5rem;
+    width: 12rem;
   }
 
   .heroTitle {

@@ -75,7 +75,8 @@ const config: Config = {
     colorMode: {
       defaultMode: 'light',
       disableSwitch: false,
-      respectPrefersColorScheme: true,
+      // Keep the toggle binary so navigation never exposes a third system mode.
+      respectPrefersColorScheme: false,
     },
     navbar: {
       title: 'AnimaDocs',
