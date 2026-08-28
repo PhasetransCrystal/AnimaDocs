@@ -1,0 +1,66 @@
+.tableContainer {
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  min-width: 7rem;
+  padding: 0.7rem 0.85rem;
+  vertical-align: middle;
+}
+
+.table th {
+  white-space: nowrap;
+}
+
+.caption {
+  margin-bottom: 0.6rem;
+  color: var(--ifm-color-content-secondary);
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+.sortButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: -0.25rem -0.35rem;
+  padding: 0.25rem 0.35rem;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-weight: inherit;
+  text-align: left;
+}
+
+.sortButton:hover {
+  background: var(--ifm-hover-overlay);
+}
+
+.sortButton:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.sortIndicator {
+  display: inline-block;
+  width: 1em;
+  color: var(--ifm-color-content-secondary);
+  font-size: 0.9em;
+  text-align: center;
+}
+
+.emptyCell {
+  color: var(--ifm-color-content-secondary);
+  text-align: center;
+}
