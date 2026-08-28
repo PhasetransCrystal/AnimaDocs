@@ -61,6 +61,7 @@ export default function HomepageFeatures(): ReactNode {
       <div className="container">
         <div className={styles.workflowBand}>
           <span className={styles.workflowStamp} aria-hidden="true">A / 05</span>
+          <span className={styles.nightTelemetry} aria-hidden="true" />
           <div className={styles.workflowHeader}>
             <span className={styles.workflowKicker}>WORKFLOW / SIGNAL PATH</span>
             <span className={styles.workflowMeta}>COMFYUI + ANIMA / 05 NODES</span>

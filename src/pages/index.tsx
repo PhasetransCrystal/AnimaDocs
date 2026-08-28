@@ -27,6 +27,18 @@ function HomepageHeader(): ReactNode {
           <span className={styles.heroCollageGrid} />
           <span className={styles.heroCollageLabel}>PLATE / 004</span>
         </span>
+        <span className={styles.nightScene}>
+          <span className={styles.nightStarField} />
+          <span className={styles.nightHalo} />
+          <span className={styles.nightRingPrimary} />
+          <span className={styles.nightRingSecondary} />
+          <span className={styles.nightCrosshair} />
+          <span className={styles.nightSweep} />
+          <span className={styles.nightInstrument}>
+            <span className={styles.nightInstrumentCore}>A</span>
+            <span className={styles.nightInstrumentFin} />
+          </span>
+        </span>
       </div>
       <div className={styles.heroGrid} aria-hidden="true" />
       <div className="container">
