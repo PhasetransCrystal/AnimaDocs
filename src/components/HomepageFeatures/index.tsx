@@ -1,69 +1,77 @@
 import type {ReactNode} from 'react';
-import clsx from 'clsx';
+import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
+
 import styles from './styles.module.css';
 
-type FeatureItem = {
+type SectionItem = {
+  index: string;
+  label: string;
   title: string;
-  Svg: React.ComponentType<React.ComponentProps<'svg'>>;
-  description: ReactNode;
+  description: string;
+  to: string;
+  action: string;
 };
 
-const FeatureList: FeatureItem[] = [
+const sectionItems: SectionItem[] = [
   {
-    title: 'Easy to Use',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
-    description: (
-      <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
-      </>
-    ),
+    index: '01',
+    label: 'DOCUMENTS',
+    title: '从节点开始',
+    description: '先建立 ComfyUI 与 Anima 的共同语境，再进入可复用的工作流。',
+    to: '/docs/intro',
+    action: '打开序章',
   },
   {
-    title: 'Focus on What Matters',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
-    description: (
-      <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
-      </>
-    ),
+    index: '02',
+    label: 'THEORY',
+    title: '理解模型为何这样工作',
+    description: '把模型结构、提示词和生成结果放回同一张因果图里观察。',
+    to: '/docs/theory/anima',
+    action: '查看理论篇',
   },
   {
-    title: 'Powered by React',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
-    description: (
-      <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
-      </>
-    ),
+    index: '03',
+    label: 'NOTES',
+    title: '记录正在发生的实验',
+    description: '博客用于保存参数、发现和仍在变化中的实践判断。',
+    to: '/blog',
+    action: '进入记录',
   },
 ];
-
-function Feature({title, Svg, description}: FeatureItem) {
-  return (
-    <div className={clsx('col col--4')}>
-      <div className="text--center">
-        <Svg className={styles.featureSvg} role="img" />
-      </div>
-      <div className="text--center padding-horiz--md">
-        <Heading as="h3">{title}</Heading>
-        <p>{description}</p>
-      </div>
-    </div>
-  );
-}
 
 export default function HomepageFeatures(): ReactNode {
   return (
     <section className={styles.features}>
       <div className="container">
-        <div className="row">
-          {FeatureList.map((props, idx) => (
-            <Feature key={idx} {...props} />
+        <div className={styles.sectionHeader}>
+          <p className={styles.sectionKicker}>READING PATH / 00</p>
+          <Heading as="h2">从工作流的骨架开始。</Heading>
+          <p>
+            这里不是模板说明页，而是一份持续整理中的知识底稿。沿着编号进入，按自己的节奏建立坐标。
+          </p>
+        </div>
+
+        <div className={styles.sectionList}>
+          {sectionItems.map((item) => (
+            <Link className={styles.sectionItem} key={item.index} to={item.to}>
+              <span className={styles.sectionIndex}>{item.index}</span>
+              <span className={styles.sectionBody}>
+                <span className={styles.sectionLabel}>{item.label}</span>
+                <span className={styles.sectionTitle}>{item.title}</span>
+                <span className={styles.sectionDescription}>{item.description}</span>
+              </span>
+              <span className={styles.sectionAction}>
+                <span>{item.action}</span>
+                <span aria-hidden="true">→</span>
+              </span>
+            </Link>
           ))}
+        </div>
+
+        <div className={styles.sectionFootnote}>
+          <span>ANIMADOCS / OPEN INDEX</span>
+          <span>CONTENT FIRST / DECORATION SECOND</span>
         </div>
       </div>
     </section>

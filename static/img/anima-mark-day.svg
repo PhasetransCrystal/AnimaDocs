@@ -1,0 +1,9 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">AnimaDocs day mark</title>
+  <desc id="desc">A blue and gold geometric mark on a paper field.</desc>
+  <rect width="64" height="64" fill="#F2F3F1"/>
+  <path d="M12 12H38V18H18V38H12V12Z" fill="#121820"/>
+  <path d="M27 27H52V52H27V46H46V34H27V27Z" fill="#245DCC"/>
+  <path d="M18 38H27V46H18V38Z" fill="#B58A4A"/>
+  <path d="M40 12H52V24H46V18H40V12Z" fill="#245DCC"/>
+</svg>

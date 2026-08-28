@@ -1,0 +1,16 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#F1F3F2"/>
+  <path d="M0 492H1200V630H0V492Z" fill="#245DCC" fill-opacity="0.1"/>
+  <path d="M0 120H1200" stroke="#7D8991" stroke-opacity="0.6"/>
+  <path d="M780 0V630" stroke="#7D8991" stroke-opacity="0.45"/>
+  <path d="M960 0V630" stroke="#7D8991" stroke-opacity="0.3"/>
+  <path d="M785 360H1200" stroke="#245DCC" stroke-width="5"/>
+  <rect x="790" y="165" width="330" height="220" fill="#FFFFFF" stroke="#7D8991"/>
+  <path d="M790 165H1106L1120 179V385H790V165Z" fill="#FFFFFF" stroke="#245DCC" stroke-width="5"/>
+  <path d="M830 260H1065M830 305H1065M830 350H1015" stroke="#C7CDD0" stroke-width="2"/>
+  <text x="78" y="190" fill="#A77836" font-family="monospace" font-size="20" letter-spacing="4">ANIMADOCS / WORKFLOW FIELD NOTES</text>
+  <text x="78" y="320" fill="#111820" font-family="Arial, sans-serif" font-size="96" font-weight="700">AnimaDocs</text>
+  <text x="82" y="382" fill="#245DCC" font-family="Arial, sans-serif" font-size="30" font-weight="700">COMFYUI / ANIMA</text>
+  <text x="82" y="428" fill="#56616D" font-family="Arial, sans-serif" font-size="22">把节点，连成可理解的图像工作流。</text>
+  <text x="790" y="130" fill="#245DCC" font-family="monospace" font-size="14" letter-spacing="3">INDEX / 01</text>
+</svg>

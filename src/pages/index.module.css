@@ -1,23 +1,492 @@
-/**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
- */
-
 .heroBanner {
-  padding: 4rem 0;
-  text-align: center;
-  position: relative;
+  background: var(--anima-paper);
+  border-bottom: 1px solid var(--anima-line-strong);
+  color: var(--anima-ink);
+  min-height: 680px;
   overflow: hidden;
+  position: relative;
 }
 
-@media screen and (max-width: 996px) {
-  .heroBanner {
-    padding: 2rem;
+.heroBanner::before,
+.heroBanner::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+}
+
+/* A flat registration block gives the day palette its blue/black split. */
+.heroBanner::before {
+  background: var(--anima-blue);
+  bottom: 0;
+  height: 9rem;
+  opacity: 0.1;
+  right: 0;
+  width: min(31vw, 28rem);
+  clip-path: polygon(18% 0, 100% 0, 100% 100%, 0 100%, 0 34%);
+}
+
+.heroBanner::after {
+  background: var(--anima-line-strong);
+  height: 1px;
+  left: 46%;
+  right: 0;
+  top: 56%;
+}
+
+.heroGrid {
+  background-image:
+    linear-gradient(to right, var(--anima-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--anima-grid) 1px, transparent 1px);
+  background-size: 96px 96px;
+  border-left: 1px solid var(--anima-grid);
+  border-right: 1px solid var(--anima-grid);
+  height: 100%;
+  left: 61%;
+  opacity: 0.8;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  width: 28%;
+}
+
+.heroGrid::before,
+.heroGrid::after {
+  content: "";
+  position: absolute;
+}
+
+.heroGrid::before {
+  background: var(--anima-blue);
+  height: 3px;
+  left: -20%;
+  top: 42%;
+  width: 120%;
+}
+
+.heroGrid::after {
+  color: var(--anima-blue);
+  content: "01";
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 8rem;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0.12;
+  right: 1rem;
+  top: 12rem;
+}
+
+.heroLayout {
+  display: grid;
+  gap: 5rem;
+  grid-template-columns: minmax(0, 1.12fr) minmax(320px, 0.88fr);
+  min-height: 600px;
+  padding: 8.5rem 0 3.25rem;
+  position: relative;
+}
+
+.heroCopy {
+  align-self: center;
+  max-width: 760px;
+  position: relative;
+  z-index: 1;
+}
+
+.kicker,
+.sectionKicker,
+.panelTopline,
+.sectionLabel,
+.signalBar,
+.sectionFootnote {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.kicker {
+  color: var(--anima-gold);
+  margin-bottom: 1.4rem;
+}
+
+.heroCopy h1 {
+  color: var(--anima-ink);
+  font-family: var(--ifm-heading-font-family);
+  font-size: 5.5rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 0.94;
+  margin: 0;
+}
+
+.heroTitle {
+  color: var(--anima-blue);
+  font-family: var(--ifm-heading-font-family);
+  font-size: 1.85rem;
+  font-weight: 650;
+  line-height: 1.3;
+  margin: 1.8rem 0 0.85rem;
+  max-width: 25em;
+}
+
+.heroSubtitle {
+  color: var(--anima-ink-soft);
+  font-size: 1rem;
+  line-height: 1.85;
+  margin: 0;
+  max-width: 40rem;
+}
+
+.actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 2rem;
+}
+
+.primaryAction,
+.secondaryAction {
+  align-items: center;
+  display: inline-flex;
+  font-family: var(--ifm-heading-font-family);
+  font-size: 0.82rem;
+  font-weight: 800;
+  gap: 1rem;
+  letter-spacing: 0.03em;
+  min-height: 3.1rem;
+  padding: 0.8rem 1.15rem;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.primaryAction {
+  background: var(--anima-blue);
+  color: #ffffff;
+}
+
+.primaryAction:hover {
+  background: var(--anima-ink);
+  color: #ffffff;
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.secondaryAction {
+  border: 1px solid var(--anima-ink-soft);
+  color: var(--anima-ink);
+}
+
+.secondaryAction:hover {
+  border-color: var(--anima-blue);
+  color: var(--anima-blue);
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.signalPanel {
+  align-self: end;
+  background: var(--anima-surface);
+  border: 1px solid var(--anima-line-strong);
+  border-top: 5px solid var(--anima-blue);
+  color: var(--anima-ink);
+  margin-bottom: 1rem;
+  max-width: 380px;
+  padding: 1.1rem 1.25rem 1.25rem;
+  position: relative;
+  z-index: 1;
+}
+
+.panelTopline {
+  color: var(--anima-blue);
+  display: flex;
+  justify-content: space-between;
+}
+
+.panelTitle {
+  color: var(--anima-ink);
+  font-family: var(--ifm-heading-font-family);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  margin: 2.5rem 0 1.35rem;
+}
+
+.indexList {
+  border-top: 1px solid var(--anima-line);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.indexList li {
+  align-items: center;
+  border-bottom: 1px solid var(--anima-line);
+  color: var(--anima-ink-soft);
+  display: flex;
+  font-size: 0.86rem;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.85rem 0;
+}
+
+.indexList li > span:first-child {
+  color: var(--anima-gold);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.74rem;
+}
+
+.indexList .indexItemActive {
+  color: var(--anima-ink);
+  font-weight: 700;
+}
+
+.panelFooter {
+  align-items: center;
+  color: var(--anima-ink-soft);
+  display: flex;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.66rem;
+  justify-content: space-between;
+  letter-spacing: 0.08em;
+  margin-top: 1.35rem;
+}
+
+.panelFooter strong {
+  color: var(--anima-blue);
+  font-weight: 600;
+}
+
+.signalBar {
+  align-items: center;
+  border-top: 1px solid var(--anima-line-strong);
+  color: var(--anima-blue);
+  display: flex;
+  gap: 1.3rem;
+  padding: 1.05rem 0 1.4rem;
+  position: relative;
+  z-index: 1;
+}
+
+.signalBarLine {
+  background: var(--anima-line-strong);
+  flex: 1;
+  height: 1px;
+}
+
+.signalBarMeta {
+  color: var(--anima-ink-soft);
+  font-size: 0.63rem;
+}
+
+/* Night mode keeps the same information hierarchy but changes the material. */
+:global([data-theme='dark']) .heroBanner {
+  background: var(--anima-paper);
+}
+
+:global([data-theme='dark']) .heroBanner::before {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--anima-red) 60%, transparent);
+  border-radius: 50%;
+  bottom: -18rem;
+  height: 40rem;
+  opacity: 0.7;
+  right: -10rem;
+  width: 40rem;
+  clip-path: none;
+}
+
+:global([data-theme='dark']) .heroBanner::after {
+  background: color-mix(in srgb, var(--anima-ink) 32%, transparent);
+  left: 46%;
+  top: 57%;
+}
+
+:global([data-theme='dark']) .heroGrid {
+  background-image: none;
+  border-color: color-mix(in srgb, var(--anima-ink) 14%, transparent);
+  opacity: 1;
+}
+
+:global([data-theme='dark']) .heroGrid::before {
+  background: var(--anima-red);
+  height: 2px;
+  left: -20%;
+  opacity: 0.9;
+  top: 42%;
+}
+
+:global([data-theme='dark']) .heroGrid::after {
+  border: 1px solid color-mix(in srgb, var(--anima-ink) 24%, transparent);
+  border-radius: 50%;
+  color: transparent;
+  height: 34rem;
+  opacity: 1;
+  right: -15rem;
+  top: 8rem;
+  width: 34rem;
+}
+
+:global([data-theme='dark']) .kicker {
+  color: var(--anima-gray);
+}
+
+:global([data-theme='dark']) .heroTitle {
+  color: var(--anima-red);
+}
+
+:global([data-theme='dark']) .signalPanel {
+  background: var(--anima-surface);
+  border-color: var(--anima-line);
+  border-radius: var(--anima-radius);
+  border-top-color: var(--anima-red);
+  box-shadow: 0 18px 34px var(--anima-shadow);
+}
+
+:global([data-theme='dark']) .panelTopline,
+:global([data-theme='dark']) .panelFooter strong {
+  color: var(--anima-red);
+}
+
+:global([data-theme='dark']) .indexList {
+  border-top-color: var(--anima-line);
+}
+
+:global([data-theme='dark']) .indexList li {
+  border-bottom-color: var(--anima-line);
+  color: var(--anima-ink-soft);
+}
+
+:global([data-theme='dark']) .indexList li > span:first-child {
+  color: var(--anima-red);
+}
+
+:global([data-theme='dark']) .indexList .indexItemActive {
+  color: var(--anima-ink);
+}
+
+:global([data-theme='dark']) .primaryAction {
+  background: var(--anima-red);
+}
+
+:global([data-theme='dark']) .primaryAction:hover {
+  background: var(--anima-red-bright);
+  color: var(--anima-paper);
+}
+
+:global([data-theme='dark']) .secondaryAction {
+  border-color: var(--anima-line-strong);
+  color: var(--anima-ink);
+}
+
+:global([data-theme='dark']) .secondaryAction:hover {
+  border-color: var(--anima-red);
+  color: var(--anima-red);
+}
+
+:global([data-theme='dark']) .signalBar {
+  color: var(--anima-red);
+}
+
+@media screen and (max-width: 1200px) {
+  .heroCopy h1 {
+    font-size: 4.8rem;
+  }
+
+  .heroLayout {
+    gap: 3.5rem;
   }
 }
 
-.buttons {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+@media screen and (max-width: 996px) {
+  .heroLayout {
+    gap: 3rem;
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding-top: 5.5rem;
+  }
+
+  .signalPanel {
+    align-self: start;
+    margin-bottom: 0;
+    max-width: 520px;
+    width: 100%;
+  }
+
+  .heroGrid {
+    left: 68%;
+    width: 32%;
+  }
+
+  .heroBanner::after,
+  :global([data-theme='dark']) .heroBanner::after {
+    left: 62%;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .heroBanner {
+    min-height: 0;
+  }
+
+  .heroLayout {
+    padding-bottom: 2.5rem;
+    padding-top: 4rem;
+  }
+
+  .heroCopy h1 {
+    font-size: 3.35rem;
+  }
+
+  .heroTitle {
+    font-size: 1.5rem;
+  }
+
+  .heroSubtitle {
+    font-size: 0.94rem;
+  }
+
+  .heroGrid {
+    left: 72%;
+    width: 28%;
+  }
+
+  .heroBanner::after,
+  :global([data-theme='dark']) .heroBanner::after {
+    left: 70%;
+  }
+
+  .heroGrid::after {
+    font-size: 5rem;
+    right: 0.5rem;
+    top: 9rem;
+  }
+
+  :global([data-theme='dark']) .heroGrid::after {
+    height: 20rem;
+    right: -10rem;
+    top: 12rem;
+    width: 20rem;
+  }
+
+  .signalBar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.65rem 1rem;
+  }
+
+  .signalBarLine {
+    flex-basis: 100%;
+    order: 4;
+  }
+
+  .signalBarMeta {
+    order: 5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primaryAction,
+  .secondaryAction {
+    transition: none;
+  }
 }

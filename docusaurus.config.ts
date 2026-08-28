@@ -5,9 +5,9 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'My Site',
-  tagline: 'Dinosaurs are cool',
-  favicon: 'img/favicon.ico',
+  title: 'AnimaDocs',
+  tagline: 'ComfyUI / Anima workflow field notes',
+  favicon: 'img/anima-mark-day.svg',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -71,15 +71,18 @@ const config: Config = {
 
   themeConfig: {
     // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
+    image: 'img/anima-social-card.svg',
     colorMode: {
+      defaultMode: 'light',
+      disableSwitch: false,
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'My Site',
+      title: 'AnimaDocs',
       logo: {
-        alt: 'My Site Logo',
-        src: 'img/logo.svg',
+        alt: 'AnimaDocs mark',
+        src: 'img/anima-mark-day.svg',
+        srcDark: 'img/anima-mark-night.svg',
       },
       items: [
         {
@@ -88,7 +91,7 @@ const config: Config = {
           position: 'left',
           label: 'Docs',
         },
-        {to: '/blog', label: 'Blog', position: 'left'},
+        {to: '/blog', label: 'Notes', position: 'left'},
         {
           href: 'https://github.com/Mon-Landis/AnimaDocs',
           label: 'GitHub',
@@ -100,42 +103,42 @@ const config: Config = {
       style: 'dark',
       links: [
         {
-          title: 'Docs',
+          title: 'AnimaDocs',
           items: [
             {
-              label: 'Documentation',
+              label: 'Start reading',
               to: '/docs/intro',
             },
           ],
         },
         {
-          title: 'Community',
+          title: 'Index',
           items: [
             {
-              label: 'Stack Overflow',
-              href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+              label: 'Theory / Anima',
+              to: '/docs/theory/anima',
             },
             {
-              label: 'Discord',
-              href: 'https://discordapp.com/invite/docusaurus',
+              label: 'Notes / Blog',
+              to: '/blog',
             },
             {
-              label: 'X',
-              href: 'https://x.com/docusaurus',
+              label: 'Project source',
+              href: 'https://github.com/Mon-Landis/AnimaDocs',
             },
           ],
         },
         {
-          title: 'More',
+          title: 'Signal',
           items: [
             {
-              label: 'GitHub',
+              label: 'GitHub repository',
               href: 'https://github.com/Mon-Landis/AnimaDocs',
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `Copyright (c) ${new Date().getFullYear()} AnimaDocs. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,

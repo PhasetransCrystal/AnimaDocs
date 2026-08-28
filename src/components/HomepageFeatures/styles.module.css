@@ -1,11 +1,252 @@
 .features {
-  display: flex;
-  align-items: center;
-  padding: 2rem 0;
-  width: 100%;
+  background: var(--anima-paper);
+  border-top: 1px solid var(--anima-line);
+  overflow: hidden;
+  padding: clamp(4rem, 8vw, 7rem) 0 5rem;
+  position: relative;
 }
 
-.featureSvg {
-  height: 200px;
-  width: 200px;
+.features::after {
+  background: var(--anima-blue);
+  content: "";
+  height: 8px;
+  left: 0;
+  opacity: 0.9;
+  position: absolute;
+  top: 0;
+  width: min(22vw, 18rem);
+}
+
+.sectionHeader {
+  border-left: 4px solid var(--anima-blue);
+  max-width: 740px;
+  padding-left: 1.25rem;
+  position: relative;
+}
+
+.sectionKicker {
+  color: var(--anima-gold);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  line-height: 1.45;
+  margin: 0 0 1rem;
+  text-transform: uppercase;
+}
+
+.sectionHeader h2 {
+  color: var(--anima-ink);
+  font-family: var(--ifm-heading-font-family);
+  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.12;
+  margin: 0;
+}
+
+.sectionHeader > p:last-child {
+  color: var(--ifm-color-content-secondary);
+  font-size: 1rem;
+  line-height: 1.8;
+  margin: 1.4rem 0 0;
+  max-width: 38rem;
+}
+
+.sectionList {
+  border-top: 1px solid var(--anima-line-strong);
+  margin-top: 4rem;
+}
+
+.sectionItem {
+  align-items: stretch;
+  border-bottom: 1px solid var(--anima-line);
+  color: var(--anima-ink);
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: 4rem minmax(0, 1fr) auto;
+  padding: 1.7rem 0;
+  position: relative;
+  text-decoration: none;
+  transition: background-color 160ms ease, border-color 160ms ease, padding 160ms ease, transform 160ms ease;
+}
+
+.sectionItem::before {
+  background: var(--anima-blue);
+  content: "";
+  height: 100%;
+  left: 0;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  transform: scaleY(0.45);
+  transform-origin: center;
+  transition: opacity 160ms ease, transform 160ms ease;
+  width: 3px;
+}
+
+.sectionItem:hover {
+  background: color-mix(in srgb, var(--anima-blue) 8%, transparent);
+  color: var(--anima-ink);
+  padding-left: 0.8rem;
+  padding-right: 0.8rem;
+  text-decoration: none;
+}
+
+.sectionItem:hover::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.sectionItem:focus-visible {
+  outline: 2px solid var(--anima-blue);
+  outline-offset: 4px;
+}
+
+.sectionIndex {
+  color: var(--anima-blue);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding-top: 0.2rem;
+}
+
+.sectionBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.sectionLabel {
+  color: var(--anima-gold);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+}
+
+.sectionTitle {
+  font-family: var(--ifm-heading-font-family);
+  font-size: clamp(1.35rem, 2.4vw, 2rem);
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+.sectionDescription {
+  color: var(--ifm-color-content-secondary);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  max-width: 42rem;
+}
+
+.sectionAction {
+  align-items: center;
+  align-self: center;
+  color: var(--anima-blue);
+  display: inline-flex;
+  font-family: var(--ifm-heading-font-family);
+  font-size: 0.76rem;
+  font-weight: 700;
+  gap: 0.7rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.sectionItem:hover .sectionAction {
+  color: var(--anima-red);
+}
+
+.sectionFootnote {
+  color: var(--ifm-color-content-secondary);
+  display: flex;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.68rem;
+  justify-content: space-between;
+  letter-spacing: 0.1em;
+  margin-top: 1.25rem;
+  text-transform: uppercase;
+}
+
+/* The night palette treats each route as a soft observation row. */
+:global([data-theme='dark']) .features::after {
+  background: var(--anima-red);
+  border-radius: 0 0 8px 0;
+}
+
+:global([data-theme='dark']) .sectionHeader {
+  border-left-color: var(--anima-red);
+}
+
+:global([data-theme='dark']) .sectionKicker,
+:global([data-theme='dark']) .sectionLabel {
+  color: var(--anima-gray);
+}
+
+:global([data-theme='dark']) .sectionList {
+  border-top-color: var(--anima-line-strong);
+}
+
+:global([data-theme='dark']) .sectionItem {
+  border-bottom-color: var(--anima-line);
+  border-radius: var(--anima-radius);
+  margin: 0.7rem 0;
+  padding: 1.25rem 1rem;
+}
+
+:global([data-theme='dark']) .sectionItem::before {
+  background: var(--anima-red);
+  border-radius: 4px;
+  left: 0.35rem;
+  width: 4px;
+}
+
+:global([data-theme='dark']) .sectionItem:hover {
+  background: color-mix(in srgb, var(--anima-red) 10%, var(--anima-surface));
+  box-shadow: 0 12px 28px var(--anima-shadow);
+  padding-left: 1.35rem;
+  padding-right: 1.35rem;
+  transform: translateX(3px);
+}
+
+:global([data-theme='dark']) .sectionIndex,
+:global([data-theme='dark']) .sectionAction,
+:global([data-theme='dark']) .sectionItem:hover .sectionAction {
+  color: var(--anima-red);
+}
+
+@media screen and (max-width: 640px) {
+  .sectionList {
+    margin-top: 3rem;
+  }
+
+  .sectionItem {
+    gap: 0.7rem;
+    grid-template-columns: 2.4rem minmax(0, 1fr);
+  }
+
+  .sectionAction {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: 0.35rem;
+  }
+
+  :global([data-theme='dark']) .sectionItem {
+    padding: 1.1rem 0.85rem;
+  }
+
+  :global([data-theme='dark']) .sectionItem:hover {
+    padding-left: 1.1rem;
+    padding-right: 1.1rem;
+  }
+
+  .sectionFootnote {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sectionItem,
+  .sectionItem::before {
+    transition: none;
+  }
 }
