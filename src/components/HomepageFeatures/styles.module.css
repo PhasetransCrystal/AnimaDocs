@@ -844,3 +844,384 @@
     transition: none;
   }
 }
+
+/* Workflow graph v2 ------------------------------------------------------
+ * The graph uses fixed semantic positions and a separate SVG connection
+ * layer. Keeping the artwork and node layer independent makes both themes
+ * replaceable without changing the information structure. */
+.workflowDiagram {
+  margin: 1.25rem -1.35rem 0;
+  min-height: 23rem;
+  overflow: hidden;
+  padding: 0 1.35rem 2.5rem;
+}
+
+.workflowPolarGrid {
+  background-image:
+    linear-gradient(90deg, color-mix(in srgb, var(--anima-blue) 17%, transparent) 1px, transparent 1px),
+    linear-gradient(0deg, color-mix(in srgb, var(--anima-blue) 17%, transparent) 1px, transparent 1px);
+  background-size: 2.8rem 2.8rem;
+  inset: 0;
+  mask-image:
+    linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%),
+    linear-gradient(0deg, transparent 0%, #000 8%, #000 91%, transparent 100%);
+  mask-composite: intersect;
+  opacity: 0.58;
+  transform: rotate(-6deg) scale(1.05);
+  transform-origin: 50% 50%;
+  z-index: 0;
+}
+
+.workflowPolarGridSvg {
+  display: none;
+  height: 100%;
+  overflow: visible;
+  width: 100%;
+}
+
+.workflowGraph {
+  height: 20rem;
+  margin: 0;
+  min-height: 0;
+  position: relative;
+  z-index: 3;
+}
+
+.workflowNode {
+  box-sizing: border-box;
+  display: flex;
+  flex: none;
+  min-height: 6rem;
+  padding: 0.85rem 0.9rem 0.72rem;
+  position: absolute;
+  width: auto;
+}
+
+.nodeModel {
+  left: 1%;
+  top: 3%;
+  width: 21%;
+}
+
+.nodeAttachments {
+  left: 24.5%;
+  top: 3%;
+  width: 20%;
+}
+
+.nodeCanvas {
+  left: 1%;
+  top: 36%;
+  width: 21%;
+}
+
+.nodeEncoder {
+  left: 1%;
+  top: 69%;
+  width: 21%;
+}
+
+.nodePrompt {
+  left: 24.5%;
+  top: 69%;
+  width: 20%;
+}
+
+.nodeDraw {
+  left: 57.5%;
+  top: 36%;
+  width: 22%;
+}
+
+.nodeSave {
+  left: 81%;
+  top: 36%;
+  width: 17%;
+}
+
+.workflowNodeIndex {
+  flex: none;
+}
+
+.workflowNodeTitle {
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.workflowNodeDetail {
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  margin-top: auto;
+  overflow-wrap: anywhere;
+}
+
+.workflowConnections,
+.workflowConnectionsMobile {
+  height: 100%;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  z-index: 2;
+}
+
+.workflowConnectionsMobile {
+  display: none;
+}
+
+.workflowConnections > g > path,
+.workflowConnectionsMobile > g > path {
+  fill: none;
+  marker-end: url(#workflow-arrow);
+  stroke: var(--anima-line-strong);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.workflowConnectionsMobile > g > path {
+  marker-end: url(#workflow-arrow-mobile);
+}
+
+.workflowConnections marker path,
+.workflowConnectionsMobile marker path {
+  fill: var(--anima-line-strong);
+  stroke: none;
+}
+
+.workflowDecorativeCopy {
+  inset: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.workflowDecorativeCopy > span {
+  font-size: 2.25rem;
+  line-height: 0.92;
+  top: 48%;
+  transform: translateY(-50%);
+}
+
+.workflowDecorativeCopy .decorativeInput {
+  left: -0.18rem;
+  text-align: left;
+}
+
+.workflowDecorativeCopy .decorativeResult {
+  right: -0.18rem;
+  text-align: right;
+}
+
+.workflowNoiseIsland {
+  --island-cell: 0.3rem;
+  display: grid;
+  grid-template-columns: repeat(9, var(--island-cell));
+  position: absolute;
+  transform-origin: center;
+  z-index: 2;
+}
+
+.workflowNoiseCell {
+  border: 1px solid var(--anima-blue);
+  box-sizing: border-box;
+  display: block;
+  height: var(--island-cell);
+  width: var(--island-cell);
+}
+
+.workflowNoiseCell.noiseSolid {
+  background: var(--anima-blue);
+}
+
+.workflowNoiseCell.noiseHollow {
+  background: transparent;
+}
+
+.workflowNoiseCell.noiseMarker {
+  border-radius: 50%;
+}
+
+.workflowFooter {
+  display: block;
+  min-height: 2.9rem;
+  margin: -3.1rem 0 0;
+  padding: 0 1.35rem 0.8rem;
+  position: relative;
+  z-index: 4;
+}
+
+.workflowEdgeLabel {
+  bottom: 0.8rem;
+  position: absolute;
+}
+
+.workflowTextInput {
+  left: 1.35rem;
+}
+
+.workflowImageOutput {
+  right: 1.35rem;
+  text-align: right;
+}
+
+.workflowFooterLine {
+  bottom: 0.95rem;
+  left: 7.2rem;
+  max-width: none;
+  position: absolute;
+  right: 7.2rem;
+}
+
+/* Night mode: straight rays and thin concentric rings. The SVG avoids the
+ * moire-like fish-scale artefact produced by overlapping CSS conic bands. */
+:global([data-theme='dark']) .workflowPolarGrid {
+  background: none;
+  mask-image:
+    linear-gradient(90deg, transparent 0%, #000 7%, #000 93%, transparent 100%),
+    linear-gradient(0deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
+  opacity: 0.78;
+  transform: none;
+}
+
+:global([data-theme='dark']) .workflowPolarGridSvg {
+  display: block;
+}
+
+:global([data-theme='dark']) .workflowPolarGridSvg circle,
+:global([data-theme='dark']) .workflowPolarGridSvg line {
+  fill: none;
+  stroke: color-mix(in srgb, var(--anima-red) 33%, transparent);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+:global([data-theme='dark']) .workflowPolarGridSvg line {
+  stroke: color-mix(in srgb, var(--anima-red) 28%, transparent);
+}
+
+:global([data-theme='dark']) .workflowNoiseIsland {
+  --island-cell: 0.32rem;
+}
+
+:global([data-theme='dark']) .workflowNoiseCell {
+  border-color: var(--anima-red);
+}
+
+:global([data-theme='dark']) .workflowNoiseCell.noiseSolid {
+  background: var(--anima-red);
+}
+
+:global([data-theme='dark']) .workflowNode {
+  border-radius: calc(var(--anima-radius) - 4px);
+}
+
+:global([data-theme='dark']) .workflowConnections > g > path,
+:global([data-theme='dark']) .workflowConnectionsMobile > g > path {
+  stroke: color-mix(in srgb, var(--anima-red) 62%, var(--anima-line));
+}
+
+:global([data-theme='dark']) .workflowConnections marker path,
+:global([data-theme='dark']) .workflowConnectionsMobile marker path {
+  fill: color-mix(in srgb, var(--anima-red) 62%, var(--anima-line));
+}
+
+@media screen and (max-width: 640px) {
+  .workflowDiagram {
+    margin-left: -0.85rem;
+    margin-right: -0.85rem;
+    min-height: 31rem;
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+  }
+
+  .workflowGraph {
+    height: 31rem;
+  }
+
+  .workflowNode {
+    min-height: 6rem;
+    padding: 0.72rem 0.7rem 0.62rem;
+  }
+
+  .workflowNodeTitle {
+    font-size: 0.92rem;
+  }
+
+  .workflowNodeDetail {
+    font-size: 0.56rem;
+  }
+
+  .nodeModel {
+    left: 0;
+    top: 0;
+    width: 43%;
+  }
+
+  .nodeAttachments {
+    left: 57%;
+    top: 0;
+    width: 43%;
+  }
+
+  .nodeCanvas {
+    left: 0;
+    top: 27%;
+    width: 43%;
+  }
+
+  .nodeDraw {
+    left: 57%;
+    top: 27%;
+    width: 43%;
+  }
+
+  .nodeEncoder {
+    left: 0;
+    top: 54%;
+    width: 43%;
+  }
+
+  .nodePrompt {
+    left: 57%;
+    top: 54%;
+    width: 43%;
+  }
+
+  .nodeSave {
+    left: 57%;
+    top: 81%;
+    width: 43%;
+  }
+
+  .workflowConnections {
+    display: none;
+  }
+
+  .workflowConnectionsMobile {
+    display: block;
+  }
+
+  .workflowDecorativeCopy > span {
+    font-size: 1.2rem;
+  }
+
+  .workflowFooter {
+    margin-top: -3rem;
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+  }
+
+  .workflowTextInput {
+    left: 0.85rem;
+  }
+
+  .workflowImageOutput {
+    right: 0.85rem;
+  }
+
+  .workflowFooterLine {
+    left: 5.8rem;
+    right: 5.8rem;
+  }
+}
