@@ -1,4 +1,4 @@
-import {Fragment, type ReactNode} from 'react';
+import {Fragment, type CSSProperties, type ReactNode} from 'react';
 import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
 
@@ -18,6 +18,14 @@ type WorkflowNode = {
   title: string;
   detail: string;
   tone: 'blue' | 'red' | 'gold' | 'ink';
+};
+
+type NoisePoint = {
+  x: number;
+  y: number;
+  size: number;
+  opacity: number;
+  hollow?: boolean;
 };
 
 const sectionItems: SectionItem[] = [
@@ -60,6 +68,28 @@ const textWorkflowNodes: WorkflowNode[] = [
   {index: 'T2', title: '编码提示词', detail: 'CONDITIONING', tone: 'red'},
 ];
 
+// A stable, clustered field keeps the decorative noise reproducible in screenshots.
+const workflowNoise: NoisePoint[] = [
+  {x: 63, y: 19, size: 6, opacity: 0.22},
+  {x: 67, y: 24, size: 4, opacity: 0.3, hollow: true},
+  {x: 71, y: 28, size: 8, opacity: 0.4},
+  {x: 75, y: 31, size: 5, opacity: 0.36, hollow: true},
+  {x: 78, y: 37, size: 10, opacity: 0.52},
+  {x: 82, y: 41, size: 4, opacity: 0.44, hollow: true},
+  {x: 84, y: 46, size: 7, opacity: 0.62},
+  {x: 80, y: 51, size: 5, opacity: 0.52, hollow: true},
+  {x: 75, y: 55, size: 9, opacity: 0.45},
+  {x: 70, y: 58, size: 4, opacity: 0.34, hollow: true},
+  {x: 66, y: 63, size: 7, opacity: 0.28},
+  {x: 61, y: 67, size: 5, opacity: 0.23, hollow: true},
+  {x: 57, y: 61, size: 3, opacity: 0.2},
+  {x: 54, y: 55, size: 6, opacity: 0.25, hollow: true},
+  {x: 58, y: 48, size: 4, opacity: 0.31},
+  {x: 62, y: 42, size: 3, opacity: 0.2, hollow: true},
+  {x: 69, y: 37, size: 3, opacity: 0.26},
+  {x: 73, y: 45, size: 4, opacity: 0.48, hollow: true},
+];
+
 export default function HomepageFeatures(): ReactNode {
   return (
     <section className={styles.features}>
@@ -71,6 +101,28 @@ export default function HomepageFeatures(): ReactNode {
             <span className={styles.workflowMeta}>5 个主节点 + 2 个文本节点</span>
           </div>
           <div className={styles.workflowDiagram} aria-label="ComfyUI 图像生成基础工作流">
+            <span className={styles.workflowPolarGrid} aria-hidden="true" />
+            <span className={styles.workflowNoiseField} aria-hidden="true">
+              {workflowNoise.map((point, index) => (
+                <span
+                  className={`${styles.workflowNoisePoint} ${point.hollow ? styles.noiseHollow : styles.noiseSolid}`}
+                  key={`${point.x}-${point.y}-${index}`}
+                  style={{
+                    left: `${point.x}%`,
+                    top: `${point.y}%`,
+                    width: `${point.size}px`,
+                    height: `${point.size}px`,
+                    opacity: point.opacity,
+                  } as CSSProperties}
+                />
+              ))}
+            </span>
+            <span className={styles.workflowDecorativeCopy} aria-hidden="true">
+              <span>TEXT</span>
+              <span>CONDITIONING</span>
+              <span className={styles.decorativeResult}>IMAGE</span>
+              <span className={styles.decorativeResult}>RESULT</span>
+            </span>
             <div className={styles.workflowTrack} role="list" aria-label="主图像路径">
               {workflowNodes.map((node, index) => (
                 <Fragment key={node.index}>

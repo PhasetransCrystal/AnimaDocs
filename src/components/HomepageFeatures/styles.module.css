@@ -115,12 +115,90 @@
   margin: 1.25rem 0 1.1rem;
   min-width: 0;
   position: relative;
-  z-index: 1;
+  z-index: 3;
 }
 
 .workflowDiagram {
+  min-height: 15.5rem;
   min-width: 0;
   position: relative;
+}
+
+.workflowPolarGrid,
+.workflowNoiseField,
+.workflowDecorativeCopy {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+/* Day mode: a tilted, pale-blue Cartesian registration plane. */
+.workflowPolarGrid {
+  background-image:
+    linear-gradient(90deg, color-mix(in srgb, var(--anima-blue) 19%, transparent) 1px, transparent 1px),
+    linear-gradient(0deg, color-mix(in srgb, var(--anima-blue) 19%, transparent) 1px, transparent 1px);
+  background-size: 2.8rem 2.8rem;
+  opacity: 0.62;
+  transform: rotate(-6deg) scale(1.08);
+  transform-origin: 50% 50%;
+  z-index: 0;
+}
+
+.workflowNoiseField {
+  z-index: 1;
+}
+
+.workflowNoisePoint {
+  border: 1px solid var(--anima-blue);
+  display: block;
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.noiseSolid {
+  background: var(--anima-blue);
+}
+
+.noiseHollow {
+  background: transparent;
+}
+
+.workflowDecorativeCopy {
+  color: var(--anima-blue);
+  font-family: var(--ifm-heading-font-family);
+  font-size: clamp(1rem, 2.5vw, 2.4rem);
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  opacity: 0.09;
+  overflow: hidden;
+  text-transform: uppercase;
+  z-index: 1;
+}
+
+.workflowDecorativeCopy > span {
+  position: absolute;
+  white-space: nowrap;
+}
+
+.workflowDecorativeCopy > span:nth-child(1) {
+  left: -0.7rem;
+  top: 38%;
+}
+
+.workflowDecorativeCopy > span:nth-child(2) {
+  left: -0.7rem;
+  top: 51%;
+}
+
+.workflowDecorativeCopy > span:nth-child(3) {
+  right: -0.7rem;
+  top: 38%;
+}
+
+.workflowDecorativeCopy > span:nth-child(4) {
+  right: -0.7rem;
+  top: 51%;
 }
 
 .workflowBranch {
@@ -130,6 +208,7 @@
   max-width: 62%;
   min-width: 0;
   position: relative;
+  z-index: 3;
 }
 
 .workflowBranch .workflowNode {
@@ -168,6 +247,7 @@
   padding: 0.8rem 0.85rem;
   position: relative;
   transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  z-index: 3;
 }
 
 .workflowNode:hover {
@@ -499,6 +579,45 @@
 
 :global([data-theme='dark']) .workflowKicker {
   color: var(--anima-red);
+}
+
+:global([data-theme='dark']) .workflowPolarGrid {
+  background-image:
+    repeating-radial-gradient(
+      circle at 112% 48%,
+      transparent 0 2.5rem,
+      color-mix(in srgb, var(--anima-red) 18%, transparent) 2.55rem 2.62rem,
+      transparent 2.67rem 4.9rem
+    ),
+    repeating-conic-gradient(
+      from 184deg at 112% 48%,
+      color-mix(in srgb, var(--anima-red) 14%, transparent) 0deg 1deg,
+      transparent 1deg 13deg
+    );
+  opacity: 0.72;
+  transform: rotate(0deg) scale(1.08);
+}
+
+:global([data-theme='dark']) .workflowNoisePoint {
+  border-color: var(--anima-red);
+  border-radius: 50%;
+}
+
+:global([data-theme='dark']) .noiseSolid {
+  background: var(--anima-red);
+}
+
+:global([data-theme='dark']) .workflowDecorativeCopy {
+  color: var(--anima-red);
+  opacity: 0.12;
+}
+
+:global([data-theme='dark']) .workflowBranchJoin {
+  border-color: color-mix(in srgb, var(--anima-red) 70%, transparent);
+}
+
+:global([data-theme='dark']) .workflowBranchJoin::after {
+  background: var(--anima-red);
 }
 
 :global([data-theme='dark']) .workflowNode {
