@@ -930,3 +930,44 @@
     transition: none;
   }
 }
+
+/* Give ultra-wide screens a deliberate composition instead of leaving the
+ * main content in a narrow desktop-sized island. */
+@media screen and (min-width: 1600px) {
+  .heroBanner {
+    min-height: 780px;
+  }
+
+  .heroLayout {
+    gap: 8rem;
+    grid-template-columns: minmax(0, 1.15fr) minmax(480px, 0.85fr);
+    min-height: 690px;
+    padding-top: 10rem;
+  }
+
+  .heroCopy {
+    max-width: 980px;
+  }
+
+  .heroCopy h1 {
+    font-size: 5rem;
+  }
+
+  .heroTitle {
+    font-size: 2.1rem;
+  }
+
+  .heroSubtitle {
+    max-width: 48rem;
+  }
+
+  .signalPanel {
+    justify-self: end;
+    max-width: 560px;
+    width: 100%;
+  }
+
+  .signalBar {
+    padding-bottom: 1.8rem;
+  }
+}

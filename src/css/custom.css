@@ -50,7 +50,7 @@
   --ifm-card-border-radius: var(--anima-radius);
   --ifm-global-shadow-lw: 0 1px 0 var(--anima-line);
   --ifm-global-shadow-md: 0 12px 28px var(--anima-shadow);
-  --ifm-container-width-xl: 1400px;
+  --ifm-container-width-xl: 2200px;
   --docusaurus-highlighted-code-line-bg: rgba(36, 93, 204, 0.14);
 }
 
@@ -244,7 +244,7 @@ a:hover {
 }
 
 .container {
-  width: min(100% - 2rem, var(--ifm-container-width-xl));
+  width: min(calc(100% - clamp(2rem, 6vw, 8rem)), var(--ifm-container-width-xl));
 }
 
 .button {
