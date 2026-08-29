@@ -1018,3 +1018,55 @@
     color-mix(in srgb, var(--anima-red) 8%, var(--anima-surface));
   background-size: 2.8rem 2.8rem;
 }
+
+/* Day material pass: layered blue-white planes and crisp editorial edges. */
+:global([data-theme='light']) .heroBackground {
+  background:
+    linear-gradient(135deg, transparent 0 56%, color-mix(in srgb, var(--anima-blue) 10%, transparent) 56% 72%, transparent 72% 100%),
+    var(--anima-paper);
+}
+
+:global([data-theme='light']) .heroBackground::before {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--anima-blue) 18%, transparent), color-mix(in srgb, var(--anima-blue-bright) 5%, transparent));
+  box-shadow: -1.5rem -1.5rem 0 color-mix(in srgb, var(--anima-gold) 12%, transparent);
+}
+
+:global([data-theme='light']) .atmosphereFrame {
+  border-color: color-mix(in srgb, var(--anima-blue) 58%, transparent);
+  box-shadow: 0.8rem 0.8rem 0 color-mix(in srgb, var(--anima-blue) 8%, transparent);
+}
+
+:global([data-theme='light']) .atmosphereSlash {
+  background: linear-gradient(90deg, var(--anima-blue), var(--anima-blue-bright));
+}
+
+:global([data-theme='light']) .atmosphereBlock {
+  box-shadow: -1rem -1rem 0 color-mix(in srgb, var(--anima-gold) 16%, transparent);
+}
+
+:global([data-theme='light']) .signalPanel {
+  border-radius: 0;
+  box-shadow: 0.8rem 0.8rem 0 color-mix(in srgb, var(--anima-blue) 10%, transparent), 0 0 0 1px color-mix(in srgb, var(--anima-ink) 6%, transparent);
+}
+
+:global([data-theme='light']) .panelRibbon {
+  background: var(--anima-ink);
+  clip-path: polygon(0 0, 100% 0, 100% 82%, 10% 100%, 0 78%);
+}
+
+:global([data-theme='light']) .panelDiagram {
+  background:
+    linear-gradient(to right, color-mix(in srgb, var(--anima-ink) 16%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--anima-ink) 16%, transparent) 1px, transparent 1px),
+    linear-gradient(135deg, color-mix(in srgb, var(--anima-blue) 10%, var(--anima-surface)), var(--anima-surface));
+  background-size: 2.5rem 2.5rem;
+}
+
+:global([data-theme='light']) .panelDiagramDisc {
+  background: linear-gradient(135deg, var(--anima-blue), var(--anima-blue-bright));
+}
+
+:global([data-theme='light']) .panelStats strong,
+:global([data-theme='light']) .panelFooter strong {
+  color: var(--anima-blue);
+}

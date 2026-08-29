@@ -1292,3 +1292,41 @@
 :global([data-theme='dark']) .workflowEdgeDecor {
   color: color-mix(in srgb, var(--anima-ink) 24%, transparent);
 }
+
+/* Day material pass: hard registration edges, layered paper blocks and a
+ * restrained brass calibration mark. */
+:global([data-theme='light']) .workflowBand {
+  box-shadow: 8px 8px 0 color-mix(in srgb, var(--anima-blue) 8%, transparent);
+}
+
+:global([data-theme='light']) .workflowNode {
+  box-shadow: 5px 5px 0 color-mix(in srgb, var(--anima-blue) 7%, transparent);
+}
+
+:global([data-theme='light']) .nodeAttachments,
+:global([data-theme='light']) .nodePrompt {
+  box-shadow: 5px 5px 0 color-mix(in srgb, var(--anima-gold) 12%, transparent);
+}
+
+:global([data-theme='light']) .nodeDraw {
+  box-shadow: 6px 6px 0 color-mix(in srgb, var(--anima-ink) 8%, transparent);
+}
+
+:global([data-theme='light']) .workflowNoiseCell.noiseMarker {
+  background: var(--anima-gold);
+  border-color: var(--anima-gold);
+}
+
+:global([data-theme='light']) .workflowConnections > g > path {
+  stroke: color-mix(in srgb, var(--anima-ink) 52%, var(--anima-blue));
+}
+
+:global([data-theme='light']) .workflowConnections > g > path:nth-child(2),
+:global([data-theme='light']) .workflowConnections > g > path:nth-child(5) {
+  stroke: var(--anima-blue);
+}
+
+:global([data-theme='light']) .workflowBand::after {
+  border-color: color-mix(in srgb, var(--anima-blue) 28%, transparent);
+  transform: rotate(18deg);
+}
