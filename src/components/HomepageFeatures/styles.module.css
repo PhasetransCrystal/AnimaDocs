@@ -118,6 +118,44 @@
   z-index: 1;
 }
 
+.workflowDiagram {
+  min-width: 0;
+  position: relative;
+}
+
+.workflowBranch {
+  align-items: center;
+  display: flex;
+  margin: 0 0 1.1rem 12%;
+  max-width: 62%;
+  min-width: 0;
+  position: relative;
+}
+
+.workflowBranch .workflowNode {
+  min-height: 5rem;
+}
+
+.workflowBranchJoin {
+  border-bottom: 1px dashed var(--anima-line-strong);
+  border-right: 1px dashed var(--anima-line-strong);
+  height: 1.35rem;
+  margin-left: 0.7rem;
+  position: relative;
+  width: 1.35rem;
+}
+
+.workflowBranchJoin::after {
+  background: var(--anima-red);
+  border-radius: 50%;
+  bottom: -0.2rem;
+  content: "";
+  height: 0.35rem;
+  position: absolute;
+  right: -0.2rem;
+  width: 0.35rem;
+}
+
 .workflowNode {
   background: var(--anima-paper);
   border: 1px solid var(--anima-line-strong);
@@ -212,6 +250,22 @@
   justify-content: flex-start;
 }
 
+.workflowEdgeLabel {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  position: relative;
+}
+
+.workflowEdgeDecor {
+  color: color-mix(in srgb, var(--anima-ink) 16%, transparent);
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .workflowFooterLine {
   background: var(--anima-line-strong);
   flex: 1;
@@ -258,6 +312,10 @@
   letter-spacing: 0;
   line-height: 1.12;
   margin: 0;
+}
+
+.headingLine {
+  display: block;
 }
 
 .sectionHeader > p:last-child {
@@ -570,6 +628,24 @@
     align-items: stretch;
     flex-direction: column;
     gap: 0;
+  }
+
+  .workflowBranch {
+    align-items: stretch;
+    flex-direction: column;
+    margin: 0 0 1rem 1.25rem;
+    max-width: none;
+  }
+
+  .workflowBranch .workflowConnector {
+    flex: 0 0 1rem;
+    height: 1rem;
+  }
+
+  .workflowBranchJoin {
+    align-self: flex-end;
+    margin: 0.3rem 1rem 0 0;
+    transform: rotate(90deg);
   }
 
   .workflowNode {
