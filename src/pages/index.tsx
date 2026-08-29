@@ -11,6 +11,17 @@ import styles from './index.module.css';
 const contributorCount = 1;
 const thirdPartyToolCount = 0;
 
+const heroRadialRays = [-66, -55, -44, -33, -22, -11, 0, 11, 22, 33, 44, 55, 66].map(
+  (angle, index) => {
+    const radians = angle * Math.PI / 180;
+    return {
+      x: 500 + Math.cos(radians) * 720,
+      y: 500 + Math.sin(radians) * 720,
+      opacity: 0.26 + (6 - Math.abs(index - 6)) * 0.018,
+    };
+  },
+);
+
 function HomepageHeader(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
   const docsData = useDocsData(undefined);
@@ -26,7 +37,22 @@ function HomepageHeader(): ReactNode {
           <span className={styles.atmosphereSlash} />
           <span className={styles.atmosphereBlock} />
           <span className={styles.atmosphereFrame} />
-          <span className={styles.atmosphereTicks} />
+          <span className={styles.atmosphereTicks}>
+            <svg className={styles.atmosphereRadialGrid} viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
+              <g aria-hidden="true">
+                {heroRadialRays.map((ray, index) => (
+                  <line
+                    key={index}
+                    x1="500"
+                    y1="500"
+                    x2={ray.x}
+                    y2={ray.y}
+                    opacity={ray.opacity}
+                  />
+                ))}
+              </g>
+            </svg>
+          </span>
           <span className={styles.atmosphereLabel}>工作流 / 01</span>
         </div>
         <div className={styles.heroGrid} />

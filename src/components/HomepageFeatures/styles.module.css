@@ -582,20 +582,9 @@
 }
 
 :global([data-theme='dark']) .workflowPolarGrid {
-  background-image:
-    repeating-radial-gradient(
-      circle at 112% 48%,
-      transparent 0 2.5rem,
-      color-mix(in srgb, var(--anima-red) 18%, transparent) 2.55rem 2.62rem,
-      transparent 2.67rem 4.9rem
-    ),
-    repeating-conic-gradient(
-      from 184deg at 112% 48%,
-      color-mix(in srgb, var(--anima-red) 14%, transparent) 0deg 1deg,
-      transparent 1deg 13deg
-    );
-  opacity: 0.72;
-  transform: rotate(0deg) scale(1.08);
+  background: none;
+  opacity: 0.86;
+  transform: none;
 }
 
 :global([data-theme='dark']) .workflowNoisePoint {
@@ -1078,9 +1067,10 @@
 :global([data-theme='dark']) .workflowPolarGrid {
   background: none;
   mask-image:
-    linear-gradient(90deg, transparent 0%, #000 7%, #000 93%, transparent 100%),
+    linear-gradient(90deg, transparent 0%, #000 7%, #000 96%, transparent 100%),
     linear-gradient(0deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
-  opacity: 0.78;
+  mask-composite: intersect;
+  opacity: 0.86;
   transform: none;
 }
 
@@ -1091,13 +1081,14 @@
 :global([data-theme='dark']) .workflowPolarGridSvg circle,
 :global([data-theme='dark']) .workflowPolarGridSvg line {
   fill: none;
-  stroke: color-mix(in srgb, var(--anima-red) 33%, transparent);
-  stroke-width: 1;
+  stroke: color-mix(in srgb, var(--anima-red) 48%, transparent);
+  stroke-linecap: round;
+  stroke-width: 0.9;
   vector-effect: non-scaling-stroke;
 }
 
 :global([data-theme='dark']) .workflowPolarGridSvg line {
-  stroke: color-mix(in srgb, var(--anima-red) 28%, transparent);
+  stroke: color-mix(in srgb, var(--anima-red) 38%, transparent);
 }
 
 :global([data-theme='dark']) .workflowNoiseIsland {

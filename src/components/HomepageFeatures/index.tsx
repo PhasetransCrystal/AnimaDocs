@@ -137,12 +137,18 @@ const workflowIslands: NoiseIsland[] = [
   },
 ];
 
-const polarRings = [150, 285, 420, 555, 690];
-const polarRayPoints = Array.from({length: 7}, (_, index) => {
-  const angle = (156 + index * 6) * Math.PI / 180;
+const polarOrigin = {x: 980, y: 190};
+const polarRings = [
+  {radius: 220, dash: '260 72', offset: 0, opacity: 0.74},
+  {radius: 430, dash: '330 108', offset: 64, opacity: 0.52},
+  {radius: 690, dash: '430 158', offset: 124, opacity: 0.32},
+];
+const polarRayPoints = Array.from({length: 5}, (_, index) => {
+  const angle = (148 + index * 12) * Math.PI / 180;
   return {
-    x: 1120 + Math.cos(angle) * 980,
-    y: 180 + Math.sin(angle) * 980,
+    x: polarOrigin.x + Math.cos(angle) * 1040,
+    y: polarOrigin.y + Math.sin(angle) * 1040,
+    opacity: 0.34 - index * 0.024,
   };
 });
 
@@ -158,13 +164,28 @@ export default function HomepageFeatures(): ReactNode {
           </div>
           <div className={styles.workflowDiagram} aria-label="ComfyUI 图像生成基础工作流">
             <span className={styles.workflowPolarGrid} aria-hidden="true">
-              <svg className={styles.workflowPolarGridSvg} viewBox="0 0 1000 360" preserveAspectRatio="none">
+              <svg className={styles.workflowPolarGridSvg} viewBox="0 0 1000 1000" preserveAspectRatio="xMaxYMid meet">
                 <g>
-                  {polarRings.map((radius) => (
-                    <circle key={radius} cx="1120" cy="180" r={radius} />
+                  {polarRings.map((ring) => (
+                    <circle
+                      key={ring.radius}
+                      cx={polarOrigin.x}
+                      cy={polarOrigin.y}
+                      r={ring.radius}
+                      opacity={ring.opacity}
+                      strokeDasharray={ring.dash}
+                      strokeDashoffset={ring.offset}
+                    />
                   ))}
                   {polarRayPoints.map((point, index) => (
-                    <line key={index} x1="1120" y1="180" x2={point.x} y2={point.y} />
+                    <line
+                      key={index}
+                      x1={polarOrigin.x}
+                      y1={polarOrigin.y}
+                      x2={point.x}
+                      y2={point.y}
+                      opacity={point.opacity}
+                    />
                   ))}
                 </g>
               </svg>

@@ -750,3 +750,87 @@ a:hover {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Global closure pass ----------------------------------------------------
+ * Keep the shared navigation and footer quiet enough for reading while
+ * allowing each theme to swap its material independently. */
+.navbar__inner {
+  width: min(calc(100% - clamp(2rem, 6vw, 8rem)), var(--ifm-container-width-xl));
+}
+
+.navbar__toggle {
+  border: 1px solid var(--anima-line);
+  border-radius: var(--anima-radius);
+}
+
+.navbar__toggle:hover {
+  background: var(--ifm-hover-overlay);
+}
+
+.theme-doc-markdown {
+  max-width: min(100%, 1040px);
+}
+
+.theme-doc-markdown a:focus-visible,
+.navbar a:focus-visible,
+.footer a:focus-visible,
+.menu__link:focus-visible {
+  outline: 2px solid var(--anima-blue);
+  outline-offset: 3px;
+}
+
+[data-theme='light'] .footer {
+  background: var(--anima-surface-strong);
+  color: var(--anima-ink);
+}
+
+[data-theme='light'] .footer::before {
+  border-color: color-mix(in srgb, var(--anima-blue) 32%, transparent);
+  border-radius: 0;
+  height: 22rem;
+  right: -8rem;
+  top: -10rem;
+  transform: rotate(14deg);
+  width: 22rem;
+}
+
+[data-theme='light'] .footer__title {
+  color: var(--anima-blue);
+}
+
+[data-theme='light'] .footer__link-item,
+[data-theme='light'] .footer__copyright {
+  color: var(--anima-ink-soft);
+}
+
+[data-theme='light'] .footer__link-item:hover {
+  color: var(--anima-blue);
+}
+
+[data-theme='dark'] .footer {
+  background: #0c0e12;
+}
+
+[data-theme='dark'] .footer::after {
+  background: color-mix(in srgb, var(--anima-red) 24%, transparent);
+  content: "";
+  height: 0.25rem;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: min(24vw, 18rem);
+}
+
+@media screen and (max-width: 640px) {
+  .navbar__inner {
+    width: calc(100% - 1rem);
+  }
+
+  .navbar__title {
+    font-size: 0.82rem;
+  }
+
+  .theme-doc-markdown {
+    max-width: 100%;
+  }
+}

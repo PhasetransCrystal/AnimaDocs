@@ -118,16 +118,29 @@
 }
 
 .atmosphereTicks::before {
-  background: repeating-conic-gradient(
-    from 0deg,
-    var(--anima-blue) 0deg 1deg,
-    transparent 1deg 12deg
-  );
+  background: none;
   border-radius: 50%;
   content: "";
   inset: -0.55rem;
   opacity: 0.5;
   position: absolute;
+}
+
+.atmosphereRadialGrid {
+  display: block;
+  height: calc(100% + 1.1rem);
+  inset: -0.55rem;
+  overflow: visible;
+  position: absolute;
+  width: calc(100% + 1.1rem);
+}
+
+.atmosphereRadialGrid line {
+  fill: none;
+  stroke: color-mix(in srgb, var(--anima-blue) 42%, transparent);
+  stroke-linecap: round;
+  stroke-width: 1.1;
+  vector-effect: non-scaling-stroke;
 }
 
 .atmosphereLabel {
@@ -630,11 +643,11 @@
 }
 
 :global([data-theme='dark']) .atmosphereTicks::before {
-  background: repeating-conic-gradient(
-    from 0deg,
-    var(--anima-red) 0deg 1deg,
-    transparent 1deg 12deg
-  );
+  background: none;
+}
+
+:global([data-theme='dark']) .atmosphereRadialGrid line {
+  stroke: color-mix(in srgb, var(--anima-red) 52%, transparent);
 }
 
 :global([data-theme='dark']) .atmosphereLabel {
