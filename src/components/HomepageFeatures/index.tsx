@@ -23,36 +23,36 @@ type WorkflowNode = {
 const sectionItems: SectionItem[] = [
   {
     index: '01',
-    label: 'DOCUMENTS',
-    title: '从节点开始',
-    description: '先建立 ComfyUI 与 Anima 的共同语境，再进入可复用的工作流。',
+    label: '文档',
+    title: '基础概念与安装',
+    description: '了解 ComfyUI、Anima 及本地运行所需的基础环境。',
     to: '/docs/intro',
-    action: '打开序章',
+    action: '阅读文档',
   },
   {
     index: '02',
-    label: 'THEORY',
-    title: '理解模型为何这样工作',
-    description: '把模型结构、提示词和生成结果放回同一张因果图里观察。',
+    label: '原理',
+    title: '模型与参数',
+    description: '说明模型结构、提示词和生成参数如何影响结果。',
     to: '/docs/theory/anima',
-    action: '查看理论篇',
+    action: '查看 Anima 原理',
   },
   {
     index: '03',
-    label: 'NOTES',
-    title: '记录正在发生的实验',
-    description: '博客用于保存参数、发现和仍在变化中的实践判断。',
+    label: '实践',
+    title: '工作流与记录',
+    description: '记录测试过程、参数调整和可复用的工作流。',
     to: '/blog',
-    action: '进入记录',
+    action: '查看实践记录',
   },
 ];
 
 const workflowNodes: WorkflowNode[] = [
-  {index: '01', title: '加载模型', detail: 'MODEL', tone: 'blue'},
-  {index: '02', title: '编码文本', detail: 'ENCODER', tone: 'gold'},
-  {index: '03', title: '配置提示词', detail: 'PROMPT', tone: 'red'},
-  {index: '04', title: '图片绘制', detail: 'SAMPLER', tone: 'ink'},
-  {index: '05', title: '图片保存', detail: 'OUTPUT', tone: 'blue'},
+  {index: '01', title: '加载模型', detail: '模型', tone: 'blue'},
+  {index: '02', title: '编码文本', detail: '文本编码', tone: 'gold'},
+  {index: '03', title: '配置提示词', detail: '提示词', tone: 'red'},
+  {index: '04', title: '图片绘制', detail: '采样', tone: 'ink'},
+  {index: '05', title: '图片保存', detail: '输出', tone: 'blue'},
 ];
 
 export default function HomepageFeatures(): ReactNode {
@@ -60,10 +60,10 @@ export default function HomepageFeatures(): ReactNode {
     <section className={styles.features}>
       <div className="container">
         <div className={styles.workflowBand}>
-          <span className={styles.workflowStamp} aria-hidden="true">A / 05</span>
+          <span className={styles.workflowStamp} aria-hidden="true">流程 / 05</span>
           <div className={styles.workflowHeader}>
-            <span className={styles.workflowKicker}>WORKFLOW / SIGNAL PATH</span>
-            <span className={styles.workflowMeta}>COMFYUI + ANIMA / 05 NODES</span>
+            <span className={styles.workflowKicker}>工作流 / 图像生成流程</span>
+            <span className={styles.workflowMeta}>5 个核心节点</span>
           </div>
           <div className={styles.workflowTrack}>
             {workflowNodes.map((node, index) => (
@@ -80,17 +80,17 @@ export default function HomepageFeatures(): ReactNode {
             ))}
           </div>
           <div className={styles.workflowFooter}>
-            <span>TEXT CONDITION</span>
+            <span>文本条件</span>
             <span className={styles.workflowFooterLine} aria-hidden="true" />
-            <span>IMAGE RESULT</span>
+            <span>图像结果</span>
           </div>
         </div>
         <div className={styles.sectionHeader}>
           <span className={styles.sectionHeaderMark} aria-hidden="true">02</span>
-          <p className={styles.sectionKicker}>READING PATH / 00</p>
-          <Heading as="h2">从工作流的骨架开始。</Heading>
+          <p className={styles.sectionKicker}>内容导航 / 00</p>
+          <Heading as="h2">按顺序学习 ComfyUI 与 Anima</Heading>
           <p>
-            这里不是模板说明页，而是一份持续整理中的知识底稿。沿着编号进入，按自己的节奏建立坐标。
+            从基础概念和安装配置开始，逐步学习节点工作流、模型参数与实践方法。
           </p>
         </div>
 
@@ -113,8 +113,8 @@ export default function HomepageFeatures(): ReactNode {
         </div>
 
         <div className={styles.sectionFootnote}>
-          <span>ANIMADOCS / OPEN INDEX</span>
-          <span>CONTENT FIRST / DECORATION SECOND</span>
+          <span>CUI-ANIMA / 内容索引</span>
+          <span>持续更新</span>
         </div>
       </div>
     </section>

@@ -5,8 +5,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'AnimaDocs',
-  tagline: 'ComfyUI / Anima workflow field notes',
+  title: 'Cui-Anima集合教程',
+  tagline: 'ComfyUI 与 Anima 的安装、配置和使用教程',
   favicon: 'img/anima-mark-day.svg',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -79,9 +79,9 @@ const config: Config = {
       respectPrefersColorScheme: false,
     },
     navbar: {
-      title: 'AnimaDocs',
+      title: 'Cui-Anima集合教程',
       logo: {
-        alt: 'AnimaDocs mark',
+        alt: 'Cui-Anima集合教程标志',
         src: 'img/anima-mark-day.svg',
         srcDark: 'img/anima-mark-night.svg',
       },
@@ -90,9 +90,9 @@ const config: Config = {
           type: 'docSidebar',
           sidebarId: 'tutorialSidebar',
           position: 'left',
-          label: 'Docs',
+          label: '文档',
         },
-        {to: '/blog', label: 'Notes', position: 'left'},
+        {to: '/blog', label: '记录', position: 'left'},
         {
           href: 'https://github.com/Mon-Landis/AnimaDocs',
           label: 'GitHub',
@@ -104,42 +104,42 @@ const config: Config = {
       style: 'dark',
       links: [
         {
-          title: 'AnimaDocs',
+          title: 'Cui-Anima集合教程',
           items: [
             {
-              label: 'Start reading',
+              label: '开始阅读',
               to: '/docs/intro',
             },
           ],
         },
         {
-          title: 'Index',
+          title: '内容索引',
           items: [
             {
-              label: 'Theory / Anima',
+              label: 'Anima 原理',
               to: '/docs/theory/anima',
             },
             {
-              label: 'Notes / Blog',
+              label: '实践记录',
               to: '/blog',
             },
             {
-              label: 'Project source',
+              label: '项目源码',
               href: 'https://github.com/Mon-Landis/AnimaDocs',
             },
           ],
         },
         {
-          title: 'Signal',
+          title: '项目链接',
           items: [
             {
-              label: 'GitHub repository',
+              label: 'GitHub 仓库',
               href: 'https://github.com/Mon-Landis/AnimaDocs',
             },
           ],
         },
       ],
-      copyright: `Copyright (c) ${new Date().getFullYear()} AnimaDocs. Built with Docusaurus.`,
+      copyright: `Copyright (c) ${new Date().getFullYear()} Cui-Anima集合教程。基于 Docusaurus 构建。`,
     },
     prism: {
       theme: prismThemes.github,

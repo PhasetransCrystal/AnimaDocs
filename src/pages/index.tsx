@@ -1,5 +1,6 @@
 import type {ReactNode} from 'react';
 import Link from '@docusaurus/Link';
+import {useDocsData} from '@docusaurus/plugin-content-docs/client';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
@@ -7,46 +8,58 @@ import HomepageFeatures from '@site/src/components/HomepageFeatures';
 
 import styles from './index.module.css';
 
+const contributorCount = 1;
+const thirdPartyToolCount = 0;
+
 function HomepageHeader(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
+  const docsData = useDocsData(undefined);
+  const latestVersion = docsData.versions.find((version) => version.isLast) ?? docsData.versions[0];
+  const tutorialCount = latestVersion?.docs.filter((doc) => !doc.unlisted).length ?? 0;
 
   return (
     <header className={styles.heroBanner}>
-      <div className={styles.heroAtmosphere} aria-hidden="true">
-        <span className={styles.atmosphereDisc} />
-        <span className={styles.atmosphereOrbit} />
-        <span className={styles.atmosphereSlash} />
-        <span className={styles.atmosphereBlock} />
-        <span className={styles.atmosphereFrame} />
-        <span className={styles.atmosphereTicks} />
-        <span className={styles.atmosphereLabel}>FIELD 01 / CALIBRATION</span>
+      <div className={styles.heroBackground} aria-hidden="true">
+        <div className={styles.heroAtmosphere}>
+          <span className={styles.atmosphereDisc} />
+          <span className={styles.atmosphereOrbit} />
+          <span className={styles.atmosphereSlash} />
+          <span className={styles.atmosphereBlock} />
+          <span className={styles.atmosphereFrame} />
+          <span className={styles.atmosphereTicks} />
+          <span className={styles.atmosphereLabel}>工作流 / 01</span>
+        </div>
+        <div className={styles.heroGrid} />
       </div>
-      <div className={styles.heroGrid} aria-hidden="true" />
-      <div className="container">
-        <div className={styles.heroLayout}>
+      <div className={styles.heroContent}>
+        <div className="container">
+          <div className={styles.heroLayout}>
           <div className={styles.heroCopy}>
-            <p className={styles.kicker}>ANIMADOCS / WORKFLOW FIELD NOTES</p>
-            <Heading as="h1">{siteConfig.title}</Heading>
-            <p className={styles.heroTitle}>把节点，连成可理解的图像工作流。</p>
+            <p className={styles.kicker}>CUI-ANIMA / 教程</p>
+            <Heading as="h1" aria-label={siteConfig.title}>
+              <span>Cui-Anima</span><wbr /><span>集合教程</span>
+            </Heading>
+            <p className={styles.heroTitle}>
+              <span>ComfyUI 与 Anima</span>{' '}<span>的使用指南</span>
+            </p>
             <p className={styles.heroSubtitle}>
-              一份围绕 ComfyUI 与 Anima 的实践档案：从基础概念、节点关系到模型参数，
-              让每一次出图都能被复盘、解释和复用。
+              涵盖本地安装、节点连接、模型配置和图像生成，提供可直接复现的步骤与示例。
             </p>
             <div className={styles.actions}>
               <Link className={styles.primaryAction} to="/docs/intro">
-                <span>进入文档</span>
+                <span>开始阅读</span>
                 <span aria-hidden="true">→</span>
               </Link>
-              <Link className={styles.secondaryAction} to="/docs/theory/anima">
-                查看理论篇
-              </Link>
+              <button className={styles.secondaryAction} type="button" disabled title="暂未开放">
+                原理篇
+              </button>
             </div>
           </div>
 
-          <aside className={styles.signalPanel} aria-label="Documentation index">
-            <span className={styles.panelRibbon} aria-hidden="true">INDEX / 01</span>
+          <aside className={styles.signalPanel} aria-label="文档目录">
+            <span className={styles.panelRibbon} aria-hidden="true">目录 / 01</span>
             <div className={styles.panelTopline}>
-              <span>NOW INDEXING</span>
+              <span>内容目录</span>
               <span>01 / 03</span>
             </div>
             <div className={styles.panelDiagram} aria-hidden="true">
@@ -55,42 +68,43 @@ function HomepageHeader(): ReactNode {
               <span className={styles.panelDiagramOrbitSecondary} />
               <span className={styles.panelDiagramCore}>A</span>
               <span className={styles.panelDiagramAxis} />
-              <span className={styles.panelDiagramCaption}>MODEL / 2B</span>
+              <span className={styles.panelDiagramCaption}>模型 / 2B</span>
             </div>
-            <p className={styles.panelTitle}>ANIMA / COMFYUI</p>
+            <p className={styles.panelTitle}>ComfyUI / Anima</p>
             <ol className={styles.indexList}>
               <li className={styles.indexItemActive}>
                 <span>01</span>
-                <span>基础概念与入口</span>
+                <span>基础教程</span>
               </li>
               <li>
                 <span>02</span>
-                <span>理论与模型拆解</span>
+                <span>原理讲解</span>
               </li>
               <li>
                 <span>03</span>
-                <span>实验记录与更新</span>
+                <span>第三方工具推荐</span>
               </li>
             </ol>
-            <div className={styles.panelStats} aria-label="Current index status">
-              <span><strong>02B</strong><small>MODEL</small></span>
-              <span><strong>24</strong><small>NODES</small></span>
-              <span><strong>OPEN</strong><small>STATE</small></span>
+            <div className={styles.panelStats} aria-label="项目统计">
+              <span><strong>{tutorialCount}</strong><small>教程篇数</small></span>
+              <span><strong>{contributorCount}</strong><small>贡献人数</small></span>
+              <span><strong>{thirdPartyToolCount}</strong><small>第三方工具</small></span>
             </div>
             <div className={styles.panelFooter}>
-              <span>STATUS</span>
-              <strong>OPEN / READING</strong>
+              <span>状态</span>
+              <strong>持续更新</strong>
             </div>
           </aside>
-        </div>
+          </div>
 
-        <div className={styles.signalBar} aria-label="Site sections">
-          <span className={styles.signalBarMarker} aria-hidden="true" />
-          <span>DOCS</span>
-          <span>THEORY</span>
-          <span>NOTES</span>
-          <span className={styles.signalBarLine} aria-hidden="true" />
-          <span className={styles.signalBarMeta}>LOCAL KNOWLEDGE BASE / 2026</span>
+          <div className={styles.signalBar} aria-label="内容分类">
+            <span className={styles.signalBarMarker} aria-hidden="true" />
+            <span>文档</span>
+            <span>原理</span>
+            <span>实践</span>
+            <span className={styles.signalBarLine} aria-hidden="true" />
+            <span className={styles.signalBarMeta}>持续更新 / 2026</span>
+          </div>
         </div>
       </div>
     </header>
@@ -102,8 +116,8 @@ export default function Home(): ReactNode {
 
   return (
     <Layout
-      title={`Field notes from ${siteConfig.title}`}
-      description="ComfyUI and Anima workflow field notes">
+      title={siteConfig.title}
+      description={siteConfig.tagline}>
       <HomepageHeader />
       <main>
         <HomepageFeatures />

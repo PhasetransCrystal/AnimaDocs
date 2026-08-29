@@ -1,12 +1,27 @@
 .heroBanner {
-  background:
-    linear-gradient(135deg, transparent 0 62%, color-mix(in srgb, var(--anima-blue) 8%, transparent) 62% 100%),
-    var(--anima-paper);
+  background: var(--anima-paper);
   border-bottom: 1px solid var(--anima-line-strong);
   color: var(--anima-ink);
   min-height: 720px;
   overflow: hidden;
   position: relative;
+}
+
+/* The environment is a replaceable layer; foreground layout stays independent. */
+.heroBackground {
+  background:
+    linear-gradient(135deg, transparent 0 62%, color-mix(in srgb, var(--anima-blue) 8%, transparent) 62% 100%),
+    var(--anima-paper);
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
 }
 
 .heroAtmosphere {
@@ -126,15 +141,15 @@
   transform-origin: right bottom;
 }
 
-.heroBanner::before,
-.heroBanner::after {
+.heroBackground::before,
+.heroBackground::after {
   content: "";
   pointer-events: none;
   position: absolute;
 }
 
 /* A flat registration block gives the day palette its blue/black split. */
-.heroBanner::before {
+.heroBackground::before {
   background: var(--anima-blue);
   bottom: 0;
   height: 9rem;
@@ -144,7 +159,7 @@
   clip-path: polygon(18% 0, 100% 0, 100% 100%, 0 100%, 0 34%);
 }
 
-.heroBanner::after {
+.heroBackground::after {
   background: var(--anima-line-strong);
   height: 1px;
   left: 46%;
@@ -205,7 +220,7 @@
   z-index: 1;
 }
 
-.heroBanner > .container {
+.heroContent > .container {
   position: relative;
   z-index: 1;
 }
@@ -238,11 +253,17 @@
 .heroCopy h1 {
   color: var(--anima-ink);
   font-family: var(--ifm-heading-font-family);
-  font-size: 5.5rem;
+  font-size: 4rem;
   font-weight: 700;
   letter-spacing: 0;
   line-height: 0.94;
   margin: 0;
+}
+
+.heroCopy h1 > span,
+.heroTitle > span {
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .heroTitle {
@@ -298,8 +319,11 @@
 }
 
 .secondaryAction {
+  appearance: none;
+  background: transparent;
   border: 1px solid var(--anima-ink-soft);
   color: var(--anima-ink);
+  cursor: pointer;
 }
 
 .secondaryAction:hover {
@@ -307,6 +331,15 @@
   color: var(--anima-blue);
   text-decoration: none;
   transform: translateY(-2px);
+}
+
+.secondaryAction:disabled,
+.secondaryAction:disabled:hover {
+  border-color: var(--anima-line);
+  color: var(--anima-ink-soft);
+  cursor: not-allowed;
+  opacity: 0.72;
+  transform: none;
 }
 
 .signalPanel {
@@ -608,7 +641,7 @@
   color: var(--anima-red);
 }
 
-:global([data-theme='dark']) .heroBanner::before {
+:global([data-theme='dark']) .heroBackground::before {
   background: transparent;
   border: 1px solid color-mix(in srgb, var(--anima-red) 60%, transparent);
   border-radius: 50%;
@@ -620,7 +653,7 @@
   clip-path: none;
 }
 
-:global([data-theme='dark']) .heroBanner::after {
+:global([data-theme='dark']) .heroBackground::after {
   background: color-mix(in srgb, var(--anima-ink) 32%, transparent);
   left: 46%;
   top: 57%;
@@ -734,13 +767,19 @@
   color: var(--anima-red);
 }
 
+:global([data-theme='dark']) .secondaryAction:disabled,
+:global([data-theme='dark']) .secondaryAction:disabled:hover {
+  border-color: var(--anima-line-strong);
+  color: var(--anima-ink-soft);
+}
+
 :global([data-theme='dark']) .signalBar {
   color: var(--anima-red);
 }
 
 @media screen and (max-width: 1200px) {
   .heroCopy h1 {
-    font-size: 4.8rem;
+    font-size: 4rem;
   }
 
   .heroLayout {
@@ -773,8 +812,8 @@
     width: 32%;
   }
 
-  .heroBanner::after,
-  :global([data-theme='dark']) .heroBanner::after {
+  .heroBackground::after,
+  :global([data-theme='dark']) .heroBackground::after {
     left: 62%;
   }
 }
@@ -851,8 +890,8 @@
     width: 28%;
   }
 
-  .heroBanner::after,
-  :global([data-theme='dark']) .heroBanner::after {
+  .heroBackground::after,
+  :global([data-theme='dark']) .heroBackground::after {
     left: 70%;
   }
 
