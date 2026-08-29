@@ -137,7 +137,7 @@ const workflowIslands: NoiseIsland[] = [
   },
 ];
 
-const polarOrigin = {x: 980, y: 190};
+const polarOrigin = {x: 1060, y: 190};
 const polarRings = [
   {radius: 220, dash: '260 72', offset: 0, opacity: 0.74},
   {radius: 430, dash: '330 108', offset: 64, opacity: 0.52},
