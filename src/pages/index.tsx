@@ -20,25 +20,6 @@ function HomepageHeader(): ReactNode {
         <span className={styles.atmosphereFrame} />
         <span className={styles.atmosphereTicks} />
         <span className={styles.atmosphereLabel}>FIELD 01 / CALIBRATION</span>
-        <span className={styles.heroCollage}>
-          <span className={`${styles.heroCollageBlock} ${styles.heroCollageBlue}`} />
-          <span className={`${styles.heroCollageBlock} ${styles.heroCollageInk}`} />
-          <span className={`${styles.heroCollageBlock} ${styles.heroCollageGold}`} />
-          <span className={styles.heroCollageGrid} />
-          <span className={styles.heroCollageLabel}>PLATE / 004</span>
-        </span>
-        <span className={styles.nightScene}>
-          <span className={styles.nightStarField} />
-          <span className={styles.nightHalo} />
-          <span className={styles.nightRingPrimary} />
-          <span className={styles.nightRingSecondary} />
-          <span className={styles.nightCrosshair} />
-          <span className={styles.nightSweep} />
-          <span className={styles.nightInstrument}>
-            <span className={styles.nightInstrumentCore}>A</span>
-            <span className={styles.nightInstrumentFin} />
-          </span>
-        </span>
       </div>
       <div className={styles.heroGrid} aria-hidden="true" />
       <div className="container">
