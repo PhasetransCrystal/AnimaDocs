@@ -1330,3 +1330,296 @@
   border-color: color-mix(in srgb, var(--anima-blue) 28%, transparent);
   transform: rotate(18deg);
 }
+
+/* Learning path pass: the introduction and route cards now share the same
+ * full-width measure as the workflow frame. */
+.sectionHeader {
+  background: color-mix(in srgb, var(--anima-surface) 84%, transparent);
+  display: grid;
+  gap: 0.7rem 2rem;
+  grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.42fr);
+  max-width: none;
+  padding: 1.5rem 2rem 1.65rem 1.45rem;
+  width: 100%;
+}
+
+.sectionKicker,
+.sectionHeader h2,
+.sectionHeader > p:last-child {
+  grid-column: 1;
+}
+
+.sectionKicker {
+  grid-row: 1;
+  margin-bottom: 0.35rem;
+}
+
+.sectionHeader h2 {
+  grid-row: 2;
+}
+
+.sectionHeader > p:last-child {
+  grid-row: 3;
+  margin-top: 0.65rem;
+  max-width: 48rem;
+}
+
+.sectionHeaderMark {
+  font-size: 9rem;
+  right: 2rem;
+  top: 1.2rem;
+}
+
+.sectionList {
+  border-top: 0;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 2.4rem;
+}
+
+.sectionItem,
+.sectionItem:hover {
+  background: var(--anima-surface);
+  border: 1px solid var(--anima-line);
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-height: 15rem;
+  padding: 1.35rem;
+  transform: none;
+}
+
+.sectionItem:hover {
+  border-color: var(--anima-blue);
+  box-shadow: 0 12px 24px var(--anima-shadow);
+  transform: translateY(-4px);
+}
+
+.sectionIndex {
+  font-size: 0.75rem;
+}
+
+.sectionSignal {
+  height: 0.35rem;
+  margin: 0.1rem 0 0.6rem;
+  width: 3.4rem;
+}
+
+.sectionSignal::after {
+  height: 0.35rem;
+  left: auto;
+  right: -0.5rem;
+  top: 0;
+  width: 0.35rem;
+}
+
+.sectionBody {
+  gap: 0.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.45rem;
+}
+
+.sectionDescription {
+  max-width: none;
+}
+
+.sectionAction {
+  justify-content: space-between;
+  margin-top: auto;
+  width: 100%;
+}
+
+.learningScope {
+  border-bottom: 1px solid var(--anima-line);
+  border-top: 1px solid var(--anima-line);
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  margin-top: 2.2rem;
+  padding: 1rem 0;
+}
+
+.learningScopeTitle {
+  color: var(--anima-gold);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  padding-top: 0.2rem;
+}
+
+.learningScopeList {
+  display: grid;
+  gap: 0;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.learningScopeList li {
+  border-left: 1px solid var(--anima-line);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  padding: 0 0.8rem;
+}
+
+.learningScopeList li:first-child {
+  border-left: 0;
+  padding-left: 0;
+}
+
+.learningScopeIndex {
+  color: var(--anima-blue);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.62rem;
+}
+
+.learningScopeBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.learningScopeBody strong {
+  color: var(--anima-ink);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.learningScopeBody span {
+  color: var(--anima-ink-soft);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+:global([data-theme='dark']) .sectionHeader {
+  border-radius: var(--anima-radius);
+}
+
+:global([data-theme='dark']) .sectionItem,
+:global([data-theme='dark']) .sectionItem:hover {
+  border-radius: var(--anima-radius);
+  margin: 0;
+  padding: 1.35rem;
+}
+
+:global([data-theme='dark']) .sectionItem:hover {
+  transform: translateY(-4px);
+}
+
+:global([data-theme='dark']) .learningScope {
+  border-color: var(--anima-line);
+}
+
+@media screen and (max-width: 900px) {
+  .sectionList {
+    grid-template-columns: 1fr;
+  }
+
+  .sectionItem,
+  .sectionItem:hover {
+    min-height: 0;
+  }
+
+  .learningScopeList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 1rem;
+  }
+
+  .learningScopeList li:nth-child(4) {
+    border-left: 0;
+    padding-left: 0;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .sectionHeader {
+    display: block;
+    padding: 1.2rem 1rem 1.3rem 1.05rem;
+  }
+
+  .sectionHeaderMark {
+    font-size: 5rem;
+    right: 0.6rem;
+    top: 0.7rem;
+  }
+
+  .sectionHeader > p:last-child {
+    margin-top: 1.1rem;
+  }
+
+  .sectionList {
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  .sectionItem,
+  .sectionItem:hover {
+    display: grid;
+    gap: 0.6rem 0.75rem;
+    grid-template-columns: 2.4rem 3rem minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    padding: 1rem;
+  }
+
+  .sectionIndex {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .sectionSignal {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0.2rem 0 0;
+  }
+
+  .sectionBody {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+
+  .sectionAction {
+    grid-column: 3;
+    grid-row: 3;
+    margin-top: 0.35rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.2rem;
+  }
+
+  .learningScope {
+    display: block;
+    padding: 0.9rem 0;
+  }
+
+  .learningScopeTitle {
+    display: block;
+    margin-bottom: 0.8rem;
+  }
+
+  .learningScopeList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 0.9rem;
+  }
+
+  .learningScopeList li:nth-child(odd),
+  .learningScopeList li:nth-child(4) {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .learningScopeList li:nth-child(even) {
+    padding-right: 0;
+  }
+
+  .learningScopeBody strong {
+    white-space: normal;
+  }
+}

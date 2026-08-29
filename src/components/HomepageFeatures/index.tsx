@@ -55,6 +55,14 @@ const sectionItems: SectionItem[] = [
   },
 ];
 
+const learningTopics = [
+  {index: '01', title: '本地部署', detail: '安装 ComfyUI 与 Anima'},
+  {index: '02', title: '原版节点', detail: '理解输入、处理与输出'},
+  {index: '03', title: '画风调试', detail: '记录参数并复现结果'},
+  {index: '04', title: '第三方节点', detail: '扩展功能与常用工作流'},
+  {index: '05', title: '本地训练', detail: '准备数据并验证模型'},
+];
+
 const workflowNodes: WorkflowNode[] = [
   {index: '01', title: '加载主模型', detail: 'MODEL', tone: 'blue'},
   {index: '02', title: '应用附件', detail: 'LoRA / ControlNet 等', tone: 'red'},
@@ -305,6 +313,21 @@ export default function HomepageFeatures(): ReactNode {
               </span>
             </Link>
           ))}
+        </div>
+
+        <div className={styles.learningScope}>
+          <span className={styles.learningScopeTitle}>教程范围</span>
+          <ol className={styles.learningScopeList}>
+            {learningTopics.map((topic) => (
+              <li key={topic.index}>
+                <span className={styles.learningScopeIndex}>{topic.index}</span>
+                <span className={styles.learningScopeBody}>
+                  <strong>{topic.title}</strong>
+                  <span>{topic.detail}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
         </div>
 
         <div className={styles.sectionFootnote}>
