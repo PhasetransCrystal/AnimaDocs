@@ -1225,3 +1225,70 @@
     right: 5.8rem;
   }
 }
+
+/* Night material pass for the workflow module (kept here because CSS module
+ * class names are scoped per file). */
+:global([data-theme='dark']) .workflowBand {
+  background:
+    radial-gradient(circle at 88% 40%, color-mix(in srgb, var(--anima-red) 13%, transparent), transparent 27%),
+    color-mix(in srgb, var(--anima-surface) 94%, #000);
+  border-radius: 16px;
+  box-shadow: 0 20px 42px var(--anima-shadow), 0 0 0 1px color-mix(in srgb, var(--anima-red) 8%, transparent);
+}
+
+:global([data-theme='dark']) .workflowBand::after {
+  border-color: color-mix(in srgb, var(--anima-ink) 24%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--anima-red) 16%, transparent);
+}
+
+:global([data-theme='dark']) .workflowStamp {
+  background: color-mix(in srgb, var(--anima-red) 6%, transparent);
+  border-radius: 999px;
+}
+
+:global([data-theme='dark']) .workflowNode {
+  background: color-mix(in srgb, var(--anima-surface) 88%, #000);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--anima-ink) 7%, transparent);
+}
+
+:global([data-theme='dark']) .workflowNode:hover {
+  background: color-mix(in srgb, var(--anima-red) 7%, var(--anima-surface));
+}
+
+:global([data-theme='dark']) .toneblue::after,
+:global([data-theme='dark']) .tonegold::after {
+  background: var(--anima-ink-soft);
+}
+
+:global([data-theme='dark']) .toneink::after {
+  background: var(--anima-ink);
+}
+
+:global([data-theme='dark']) .workflowNoiseCell.noiseMarker {
+  background: var(--anima-ink);
+  border-color: var(--anima-ink);
+}
+
+:global([data-theme='dark']) .workflowNoiseCell.noiseHollow {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--anima-red) 18%, transparent);
+}
+
+:global([data-theme='dark']) .workflowDiagram::after {
+  background: color-mix(in srgb, var(--anima-ink) 20%, transparent);
+  clip-path: polygon(14% 0, 100% 0, 100% 74%, 84% 100%, 0 100%, 0 26%);
+  content: "";
+  height: 4rem;
+  opacity: 0.34;
+  pointer-events: none;
+  position: absolute;
+  right: 4%;
+  top: 8%;
+  transform: rotate(-8deg);
+  width: 6rem;
+  z-index: 1;
+}
+
+:global([data-theme='dark']) .workflowEdgeDecor {
+  color: color-mix(in srgb, var(--anima-ink) 24%, transparent);
+}

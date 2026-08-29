@@ -971,3 +971,50 @@
     padding-bottom: 1.8rem;
   }
 }
+
+/* Night material pass: keep the geometry shared, but change the surface
+ * language to graphite, vermilion and restrained warm white. */
+:global([data-theme='dark']) .heroBackground {
+  background:
+    linear-gradient(135deg, transparent 0 58%, color-mix(in srgb, var(--anima-red) 8%, transparent) 58% 100%),
+    var(--anima-paper);
+}
+
+:global([data-theme='dark']) .heroAtmosphere::after {
+  background: color-mix(in srgb, var(--anima-ink) 14%, transparent);
+  content: "";
+  height: 1px;
+  left: 14%;
+  position: absolute;
+  right: 0;
+  top: 34%;
+}
+
+:global([data-theme='dark']) .atmosphereFrame {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--anima-red) 12%, transparent), 0 18px 42px var(--anima-shadow);
+}
+
+:global([data-theme='dark']) .atmosphereDisc {
+  background: radial-gradient(circle at 45% 45%, var(--anima-red-bright), var(--anima-red) 58%, transparent 72%);
+}
+
+:global([data-theme='dark']) .atmosphereSlash {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--anima-red) 74%, transparent), var(--anima-red));
+}
+
+:global([data-theme='dark']) .signalPanel {
+  border-radius: 16px;
+  box-shadow: 0 20px 46px color-mix(in srgb, var(--anima-shadow) 88%, transparent), 0 0 0 1px color-mix(in srgb, var(--anima-red) 8%, transparent);
+}
+
+:global([data-theme='dark']) .panelRibbon {
+  border-radius: 0 0 0 10px;
+}
+
+:global([data-theme='dark']) .panelDiagram {
+  background:
+    linear-gradient(to right, color-mix(in srgb, var(--anima-ink) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--anima-ink) 12%, transparent) 1px, transparent 1px),
+    color-mix(in srgb, var(--anima-red) 8%, var(--anima-surface));
+  background-size: 2.8rem 2.8rem;
+}
