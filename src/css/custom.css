@@ -171,7 +171,10 @@ a:hover {
   border-bottom: 1px solid var(--anima-line);
   box-shadow: none;
   backdrop-filter: blur(10px);
-  position: relative;
+  isolation: isolate;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .navbar::before {
@@ -260,6 +263,34 @@ a:hover {
   border-right: 1px solid var(--anima-line);
   overflow: hidden;
   position: relative;
+}
+
+@media screen and (min-width: 997px) {
+  /* Keep the sidebar in its own viewport while the article remains the page
+   * scroll root. Docusaurus supplies the scrollable menu; these constraints
+   * make that contract explicit after the visual overrides above. */
+  .theme-doc-sidebar-container > div[class*="sidebarViewport"] {
+    height: 100vh;
+    max-height: 100vh;
+    position: sticky;
+    top: 0;
+  }
+
+  .theme-doc-sidebar-container nav.menu {
+    height: calc(100vh - var(--ifm-navbar-height));
+    max-height: calc(100vh - var(--ifm-navbar-height));
+    overscroll-behavior: contain;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+
+  /* Sticky descendants cannot escape an overflow-hidden ancestor. The
+   * sidebar's decorative layer is already clipped by the page root, so let
+   * the generated viewport participate in page-level sticky positioning. */
+  .theme-doc-sidebar-container {
+    overflow: visible;
+  }
 }
 
 .theme-doc-sidebar-container::before {
@@ -366,6 +397,10 @@ a:hover {
   position: relative;
 }
 
+.theme-doc-markdown > header:first-child {
+  padding-top: clamp(1.25rem, 2.5vw, 3rem);
+}
+
 .theme-doc-markdown h1::before {
   background: var(--anima-blue);
   content: "";
@@ -433,7 +468,13 @@ a:hover {
   border: 1px solid var(--anima-line);
   border-radius: var(--anima-radius);
   box-shadow: none;
+  border-collapse: separate;
+  border-spacing: 0;
+  display: table;
   overflow: hidden;
+  margin-inline: auto;
+  max-width: 100%;
+  width: 100%;
 }
 
 .theme-doc-markdown table thead tr {
@@ -451,12 +492,32 @@ a:hover {
 }
 
 .theme-doc-markdown table tbody tr {
-  transition: background-color 160ms ease, transform 160ms ease;
+  transition: background-color 180ms ease, color 180ms ease;
 }
 
 .theme-doc-markdown table tbody tr:hover {
   background: color-mix(in srgb, var(--anima-blue) 12%, transparent);
-  transform: translateX(0.2rem);
+}
+
+.theme-doc-markdown table tbody tr td:last-child {
+  position: relative;
+}
+
+.theme-doc-markdown table tbody tr td:last-child::after {
+  background: var(--anima-blue);
+  bottom: 0;
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 180ms ease;
+  width: 3px;
+}
+
+.theme-doc-markdown table tbody tr:hover td:last-child::after {
+  transform: scaleX(1);
 }
 
 .alert {
@@ -755,7 +816,9 @@ a:hover {
  * Keep the shared navigation and footer quiet enough for reading while
  * allowing each theme to swap its material independently. */
 .navbar__inner {
-  width: min(calc(100% - clamp(2rem, 6vw, 8rem)), var(--ifm-container-width-xl));
+  margin-inline: 0;
+  max-width: none;
+  width: 100%;
 }
 
 .navbar__toggle {
@@ -768,7 +831,44 @@ a:hover {
 }
 
 .theme-doc-markdown {
-  max-width: min(100%, 1040px);
+  max-width: min(100%, 1800px);
+}
+
+@media screen and (min-width: 997px) {
+  /* The article and right-hand TOC should use the available wide-screen
+   * canvas instead of inheriting the homepage's 2200px presentation frame. */
+  main[class*="docMainContainer"] > .container {
+    margin-inline: auto;
+    max-width: none;
+    width: calc(100% - clamp(2rem, 4vw, 5rem));
+  }
+
+  main[class*="docMainContainer"] > .container > .row > div[class*="docItemCol"] {
+    flex: 1 1 auto;
+    max-width: 100% !important;
+  }
+
+  html body main[class*="docMainContainer"] div[class*="docItemCol"] {
+    max-width: 100% !important;
+  }
+
+  main[class*="docMainContainer"] > .container > .row > .col.col--3 {
+    flex: 0 0 clamp(240px, 17vw, 360px);
+    max-width: clamp(240px, 17vw, 360px);
+  }
+}
+
+/* Docusaurus marks the default document column width as !important inside
+ * its theme layer. Re-state only that contract in the same layer so the
+ * fluid wide-screen override can take effect without touching generated
+ * theme files. */
+@layer docusaurus.theme-classic {
+  @media screen and (min-width: 997px) {
+    main[class*="docMainContainer"] > .container > .row > div[class*="docItemCol"] {
+      flex: 1 1 calc(100% - clamp(240px, 17vw, 360px));
+      max-width: calc(100% - clamp(240px, 17vw, 360px)) !important;
+    }
+  }
 }
 
 .theme-doc-markdown a:focus-visible,
@@ -823,7 +923,7 @@ a:hover {
 
 @media screen and (max-width: 640px) {
   .navbar__inner {
-    width: calc(100% - 1rem);
+    width: 100%;
   }
 
   .navbar__title {
@@ -833,4 +933,8 @@ a:hover {
   .theme-doc-markdown {
     max-width: 100%;
   }
+}
+
+[data-theme='dark'] .theme-doc-markdown table tbody tr td:last-child::after {
+  background: var(--anima-red);
 }

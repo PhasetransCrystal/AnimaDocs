@@ -178,6 +178,8 @@
 .workflowNightArt svg {
   height: 100%;
   inset: 0;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 7%, #000 93%, transparent 100%), linear-gradient(180deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  mask-composite: intersect;
   opacity: 0.48;
   position: absolute;
   width: 100%;
@@ -217,8 +219,10 @@
     linear-gradient(to right, rgba(36, 93, 204, 0.2) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(36, 93, 204, 0.2) 1px, transparent 1px);
   background-size: 2.8rem 2.8rem;
-  inset: -30% -6% -22% 21%;
-  opacity: 0.55;
+  inset: -32% -10% -30% -10%;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 7%, #000 93%, transparent 100%), linear-gradient(180deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  mask-composite: intersect;
+  opacity: 0.42;
   transform: rotate(-7deg);
 }
 
@@ -235,10 +239,10 @@
 
 .workflowGraph {
   display: grid;
-  gap: 1.1rem 2.4rem;
+  gap: 1.1rem 1.65rem;
   grid-template-columns: minmax(180px, 1fr) minmax(190px, 1fr) minmax(250px, 1.35fr) minmax(140px, 0.75fr);
   grid-template-rows: repeat(3, minmax(82px, 1fr));
-  inset: 4.5rem 4.25rem 4.2rem;
+  inset: 4.5rem 4.75rem 4.2rem;
   position: absolute;
   z-index: 3;
 }
@@ -251,6 +255,7 @@
   flex-direction: column;
   justify-content: center;
   min-width: 0;
+  overflow: hidden;
   padding: 0.85rem 1rem 0.8rem;
   position: relative;
   z-index: 2;
@@ -260,10 +265,10 @@
   background: var(--node-accent, var(--anima-blue));
   content: "";
   height: 3px;
-  left: -1px;
+  left: 0;
   position: absolute;
-  right: -1px;
-  top: -1px;
+  right: 0;
+  top: 0;
 }
 
 .workflowNodeIndex {
@@ -352,18 +357,18 @@
   white-space: nowrap;
 }
 
-.edgeCopyInput { left: -0.2rem; top: 46%; transform: translateY(-50%); }
-.edgeCopyOutput { right: -0.2rem; top: 48%; transform: translateY(-50%); text-align: right; }
+.edgeCopyInput { left: 0; top: 46%; transform: translateY(-50%); }
+.edgeCopyOutput { right: 0; top: 48%; transform: translateY(-50%); text-align: right; }
 
 .workflowEdgeLabels {
   align-items: end;
-  bottom: 1.1rem;
   display: grid;
   gap: 1.2rem;
   grid-template-columns: minmax(11rem, 0.45fr) 1fr minmax(11rem, 0.45fr);
   left: 4.25rem;
   position: absolute;
   right: 4.25rem;
+  top: calc(50% + 5rem);
   z-index: 4;
 }
 
@@ -390,14 +395,15 @@
 
 .pixelIsland {
   display: grid;
+  gap: 0.08rem;
   position: absolute;
 }
 
 .pixelCell {
   background: var(--island-color, var(--anima-blue));
   display: block;
-  height: 0.58rem;
-  width: 0.58rem;
+  height: 0.62rem;
+  width: 0.62rem;
 }
 
 .pixelHollow { background: transparent; border: 1px solid var(--island-color, var(--anima-blue)); }
@@ -427,7 +433,7 @@
 }
 
 .learningHeader h2 span { display: block; }
-.learningLead { color: var(--anima-ink-soft); font-size: 0.95rem; line-height: 1.7; margin: 0 0 0.15rem; max-width: 25rem; }
+.learningLead { color: var(--anima-ink-soft); font-size: 0.95rem; line-height: 1.7; margin: 0 0 0.15rem; max-width: none; white-space: nowrap; }
 
 .learningLayout {
   display: grid;
@@ -462,10 +468,12 @@
   grid-template-columns: 2.3rem 0.28rem minmax(0, 1fr) auto;
   min-height: 7.4rem;
   padding: 1rem 1.15rem;
-  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
 }
 
-.learningRoute:hover { border-color: var(--anima-blue); color: var(--anima-ink); text-decoration: none; transform: translateX(0.35rem); }
+.learningRoute:not(.learningRouteDisabled):hover { border-color: var(--anima-blue); color: var(--anima-ink); text-decoration: none; transform: translateX(0.35rem); }
+.learningRouteDisabled { cursor: default; opacity: 0.62; }
+.learningRouteDisabled .routeAction { color: var(--anima-ink-soft); }
 .routeIndex { color: var(--anima-blue); font-family: var(--ifm-font-family-monospace); font-size: 0.76rem; font-weight: 700; align-self: start; }
 .routeSignal { background: var(--anima-blue); height: 3.4rem; width: 0.28rem; }
 .routeCopy { display: flex; flex-direction: column; min-width: 0; }
@@ -476,8 +484,8 @@
 
 .learningRoute:nth-child(2) { transform: translateX(1.4rem); }
 .learningRoute:nth-child(3) { transform: translateX(2.8rem); }
-.learningRoute:nth-child(2):hover { transform: translateX(1.75rem); }
-.learningRoute:nth-child(3):hover { transform: translateX(3.15rem); }
+.learningRoute:not(.learningRouteDisabled):nth-child(2):hover { transform: translateX(1.75rem); }
+.learningRoute:not(.learningRouteDisabled):nth-child(3):hover { transform: translateX(3.15rem); }
 
 .scopeRail {
   border-bottom: 1px solid var(--anima-line-strong);
@@ -523,8 +531,8 @@
 :global([data-theme='dark']) .workflowBoard { background: #16191f; border-color: #4b4e55; border-radius: 20px; box-shadow: 0 24px 55px rgba(0, 0, 0, 0.35); }
 :global([data-theme='dark']) .workflowBoard::before { border-color: rgba(241, 237, 229, 0.16); border-radius: 14px; }
 :global([data-theme='dark']) .workflowBoard::after { background: linear-gradient(90deg, transparent, rgba(16, 19, 24, 0.85), transparent); }
-:global([data-theme='dark']) .workflowNode { background: rgba(24, 27, 33, 0.94); border-color: #4b4e55; border-radius: 14px; box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2); }
-:global([data-theme='dark']) .workflowNode::before { border-radius: 14px 14px 0 0; }
+:global([data-theme='dark']) .workflowNode { --node-radius: 14px; background: rgba(24, 27, 33, 0.94); border-color: #4b4e55; border-radius: var(--node-radius); box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2); }
+:global([data-theme='dark']) .workflowNode::before { border-radius: var(--node-radius) var(--node-radius) 0 0; }
 :global([data-theme='dark']) .toneCore { --node-accent: #f1eee7; }
 :global([data-theme='dark']) .workflowConnections path { stroke: rgba(241, 237, 229, 0.55); }
 :global([data-theme='dark']) .workflowConnections path:nth-child(2),
@@ -544,6 +552,8 @@
 :global([data-theme='dark']) .routeAction { color: var(--anima-red); }
 
 :global([data-theme='light']) .workflowBoard { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%); }
+:global([data-theme='light']) .workflowNode { --node-radius: 0px; border-radius: var(--node-radius); }
+:global([data-theme='light']) .workflowNode::before { border-radius: 0; }
 :global([data-theme='light']) .learningRoute { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%); }
 :global([data-theme='light']) .learningRoute:hover { box-shadow: 0.55rem 0.55rem 0 color-mix(in srgb, var(--anima-blue) 10%, transparent); }
 :global([data-theme='light']) .pixelCell { --island-color: var(--anima-blue); }
@@ -555,7 +565,7 @@
   .workflowGraph { gap: 0.8rem 1.4rem; inset-inline: 2.7rem; }
   .workflowEdgeLabels { inset-inline: 2.7rem; }
   .learningHeader { grid-template-columns: 5.5rem minmax(0, 1fr); }
-  .learningLead { grid-column: 2; }
+  .learningLead { grid-column: 2; max-width: 25rem; white-space: normal; }
   .learningLayout { grid-template-columns: 1fr; }
   .learningIntro { display: grid; gap: 1rem 2rem; grid-template-columns: 1fr 1fr; }
   .learningIntro p { margin: 0; }
@@ -581,14 +591,14 @@
   .workflowConnectionsMobile path:nth-child(2),
   .workflowConnectionsMobile path:nth-child(5) { stroke: var(--anima-red); }
   .workflowEdgeCopy { display: none; }
-  .workflowEdgeLabels { align-items: end; bottom: 1rem; gap: 0.7rem; grid-template-columns: 1fr 1fr; inset-inline: 1.4rem; }
+  .workflowEdgeLabels { align-items: end; bottom: 1rem; gap: 0.7rem; grid-template-columns: 1fr 1fr; inset-inline: 1.4rem; top: auto; }
   .edgeLabelLine { display: none; }
   .edgeLabelOutput { text-align: right; }
   .edgeLabelInput small, .edgeLabelOutput small { font-size: 0.58rem; }
   .learningHeader { gap: 1rem; grid-template-columns: 4.2rem 1fr; }
   .learningHeaderMark { font-size: 3.9rem; }
   .learningHeader h2 { font-size: 2rem; }
-  .learningLead { grid-column: 2; }
+  .learningLead { grid-column: 2; max-width: 25rem; white-space: normal; }
   .learningIntro { display: flex; flex-direction: column; gap: 0; }
   .learningIntro p { margin: 0.9rem 0 1.3rem; }
   .learningLegend { align-items: start; }

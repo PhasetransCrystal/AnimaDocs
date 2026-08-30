@@ -1,6 +1,6 @@
 # 前端风格化任务核查
 
-实现核查基准：`bc0c397`（2026-08-30）；本审计记录随后随项目更新推送。页面复核地址为 `http://localhost:3000/`。本记录只描述项目证据，不替代两个泛用 skill 的主干规则。
+实现核查基线：`701de7b`（2026-08-30）；后续迭代提交与截图见下方映射。本记录只描述项目证据，不替代两个泛用 skill 的主干规则。
 
 ## 六项结论
 
@@ -38,6 +38,8 @@
 - `artifacts/screenshots/audit-final-light-standard.png`
 - `artifacts/screenshots/audit-final-light-wide.png`
 
+本轮布局修复另存为 `artifacts/screenshots/home-09-fix-*` 与 `artifacts/screenshots/docs-09-fix-*`，均包含移动端、标准网页端和 `3440x1440` 宽屏版本。
+
 历史工作流局部截图使用同一轮次的 `*-workflow-*` 文件。截图目录是本地审计产物，不会被打包进网站。
 
 ## 页面核对结果
@@ -48,7 +50,7 @@
 - 宽屏工作流框约 `2168px`，仍保持可读节点尺寸。
 - 工作流语义顺序为：主模型 -> 附件 -> 图形绘制；画布 -> 图形绘制；文本编码器 -> 提示词 -> 图形绘制；图形绘制 -> 图片保存。
 - `h2` 的两个子行分别为“按顺序学习”和“ComfyUI 与 Anima”。
-- 夜间极坐标 SVG 使用方形 `viewBox` 和 `preserveAspectRatio="xMaxYMid meet"`；源码不再使用重复径向/锥形渐变。
+- 夜间极坐标 SVG 使用固定比例 `viewBox` 和 `preserveAspectRatio="xMaxYMid slice"`；源码不再使用重复径向/锥形渐变。
 - 浏览器日志无错误或警告（仅 React DevTools 提示）。
 
 ## 构建复核
@@ -67,3 +69,11 @@ git diff --check
 python -X utf8 C:\Users\Administrator\.codex\skills\.system\skill-creator\scripts\quick_validate.py C:\Users\Administrator\.codex\skills\lanart-alpha-v1
 python -X utf8 C:\Users\Administrator\.codex\skills\.system\skill-creator\scripts\quick_validate.py C:\Users\Administrator\.codex\skills\lanart-synerg-v1
 ```
+
+## 2026-08-30 布局修复复核
+
+本轮在不改变文档语义的前提下，补齐了首页与文档页的宽屏适配：导航栏改为 sticky 并将右侧操作贴近窗口边缘；文档目录拥有独立滚动容器；宽屏正文与右侧 TOC 使用流体列宽；Markdown/SortableTable 的悬浮效果取消行位移动画，改为背景透明度与末端亮线过渡；首页工作流标签、节点色条、网格边缘淡化和学习区入口同步修正。顶部“记录”已改为“日志”，首页标题使用原生 h2，避免无效的自动锚点。
+
+复核视口：`390x844`、`1440x900`、`3440x1440`，并分别检查日间/夜间主题。结果：三种视口均无横向溢出；导航滚动后保持 `top: 0`；宽屏文档正文列延展至 TOC 前，TOC 右边缘距窗口约 `71px`；侧栏 viewport 保持在视口顶部，菜单可独立滚动；首页两个主要 `h2` 的 `.hash-link` 数量为 `0`。
+
+本轮构建复核：`npm.cmd run typecheck`、`npm.cmd run build`、`git diff --check` 均通过，且构建不再报告空 Markdown 链接警告。

@@ -1,15 +1,21 @@
 .tableContainer {
   margin: 1.5rem 0;
   overflow-x: auto;
+  scrollbar-gutter: stable;
+  width: 100%;
 }
 
 .table {
   background: var(--anima-surface);
   border: 1px solid var(--anima-line);
   border-radius: var(--anima-radius);
+  border-collapse: separate;
+  border-spacing: 0;
+  display: table;
   margin: 0;
   min-width: 34rem;
   overflow: hidden;
+  table-layout: auto;
   width: 100%;
 }
 
@@ -31,8 +37,33 @@
   background: color-mix(in srgb, var(--anima-blue) 7%, transparent);
 }
 
+.table tbody tr {
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
 .table tbody tr:hover {
   background: color-mix(in srgb, var(--anima-red) 12%, transparent);
+}
+
+.table tbody tr td:last-child {
+  position: relative;
+}
+
+.table tbody tr td:last-child::after {
+  background: var(--anima-red);
+  bottom: 0;
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 180ms ease;
+  width: 3px;
+}
+
+.table tbody tr:hover td:last-child::after {
+  transform: scaleX(1);
 }
 
 .caption {
@@ -87,4 +118,8 @@
 
 :global([data-theme='dark']) .table {
   box-shadow: 0 14px 30px var(--anima-shadow);
+}
+
+:global([data-theme='light']) .table tbody tr td:last-child::after {
+  background: var(--anima-blue);
 }

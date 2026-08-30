@@ -1,6 +1,5 @@
 import {type CSSProperties, type ReactNode} from 'react';
 import Link from '@docusaurus/Link';
-import Heading from '@theme/Heading';
 
 import styles from './styles.module.css';
 
@@ -9,7 +8,7 @@ type SectionItem = {
   label: string;
   title: string;
   description: string;
-  to: string;
+  to?: string;
   action: string;
   meta: string;
 };
@@ -34,28 +33,26 @@ const sectionItems: SectionItem[] = [
   {
     index: '01',
     label: '部署',
-    title: '本地环境与首次运行',
+    title: '基础配置使用',
     description: '安装 ComfyUI 与 Anima，确认显存、模型文件和运行环境。',
-    to: '/docs/intro',
-    action: '开始部署',
+    to: '/docs/install',
+    action: '打开教程',
     meta: '基础环境 / 01',
   },
   {
     index: '02',
     label: '节点',
-    title: '原版节点与连接',
-    description: '按输入、处理和输出理解常用节点，搭建可复用的基础工作流。',
-    to: '/docs/theory/anima',
-    action: '查看节点原理',
+    title: '画风效果调整与提示词编写',
+    description: '相关教程尚未完成，内容发布后再开放入口。',
+    action: '暂未开放',
     meta: '节点逻辑 / 02',
   },
   {
     index: '03',
     label: '调试',
-    title: '画风测试与扩展',
-    description: '记录采样参数、第三方节点和本地训练的测试结果。',
-    to: '/blog',
-    action: '进入实践记录',
+    title: '第三方节点或工具的灵活使用',
+    description: '相关教程尚未完成，内容发布后再开放入口。',
+    action: '暂未开放',
     meta: '实验记录 / 03',
   },
 ];
@@ -159,8 +156,8 @@ function IslandLayer({islands, mode}: {islands: PixelIsland[]; mode: 'night' | '
               top: `${island.y}%`,
               opacity: island.opacity,
               transform: `translate(-50%, -50%) rotate(${island.rotation}deg)`,
-              gridTemplateColumns: `repeat(${columnCount}, 0.58rem)`,
-              gridTemplateRows: `repeat(${island.cells.length}, 0.58rem)`,
+              gridTemplateColumns: `repeat(${columnCount}, 0.62rem)`,
+              gridTemplateRows: `repeat(${island.cells.length}, 0.62rem)`,
             } as CSSProperties}
           >
             {island.cells.flatMap((row, rowIndex) =>
@@ -185,7 +182,7 @@ function WorkflowBoard(): ReactNode {
   return (
     <div className={styles.workflowBoard}>
       <div className={styles.workflowNightArt} aria-hidden="true">
-        <svg viewBox="0 0 1200 520" preserveAspectRatio="none">
+        <svg viewBox="0 0 1200 520" preserveAspectRatio="xMaxYMid slice">
           <g>
             <circle cx="-150" cy="270" r="190" />
             <circle cx="-150" cy="270" r="350" />
@@ -275,7 +272,7 @@ export default function HomepageFeatures(): ReactNode {
           <div className={styles.workflowHeading}>
             <div>
               <p className={styles.sectionKicker}>工作流 / 图像生成流程</p>
-              <Heading as="h2" id="workflow-title">从输入到图像输出</Heading>
+              <h2 id="workflow-title">从输入到图像输出</h2>
             </div>
             <p className={styles.workflowMeta}>三路输入 · 一个绘制核心 · 一个输出</p>
           </div>
@@ -289,11 +286,11 @@ export default function HomepageFeatures(): ReactNode {
           <div className={styles.learningHeader}>
             <div className={styles.learningHeaderMark} aria-hidden="true">02</div>
             <div>
-              <p className={styles.sectionKicker}>内容导航 / 学习路径</p>
-              <Heading as="h2" id="learning-title">
+              <p className={styles.sectionKicker}>02 / 内容导航 / 学习路径</p>
+              <h2 id="learning-title">
                 <span>按顺序学习</span>
                 <span>ComfyUI 与 Anima</span>
-              </Heading>
+              </h2>
             </div>
             <p className={styles.learningLead}>从环境配置开始，逐步掌握节点连接、模型参数和实践方法。</p>
           </div>
@@ -301,25 +298,40 @@ export default function HomepageFeatures(): ReactNode {
           <div className={styles.learningLayout}>
             <div className={styles.learningIntro}>
               <span className={styles.learningIntroIndex}>ROUTE / 03</span>
-              <p>三条入口对应文档、原理和实践记录。每一项都提供可直接执行的下一步。</p>
+              <p>当前开放基础配置；其余模块将在对应文档完成后开放。</p>
               <div className={styles.learningLegend}>
                 <span><i className={styles.legendBlue} />必修内容</span>
                 <span><i className={styles.legendRed} />实验内容</span>
               </div>
             </div>
             <nav className={styles.learningRoutes} aria-label="学习路径">
-              {sectionItems.map((item) => (
-                <Link className={styles.learningRoute} key={item.index} to={item.to}>
-                  <span className={styles.routeIndex}>{item.index}</span>
-                  <span className={styles.routeSignal} aria-hidden="true" />
-                  <span className={styles.routeCopy}>
-                    <span className={styles.routeMeta}>{item.meta}</span>
-                    <strong>{item.title}</strong>
-                    <span>{item.description}</span>
-                  </span>
-                  <span className={styles.routeAction}><span>{item.action}</span><span aria-hidden="true">↗</span></span>
-                </Link>
-              ))}
+              {sectionItems.map((item) => {
+                const routeContent = (
+                  <>
+                    <span className={styles.routeIndex}>{item.index}</span>
+                    <span className={styles.routeSignal} aria-hidden="true" />
+                    <span className={styles.routeCopy}>
+                      <span className={styles.routeMeta}>{item.meta}</span>
+                      <strong>{item.title}</strong>
+                      <span>{item.description}</span>
+                    </span>
+                    <span className={styles.routeAction}>
+                      <span>{item.action}</span>
+                      <span aria-hidden="true">{item.to ? '↗' : '—'}</span>
+                    </span>
+                  </>
+                );
+
+                return item.to ? (
+                  <Link className={styles.learningRoute} key={item.index} to={item.to}>
+                    {routeContent}
+                  </Link>
+                ) : (
+                  <div className={`${styles.learningRoute} ${styles.learningRouteDisabled}`} key={item.index} aria-disabled="true">
+                    {routeContent}
+                  </div>
+                );
+              })}
             </nav>
           </div>
 

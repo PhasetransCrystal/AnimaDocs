@@ -92,7 +92,7 @@ const config: Config = {
           position: 'left',
           label: '文档',
         },
-        {to: '/blog', label: '记录', position: 'left'},
+        {to: '/blog', label: '日志', position: 'left'},
         {
           href: 'https://github.com/Mon-Landis/AnimaDocs',
           label: 'GitHub',
