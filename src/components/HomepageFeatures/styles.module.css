@@ -114,7 +114,7 @@
 
 .workflowBoard {
   border: 1px solid var(--anima-line-strong);
-  min-height: 560px;
+  min-height: 470px;
   overflow: hidden;
   position: relative;
 }
@@ -239,10 +239,10 @@
 
 .workflowGraph {
   display: grid;
-  gap: 1.1rem 1.65rem;
-  grid-template-columns: minmax(180px, 1fr) minmax(190px, 1fr) minmax(250px, 1.35fr) minmax(140px, 0.75fr);
-  grid-template-rows: repeat(3, minmax(82px, 1fr));
-  inset: 4.5rem 4.75rem 4.2rem;
+  gap: 0.8rem 1.25rem;
+  grid-template-columns: minmax(140px, 0.9fr) minmax(150px, 0.95fr) minmax(210px, 1.2fr) minmax(120px, 0.65fr);
+  grid-template-rows: repeat(3, minmax(64px, 1fr));
+  inset: 4.2rem 3.75rem 5.5rem;
   position: absolute;
   z-index: 3;
 }
@@ -256,7 +256,7 @@
   justify-content: center;
   min-width: 0;
   overflow: hidden;
-  padding: 0.85rem 1rem 0.8rem;
+  padding: 0.65rem 0.8rem 0.6rem;
   position: relative;
   z-index: 2;
 }
@@ -281,7 +281,7 @@
 
 .workflowNodeTitle {
   color: var(--anima-ink);
-  font-size: 0.96rem;
+  font-size: 0.9rem;
   font-weight: 750;
   line-height: 1.35;
   overflow-wrap: anywhere;
@@ -290,7 +290,7 @@
 .workflowNodeDetail {
   color: var(--anima-ink-soft);
   font-family: var(--ifm-font-family-monospace);
-  font-size: 0.58rem;
+  font-size: 0.54rem;
   letter-spacing: 0.03em;
   line-height: 1.4;
   margin-top: 0.4rem;
@@ -362,13 +362,14 @@
 
 .workflowEdgeLabels {
   align-items: end;
+  bottom: 1.25rem;
   display: grid;
   gap: 1.2rem;
   grid-template-columns: minmax(11rem, 0.45fr) 1fr minmax(11rem, 0.45fr);
-  left: 4.25rem;
+  left: 3.75rem;
   position: absolute;
-  right: 4.25rem;
-  top: calc(50% + 5rem);
+  right: 3.75rem;
+  top: auto;
   z-index: 4;
 }
 
@@ -420,16 +421,7 @@
   align-items: end;
   display: grid;
   gap: 1.5rem 2rem;
-  grid-template-columns: 6.5rem minmax(18rem, 1fr) minmax(17rem, 0.8fr);
-}
-
-.learningHeaderMark {
-  color: var(--anima-blue);
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 5.5rem;
-  font-weight: 800;
-  line-height: 0.75;
-  opacity: 0.2;
+  grid-template-columns: minmax(18rem, 1fr) minmax(17rem, 0.8fr);
 }
 
 .learningHeader h2 span { display: block; }
@@ -565,8 +557,8 @@
   .sectionRail { display: none; }
   .workflowGraph { gap: 0.8rem 1.4rem; inset-inline: 2.7rem; }
   .workflowEdgeLabels { inset-inline: 2.7rem; }
-  .learningHeader { grid-template-columns: 5.5rem minmax(0, 1fr); }
-  .learningLead { grid-column: 2; max-width: 25rem; white-space: normal; }
+  .learningHeader { grid-template-columns: 1fr; }
+  .learningLead { grid-column: auto; max-width: 44rem; white-space: normal; }
   .learningLayout { grid-template-columns: 1fr; }
   .learningIntro { display: grid; gap: 1rem 2rem; grid-template-columns: 1fr 1fr; }
   .learningIntro p { margin: 0; }
@@ -577,8 +569,8 @@
   .features { padding-top: 3rem; }
   .workflowHeading { align-items: start; flex-direction: column; gap: 0.75rem; }
   .workflowMeta { white-space: normal; }
-  .workflowBoard { min-height: 720px; }
-  .workflowGraph { gap: 0.85rem 1rem; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(5, minmax(76px, 1fr)); inset: 3.8rem 1.4rem 8.5rem; }
+  .workflowBoard { min-height: 600px; }
+  .workflowGraph { gap: 0.7rem 0.8rem; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(5, minmax(62px, 1fr)); inset: 3.5rem 1.4rem 7.6rem; }
   .nodeModel { grid-column: 1; grid-row: 1; }
   .nodeAttachments { grid-column: 2; grid-row: 1; }
   .nodeCanvas { grid-column: 1; grid-row: 2; }
@@ -596,10 +588,9 @@
   .edgeLabelLine { display: none; }
   .edgeLabelOutput { text-align: right; }
   .edgeLabelInput small, .edgeLabelOutput small { font-size: 0.58rem; }
-  .learningHeader { gap: 1rem; grid-template-columns: 4.2rem 1fr; }
-  .learningHeaderMark { font-size: 3.9rem; }
+  .learningHeader { gap: 1rem; grid-template-columns: 1fr; }
   .learningHeader h2 { font-size: 2rem; }
-  .learningLead { grid-column: 2; max-width: 25rem; white-space: normal; }
+  .learningLead { grid-column: auto; max-width: 25rem; white-space: normal; }
   .learningIntro { display: flex; flex-direction: column; gap: 0; }
   .learningIntro p { margin: 0.9rem 0 1.3rem; }
   .learningLegend { align-items: start; }

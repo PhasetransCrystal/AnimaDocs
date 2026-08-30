@@ -283,10 +283,14 @@ export default function HomepageFeatures(): ReactNode {
         </section>
 
         <section className={styles.learningSection} aria-labelledby="learning-title">
+          <div className={`${styles.sectionRail} ${styles.sectionRailLearning}`} aria-hidden="true">
+            <span>02</span>
+            <i />
+            <span>PATH</span>
+          </div>
           <div className={styles.learningHeader}>
-            <div className={styles.learningHeaderMark} aria-hidden="true">02</div>
             <div>
-              <p className={styles.sectionKicker}>02 / 内容导航 / 学习路径</p>
+              <p className={styles.sectionKicker}>内容导航 / 学习路径</p>
               <h2 id="learning-title">
                 <span>按顺序学习</span>
                 <span>ComfyUI 与 Anima</span>
@@ -297,11 +301,11 @@ export default function HomepageFeatures(): ReactNode {
 
           <div className={styles.learningLayout}>
             <div className={styles.learningIntro}>
-              <span className={styles.learningIntroIndex}>ROUTE / 03</span>
-              <p>当前开放基础配置；其余模块将在对应文档完成后开放。</p>
+              <span className={styles.learningIntroIndex}>学习状态</span>
+              <p>先完成本地安装并验证首张图，再进入节点、画风与扩展工具。</p>
               <div className={styles.learningLegend}>
-                <span><i className={styles.legendBlue} />必修内容</span>
-                <span><i className={styles.legendRed} />实验内容</span>
+                <span><i className={styles.legendBlue} />已开放教程</span>
+                <span><i className={styles.legendRed} />计划中的后续章节</span>
               </div>
             </div>
             <nav className={styles.learningRoutes} aria-label="学习路径">
