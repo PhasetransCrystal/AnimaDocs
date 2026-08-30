@@ -127,6 +127,29 @@
   z-index: 2;
 }
 
+.workflowBoard > .workflowGraph::before,
+.workflowBoard > .workflowGraph::after {
+  color: var(--anima-ink-soft);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.56rem;
+  letter-spacing: 0.12em;
+  pointer-events: none;
+  position: absolute;
+  text-transform: uppercase;
+  top: -2.15rem;
+  z-index: 4;
+}
+
+.workflowBoard > .workflowGraph::before {
+  content: "INPUTS / 03";
+  left: 0;
+}
+
+.workflowBoard > .workflowGraph::after {
+  content: "CORE / OUTPUT";
+  right: 0;
+}
+
 .workflowBoard::before {
   border: 1px solid color-mix(in srgb, var(--anima-ink) 20%, transparent);
   inset: 0.8rem;
@@ -544,7 +567,7 @@
   .workflowHeading { align-items: start; flex-direction: column; gap: 0.75rem; }
   .workflowMeta { white-space: normal; }
   .workflowBoard { min-height: 720px; }
-  .workflowGraph { gap: 0.85rem 1rem; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(5, minmax(76px, 1fr)); inset: 3.8rem 1.4rem 4.5rem; }
+  .workflowGraph { gap: 0.85rem 1rem; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(5, minmax(76px, 1fr)); inset: 3.8rem 1.4rem 8.5rem; }
   .nodeModel { grid-column: 1; grid-row: 1; }
   .nodeAttachments { grid-column: 2; grid-row: 1; }
   .nodeCanvas { grid-column: 1; grid-row: 2; }
@@ -558,9 +581,9 @@
   .workflowConnectionsMobile path:nth-child(2),
   .workflowConnectionsMobile path:nth-child(5) { stroke: var(--anima-red); }
   .workflowEdgeCopy { display: none; }
-  .workflowEdgeLabels { bottom: 1rem; gap: 0.7rem; grid-template-columns: 1fr; inset-inline: 1.4rem; }
+  .workflowEdgeLabels { align-items: end; bottom: 1rem; gap: 0.7rem; grid-template-columns: 1fr 1fr; inset-inline: 1.4rem; }
   .edgeLabelLine { display: none; }
-  .edgeLabelOutput { text-align: left; }
+  .edgeLabelOutput { text-align: right; }
   .edgeLabelInput small, .edgeLabelOutput small { font-size: 0.58rem; }
   .learningHeader { gap: 1rem; grid-template-columns: 4.2rem 1fr; }
   .learningHeaderMark { font-size: 3.9rem; }
