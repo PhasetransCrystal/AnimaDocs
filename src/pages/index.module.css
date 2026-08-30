@@ -635,6 +635,11 @@
 :global([data-theme='dark']) .heroTopline { border-color: #454950; }
 :global([data-theme='dark']) .heroSubtitle { color: #b7b5af; }
 :global([data-theme='dark']) .secondaryAction { border-color: #6d7075; color: #ece9e3; }
+:global([data-theme='dark']) .secondaryAction:hover,
+:global([data-theme='dark']) .secondaryAction:focus-visible {
+  border-color: var(--anima-interactive);
+  color: var(--anima-interactive);
+}
 
 :global([data-theme='light']) .dayArt { display: block; }
 :global([data-theme='light']) .nightArt { display: none; }

@@ -77,3 +77,9 @@ python -X utf8 C:\Users\Administrator\.codex\skills\.system\skill-creator\script
 复核视口：`390x844`、`1440x900`、`3440x1440`，并分别检查日间/夜间主题。结果：三种视口均无横向溢出；导航滚动后保持 `top: 0`；宽屏文档正文列延展至 TOC 前，TOC 右边缘距窗口约 `71px`；侧栏 viewport 保持在视口顶部，菜单可独立滚动；首页两个主要 `h2` 的 `.hash-link` 数量为 `0`。
 
 本轮构建复核：`npm.cmd run typecheck`、`npm.cmd run build`、`git diff --check` 均通过，且构建不再报告空 Markdown 链接警告。
+
+## 2026-08-30 交互配色隔离复核
+
+将主题信号色与交互状态色拆分为独立 token：日间交互保持蓝色，夜间 hover 使用琥珀橙（`#f2b35d`），focus 使用亮琥珀（`#ffd48a`）。夜间侧栏当前项使用红色圆形标记；日间保持金色方形标记。该规则已覆盖正文链接、面包屑、右侧子导航、分页跳转、顶部文档/日志/GitHub、主题切换、页尾入口、排序按钮和首页可用入口。
+
+交互复核结果：夜间 hover/focus 不再回落到蓝色；`390x844`、`1440x900`、`3440x1440` 三种视口均无横向溢出，导航保持 sticky；夜间侧栏标记计算样式为红色且 `border-radius: 50%`，日间为金色且 `border-radius: 0`。`npm.cmd run typecheck`、`npm.cmd run build`、`git diff --check` 均通过。

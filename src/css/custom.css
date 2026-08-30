@@ -16,6 +16,13 @@
   --anima-line-strong: #7d8991;
   --anima-blue: #245dcc;
   --anima-blue-bright: #3474e8;
+  /* Interaction is intentionally separate from structural signal colors. */
+  --anima-interactive: var(--anima-blue);
+  --anima-interactive-bright: var(--anima-blue-bright);
+  --anima-focus: var(--anima-blue);
+  --anima-selected: var(--anima-blue);
+  --anima-selected-marker: var(--anima-gold);
+  --anima-selected-marker-radius: 0;
   --anima-red: #c6383d;
   --anima-red-bright: #e14b4c;
   --anima-gold: #a77836;
@@ -32,6 +39,8 @@
   --ifm-color-primary-light: #3a70d3;
   --ifm-color-primary-lighter: #5a89e1;
   --ifm-color-primary-lightest: #8eafea;
+  --ifm-link-hover-color: var(--anima-interactive);
+  --ifm-navbar-link-hover-color: var(--anima-interactive);
   --ifm-background-color: var(--anima-paper);
   --ifm-background-surface-color: var(--anima-surface);
   --ifm-navbar-background-color: rgba(255, 255, 255, 0.94);
@@ -66,6 +75,14 @@
   --anima-line-strong: #85868a;
   --anima-blue: #8daeff;
   --anima-blue-bright: #b2c8ff;
+  /* Amber keeps keyboard and pointer states legible without reintroducing
+   * the daylight cobalt accent into the night material. */
+  --anima-interactive: #f2b35d;
+  --anima-interactive-bright: #ffd48a;
+  --anima-focus: #ffd48a;
+  --anima-selected: var(--anima-red);
+  --anima-selected-marker: var(--anima-red);
+  --anima-selected-marker-radius: 50%;
   --anima-red: #e34549;
   --anima-red-bright: #ff5d5d;
   --anima-gold: #c5a26b;
@@ -82,6 +99,8 @@
   --ifm-color-primary-light: #ed6262;
   --ifm-color-primary-lighter: #f2857e;
   --ifm-color-primary-lightest: #ffaba0;
+  --ifm-link-hover-color: var(--anima-interactive);
+  --ifm-navbar-link-hover-color: var(--anima-interactive);
   --ifm-background-color: var(--anima-paper);
   --ifm-background-surface-color: var(--anima-surface);
   --ifm-navbar-background-color: rgba(18, 20, 25, 0.94);
@@ -89,7 +108,7 @@
   --ifm-color-content: var(--anima-ink);
   --ifm-color-content-secondary: var(--anima-ink-soft);
   --ifm-border-color: var(--anima-line);
-  --ifm-hover-overlay: rgba(227, 69, 73, 0.14);
+  --ifm-hover-overlay: color-mix(in srgb, var(--anima-interactive) 14%, transparent);
   --ifm-code-background: #24272e;
   --docusaurus-highlighted-code-line-bg: rgba(227, 69, 73, 0.2);
 }
@@ -162,8 +181,9 @@ a {
   text-underline-offset: 0.18em;
 }
 
-a:hover {
-  color: var(--anima-blue);
+a:hover,
+a:focus-visible {
+  color: var(--anima-interactive);
 }
 
 .navbar {
@@ -223,12 +243,21 @@ a:hover {
 }
 
 .navbar__link:hover,
+.navbar__link:focus-visible {
+  color: var(--anima-interactive);
+}
+
 .navbar__link--active {
-  color: var(--anima-blue);
+  color: var(--anima-selected);
+}
+
+.navbar__link--active:hover,
+.navbar__link--active:focus-visible {
+  color: var(--anima-interactive);
 }
 
 .navbar__link--active::after {
-  background: var(--anima-blue);
+  background: var(--anima-selected);
   bottom: 0.35rem;
   content: "";
   height: 2px;
@@ -328,19 +357,25 @@ a:hover {
 
 .menu__link:hover {
   background: var(--ifm-hover-overlay);
-  color: var(--anima-blue);
+  color: var(--anima-interactive);
+}
+
+.menu__link:focus-visible {
+  background: var(--ifm-hover-overlay);
+  color: var(--anima-interactive);
 }
 
 .menu__link--active {
-  background: color-mix(in srgb, var(--anima-blue) 14%, transparent);
-  border-left-color: var(--anima-blue);
-  color: var(--anima-blue);
+  background: color-mix(in srgb, var(--anima-selected) 14%, transparent);
+  border-left-color: var(--anima-selected);
+  color: var(--anima-selected);
   font-weight: 750;
   position: relative;
 }
 
 .menu__link--active::after {
-  background: var(--anima-gold);
+  background: var(--anima-selected-marker);
+  border-radius: var(--anima-selected-marker-radius);
   content: "";
   height: 0.35rem;
   position: absolute;
@@ -594,7 +629,7 @@ a:hover {
 
 .table-of-contents__link--active,
 .table-of-contents__link:hover {
-  color: var(--anima-blue);
+  color: var(--anima-interactive);
 }
 
 .pagination-nav__link {
@@ -604,7 +639,21 @@ a:hover {
 }
 
 .pagination-nav__link:hover {
-  border-color: var(--anima-blue);
+  border-color: var(--anima-interactive);
+}
+
+.pagination-nav__link:hover,
+.pagination-nav__link:focus-visible {
+  color: var(--anima-interactive);
+}
+
+.pagination-nav__link:hover .pagination-nav__label,
+.pagination-nav__link:focus-visible .pagination-nav__label {
+  color: var(--anima-interactive);
+}
+
+.pagination-nav__link:focus-visible {
+  border-color: var(--anima-focus);
 }
 
 .footer {
@@ -645,7 +694,7 @@ a:hover {
 }
 
 .footer__link-item:hover {
-  color: var(--anima-blue-bright);
+  color: var(--anima-interactive-bright);
 }
 
 .theme-blog-list-page article,
@@ -708,14 +757,9 @@ a:hover {
   background: var(--anima-red);
 }
 
-[data-theme='dark'] .menu__link--active {
-  background: color-mix(in srgb, var(--anima-red) 14%, transparent);
-  border-left-color: var(--anima-red);
-  color: var(--anima-red);
-}
-
-[data-theme='dark'] .menu__link--active::after {
-  background: var(--anima-blue);
+[data-theme='dark'] .menu__link:hover,
+[data-theme='dark'] .menu__link:focus-visible {
+  color: var(--anima-interactive);
 }
 
 [data-theme='dark'] .theme-doc-sidebar-container::before {
@@ -826,8 +870,12 @@ a:hover {
   border-radius: var(--anima-radius);
 }
 
-.navbar__toggle:hover {
+.navbar__toggle:hover,
+.navbar__toggle:focus-visible,
+.navbar [class*="toggleButton"]:hover,
+.navbar [class*="toggleButton"]:focus-visible {
   background: var(--ifm-hover-overlay);
+  color: var(--anima-interactive);
 }
 
 .theme-doc-markdown {
@@ -873,9 +921,12 @@ a:hover {
 
 .theme-doc-markdown a:focus-visible,
 .navbar a:focus-visible,
+.navbar button:focus-visible,
 .footer a:focus-visible,
-.menu__link:focus-visible {
-  outline: 2px solid var(--anima-blue);
+.menu__link:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--anima-focus);
   outline-offset: 3px;
 }
 

@@ -544,6 +544,7 @@
 :global([data-theme='dark']) .pixelAccent { background: #f1eee7; }
 :global([data-theme='dark']) .learningRoute { background: #171a20; border-color: #454950; border-radius: 14px; }
 :global([data-theme='dark']) .learningRoute:hover { box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28); }
+:global([data-theme='dark']) .learningRoute:not(.learningRouteDisabled):hover { border-color: var(--anima-interactive); }
 :global([data-theme='dark']) .learningIntro { border-left-color: var(--anima-red); }
 :global([data-theme='dark']) .legendBlue { background: #f1eee7; }
 :global([data-theme='dark']) .legendRed { background: var(--anima-red); }
