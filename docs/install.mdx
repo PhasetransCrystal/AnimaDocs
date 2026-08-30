@@ -5,14 +5,11 @@ sidebar_label: "CUI与Anima的安装"
 
 # ComfyUI与Anima的安装
 
-本章内容将带大家安装需要的本地应用。完成后，您将可以：
-
-- 在本地跑出第一张ai图片——虽然说画风可能会有点简陋。不用担心，这是可以调整的。
-- 可以便捷地下载第三方节点内容，通过Cui自带的管理器或直接从github拉取开源项目。
+本章内容将带大家安装需要的本地应用。
 
 请注意，下载可能需要用到*魔法/科学上网*，请自备。
 
-本章节安装的是`Cli-浏览器前端`版，来自官方标准框架，默认不包含第三方节点。
+本章节教程安装的是官方原版，默认不包含第三方节点。
 
 :::note[为什么使用官方原版]
 社区中还有一种包含部分常用第三方节点与常用模型的版本（常称`整合包`），其部署更加便捷，可以省去资源下载的麻烦。但同样存在一些问题：
@@ -28,6 +25,169 @@ sidebar_label: "CUI与Anima的安装"
 请认准up主[**秋葉aaaki**](https://space.bilibili.com/12566101)，小心有大量广告/伪冒账户。
 :::
 
+本部分操作讲的较详细，有一定相关网页使用基础的可以跳转至[省流部分](#省流版)
+
 ## ComfyUI安装
 
-`ComfyUI`的官网下载页面为[https://comfy.org/download](https://comfy.org/download)，可以点击直接跳转。
+`ComfyUI`的官网下载页面为[https://comfy.org/download](https://comfy.org/download)，可以点击直接跳转。或打开ComfyUI官网后选择右上角`DowloadDesktop`按钮。
+
+<div style={{ textAlign: 'center' }}>
+    <img
+        src="/img/docs/install/cui_offweb_download.png"
+        alt="cui官方下载界面"
+        style={{ width: '50%', height: 'auto' }}
+    />
+</div>
+
+这里的桌面版和cli版都可以用，本质是一样的。后续篇章教程将以cli版为例。
+
+桌面版用户点击左侧`DOWNLOAD DESKTOP`下载并安装即可。
+
+cli版用户点击右侧`INSTALL FROM GITHUB`按钮，跳转至[github下载页](https://github.com/Comfy-Org/ComfyUI#installing)。
+
+跳转到的页面大概长这样，如果是一堆文件目录就往下翻，找到`Installing`部分。
+
+<div style={{ textAlign: 'center' }}>
+    <img
+        src="/img/docs/install/cui_github_download.png"
+        alt="cui github下载界面"
+        style={{ width: '50%', height: 'auto' }}
+    />
+</div>
+
+这里提供了五种下载方式（图中黄框部分），从上到下依次是：
+
+- `Link to Download`：返回之前的官网下载界面，下载桌面版用。
+- *`Direct link to download (nvidia)`：与下方`Portable for Nvidia GPUs`指向同一下载地址。
+- `Portable for AMD GPUs`：**适用于AMD gpu用户**
+- `Portable for Intel GPUs`：**适用于intel(英特尔) gpu用户**
+- `Portable for Nvidia GPUs`：**适用于20系及以上N卡(英伟达)用户**
+- `Portable for Nvidia GPUs with pytorch cuda 12.6 and python 3.12`：适用于10系及以下N卡用户。**20代以上用户不要使用这个**。
+
+下载内容为一个7z压缩包，使用解压软件解压在需要的位置即可。
+
+:::tip[下载的压缩包解压被阻止？]
+右键选择下载的文件，点击`属性`，在最下方的`安全`栏目点击`解除锁定`并确认即可。
+:::
+
+以N卡20+版本为例。解压完后里面有一系列文件。`README_VERY_IMPORTANT.txt`内是基本用法的教学，翻译如下(已根据常用程度重新排序)：
+
+```text
+如何运行：
+
+如果你使用 NVIDIA gpu:
+双击run_nvidia_gpu.bat
+
+推荐更新方式：
+将ComfyUI更新到新版本：运行update\update_comfyui.bat
+
+*(注：下面的通常用不到，随便看看就行)
+
+更新ComfyUI与python依赖，注意仅当你在python依赖方面出现问题时才需要执行它：
+update\update_comfyui_and_python_dependencies.bat
+
+如果想启用快速fp16累加(加速fp16模型但带来少量质量下降)
+运行run_nvidia_gpu_fast_fp16_accumulation.bat
+*(注：anima不是fp16模型，没必要用这个。对于一些老模型，例如sd1.5 sd2.x sdxl及衍生模型可能有用。)
+
+如果想使用cpu跑图：
+运行run_cpu.bat
+*(注：不建议。模型运算属于算法简单但数据量极大且彼此独立，在cpu上极其缓慢。)
+
+如果你在ui中看到一个红色报错：确保你在ComfyUI\models\checkpoints有任意模型/检查点*(注：CHECKPOINT，ai领域指某一阶段的模型存档，cui中指模型包。后续会说到。)
+
+你可以在https://huggingface.co/Comfy-Org/stable-diffusion-v1-5-archive/blob/main/v1-5-pruned-emaonly-fp16.safetensors下载SD1.5
+*(注：已经过时了，也不是我们要用的东西，不用管)
+
+将你的模型与其它工具共享：
+在ComfyUI文件路径下你可以找到extra_model_paths.yaml.example文件，
+将其重命名为extra_model_paths.yaml并用你喜欢的文本编辑器编辑。
+```
+
+运行run_nvidia_gpu.bat，将会弹出一个黑色的命令行窗口。等待加载完成后，会自动打开浏览器并打开cui前端窗口。
+这一过程是完全在本地运行的，只是以浏览器为交互页面，并不是连接到了某个网页。
+
+当你看到这一窗口出现，说明你的comfyui已经安装完成并可以正常使用了。恭喜！
+
+<div style={{ textAlign: 'center' }}>
+    <img
+        src="/img/docs/install/cui_main.png"
+        alt="cui github下载界面"
+        style={{ width: '80%', height: 'auto' }}
+    />
+</div>
+
+## Anima模型和附属内容下载
+
+安装好的ComfyUI只是跑图工具，我们还需要Anima模型才能真正开始跑图。
+
+Anima需要从`HuggingFace`上下载，这是一个比较常用的开源模型发布平台。链接是[https://huggingface.co/circlestone-labs/Anima](https://huggingface.co/circlestone-labs/Anima)。
+
+:::tip[下载很慢？]
+`HuggingFace`有国内镜像站，能解决部分情况导致下载速度缓慢问题。将`huggingface.co`改为`huggingface.cn`即可，
+例如[https://huggingface.cn/circlestone-labs/Anima](https://huggingface.cn/circlestone-labs/Anima)
+:::
+
+点击`Files and versions`可以跳转到模型文件界面，选择`split_files`文件夹，这里面是主要需要用到的文件。
+其中`diffusion_models`里是Anima主模型，有好几款；`text_encoders`和`vae`里均只有一个文件，且均需要下载。
+
+`diffusion_models`内几个Anima的版本各有差异(点击名字可以跳转至下载界面)：
+
+| 名字                                                                                                                                              | 特性        | 注释                 |
+|-------------------------------------------------------------------------------------------------------------------------------------------------|-----------|--------------------|
+| [anima-base-v1.0](https://huggingface.co/circlestone-labs/Anima/blob/main/split_files/diffusion_models/anima-base-v1.0.safetensors)             | 标准版       | 最推荐使用，泛用性最佳        |
+| [anima-turbo-v1.1](https://huggingface.co/circlestone-labs/Anima/blob/main/split_files/diffusion_models/anima-turbo-v1.1.safetensors)           | 蒸馏版v1.1   | 损失一定灵活性和质量换极高速度，备选 |
+| [anima-aesthetic-v1.0](https://huggingface.co/circlestone-labs/Anima/blob/main/split_files/diffusion_models/anima-aesthetic-v1.0.safetensors)   | 美学特调版     | 欧美画风，不推荐           |
+| [anima-aesthetic-v1.0b](https://huggingface.co/circlestone-labs/Anima/blob/main/split_files/diffusion_models/anima-aesthetic-v1.0b.safetensors) | 美学特调版     | 欧美画风，不推荐           |
+| [anima-aesthetic-v1.1](https://huggingface.co/circlestone-labs/Anima/blob/main/split_files/diffusion_models/anima-aesthetic-v1.1.safetensors)   | 美学特调版v1.1 | 欧美画风，不推荐           |
+| [anima-preview](https://huggingface.co/circlestone-labs/Anima/blob/main/split_files/diffusion_models/anima-preview.safetensors)                 | 预览版1      | 已过时                |
+| [anima-preview2](https://huggingface.co/circlestone-labs/Anima/blob/main/split_files/diffusion_models/anima-preview2.safetensors)               | 预览版2      | 已过时                |
+| [anima-preview3-base](https://huggingface.co/circlestone-labs/Anima/blob/main/split_files/diffusion_models/anima-preview3-base.safetensors)     | 预览版3      | 已过时                |
+| [anima-turbo-v1.0](https://huggingface.co/circlestone-labs/Anima/blob/main/split_files/diffusion_models/anima-turbo-v1.0.safetensors)           | 蒸馏版       | 已过时的蒸馏版            |
+| [anima-2.9b-preview1](https://huggingface.co/Gazingstars123/Anima-2.9B/blob/main/Anima-2.9B-preview-v1.safetensors)                             | 社区拓展版     | 社区制作，潜力较高，但不适合初学者  |
+
+<span style={{ opacity: 0.5 }}>
+*\*注：Anima-2.9b属于社区改版模型，相比base拥有更多的新角色直接支持，但结构也有变化，导致出图速度下降且使用时需要使用额外支持功能，较为麻烦，故不推荐初学者使用。后续可能会专门介绍该变体。*
+</span>
+
+以`anima-base-v1.0`为例，点击`anima-base-v1.0.safetensors`文件，进入预览页面。下面的一大堆是模型权重结构，不用管；
+点击中间`This file is stored with Xet . It is too big to display, but you can still download it.`的`download`即可开始下载。
+
+另外的`text_encoders`和`vae`内的文件同理。网页操作方式参考下图：
+
+![下载animabase](/img/docs/install/download_anima.jpg)
+
+下载完成后，本地应该有`anima-base-v1.0.safetensors` `qwen_image_vae.safetensors` `qwen_3_06b_base.safetensors`。
+现在需要将其放进cui的模型列表里才能生效。
+
+打开cui根目录，找到`ComfyUI/models`文件夹，这里就是放模型的地方，之后我们会经常用到：
+
+| 文件                          | 类型    | 放置路径                               |
+|-----------------------------|-------|------------------------------------|
+| anima-base-v1.0.safetensors | 主模型   | ./ComfyUI/models/diffusion_models/ |
+| qwen_image_vae.safetensors  | VAE   | ./ComfyUI/models/vae/              |
+| qwen_3_06b_base.safetensors | 文本编码器 | ./ComfyUI/models/text_encoders/    |
+
+完成后，所有基础内容的安装就完成了。后续可能会用到第三方节点还需要安装一些别的东西，这就是后话了。
+
+接下来，请参考下一章“第一个工作流”，尝试跑出第一张图吧。
+
+## 省流版
+
+下载ComfyUI cli版并解压：
+
+- AMD gpu用户：[https://github.com/comfyanonymous/ComfyUI/releases/latest/download/ComfyUI_windows_portable_amd.7z](https://github.com/comfyanonymous/ComfyUI/releases/latest/download/ComfyUI_windows_portable_amd.7z)
+- Intel gpu用户：[https://github.com/comfyanonymous/ComfyUI/releases/latest/download/ComfyUI_windows_portable_intel.7z](https://github.com/comfyanonymous/ComfyUI/releases/latest/download/ComfyUI_windows_portable_intel.7z)
+- Nvidia gpu用户(20系及以上)：[https://github.com/comfyanonymous/ComfyUI/releases/latest/download/ComfyUI_windows_portable_nvidia.7z](https://github.com/comfyanonymous/ComfyUI/releases/latest/download/ComfyUI_windows_portable_nvidia.7z)
+- Nvidia gpu用户(10系及以下)：[https://github.com/comfyanonymous/ComfyUI/releases/latest/download/ComfyUI_windows_portable_nvidia_cu126.7z](https://github.com/comfyanonymous/ComfyUI/releases/latest/download/ComfyUI_windows_portable_nvidia_cu126.7z)
+
+下载Anima模型和所需资源：
+
+- 主模型：[https://huggingface.co/circlestone-labs/Anima/resolve/main/split_files/diffusion_models/anima-base-v1.0.safetensors](https://huggingface.co/circlestone-labs/Anima/resolve/main/split_files/diffusion_models/anima-base-v1.0.safetensors)，
+  放`CUI根目录/ComfyUI/models/diffusion_models/`
+- VAE：[https://huggingface.co/circlestone-labs/Anima/resolve/main/split_files/vae/qwen_image_vae.safetensors](https://huggingface.co/circlestone-labs/Anima/resolve/main/split_files/vae/qwen_image_vae.safetensors)，
+  放`CUI根目录/ComfyUI/models/vae/`
+- 文本编码器：[https://huggingface.co/circlestone-labs/Anima/resolve/main/split_files/text_encoders/qwen_3_06b_base.safetensors](https://huggingface.co/circlestone-labs/Anima/resolve/main/split_files/text_encoders/qwen_3_06b_base.safetensors)，
+  放`CUI根目录/ComfyUI/models/text_encoders/`
+
+如果`HuggingFace`下载速度慢可以试试换成国内镜像，将`huggingface.co`替换为`huggingface.cn`即可。
