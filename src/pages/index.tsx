@@ -11,16 +11,74 @@ import styles from './index.module.css';
 const contributorCount = 1;
 const thirdPartyToolCount = 0;
 
-const heroRadialRays = [-66, -55, -44, -33, -22, -11, 0, 11, 22, 33, 44, 55, 66].map(
-  (angle, index) => {
-    const radians = angle * Math.PI / 180;
-    return {
-      x: 500 + Math.cos(radians) * 720,
-      y: 500 + Math.sin(radians) * 720,
-      opacity: 0.26 + (6 - Math.abs(index - 6)) * 0.018,
-    };
-  },
-);
+const heroRays = [-54, -42, -30, -18, -6, 6, 18, 30, 42, 54].map((angle, index) => {
+  const radians = (angle * Math.PI) / 180;
+  return {
+    x2: 520 + Math.cos(radians) * 640,
+    y2: 430 + Math.sin(radians) * 640,
+    opacity: 0.22 + (5 - Math.abs(index - 4.5)) * 0.018,
+  };
+});
+
+function DirectoryPanel({tutorialCount}: {tutorialCount: number}): ReactNode {
+  return (
+    <aside className={styles.signalPanel} aria-label="文档目录">
+      <div className={styles.panelHeader}>
+        <span className={styles.panelEyebrow}>目录索引 / 01</span>
+        <span className={styles.panelStatus}>LIVE</span>
+      </div>
+      <div className={styles.panelVisual} aria-hidden="true">
+        <div className={styles.panelNightVisual}>
+          <span className={styles.panelNightHalo} />
+          <span className={`${styles.panelNightArc} ${styles.panelNightArcOne}`} />
+          <span className={`${styles.panelNightArc} ${styles.panelNightArcTwo}`} />
+          <span className={styles.panelNightCore}>A</span>
+          <span className={styles.panelNightLine} />
+          <span className={styles.panelVisualNote}>MODEL / 2B</span>
+        </div>
+        <div className={styles.panelDayVisual}>
+          <span className={styles.panelDayPlane} />
+          <span className={`${styles.panelDaySquare} ${styles.panelDaySquareOne}`} />
+          <span className={`${styles.panelDaySquare} ${styles.panelDaySquareTwo}`} />
+          <span className={styles.panelDayCross} />
+          <span className={styles.panelVisualNote}>MODEL / 2B</span>
+        </div>
+      </div>
+      <div className={styles.panelBody}>
+        <div className={styles.panelTitleRow}>
+          <p className={styles.panelTitle}>ComfyUI / Anima</p>
+          <span className={styles.panelPage}>01—03</span>
+        </div>
+        <ol className={styles.indexList}>
+          <li className={styles.indexItemActive}>
+            <span>01</span>
+            <span>基础教程</span>
+            <span aria-hidden="true">↗</span>
+          </li>
+          <li>
+            <span>02</span>
+            <span>原理讲解</span>
+            <span aria-hidden="true">—</span>
+          </li>
+          <li>
+            <span>03</span>
+            <span>第三方工具</span>
+            <span aria-hidden="true">—</span>
+          </li>
+        </ol>
+        <div className={styles.panelStats} aria-label="项目统计">
+          <span><strong>{tutorialCount}</strong><small>教程篇数</small></span>
+          <span><strong>{contributorCount}</strong><small>贡献人数</small></span>
+          <span><strong>{thirdPartyToolCount}</strong><small>工具收录</small></span>
+        </div>
+        <div className={styles.panelFooter}>
+          <span>状态 / 文档维护</span>
+          <strong>持续更新</strong>
+        </div>
+      </div>
+    </aside>
+  );
+}
 
 function HomepageHeader(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
@@ -30,97 +88,69 @@ function HomepageHeader(): ReactNode {
 
   return (
     <header className={styles.heroBanner}>
-      <div className={styles.heroBackground} aria-hidden="true">
-        <div className={styles.heroAtmosphere}>
-          <span className={styles.atmosphereDisc} />
-          <span className={styles.atmosphereOrbit} />
-          <span className={styles.atmosphereSlash} />
-          <span className={styles.atmosphereBlock} />
-          <span className={styles.atmosphereFrame} />
-          <span className={styles.atmosphereTicks}>
-            <svg className={styles.atmosphereRadialGrid} viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
-              <g aria-hidden="true">
-                {heroRadialRays.map((ray, index) => (
-                  <line
-                    key={index}
-                    x1="500"
-                    y1="500"
-                    x2={ray.x}
-                    y2={ray.y}
-                    opacity={ray.opacity}
-                  />
-                ))}
-              </g>
-            </svg>
-          </span>
-          <span className={styles.atmosphereLabel}>工作流 / 01</span>
+      <div className={styles.heroArt} aria-hidden="true">
+        <div className={styles.nightArt}>
+          <span className={styles.nightArtDisc} />
+          <span className={`${styles.nightArtOrbit} ${styles.nightArtOrbitOne}`} />
+          <span className={`${styles.nightArtOrbit} ${styles.nightArtOrbitTwo}`} />
+          <span className={styles.nightArtFrame} />
+          <span className={styles.nightArtBar} />
+          <span className={styles.nightArtBlock} />
+          <span className={`${styles.nightArtDot} ${styles.nightArtDotOne}`} />
+          <span className={`${styles.nightArtDot} ${styles.nightArtDotTwo}`} />
+          <span className={styles.nightArtLabel}>OBSERVATION FIELD / 01</span>
         </div>
-        <div className={styles.heroGrid} />
+        <div className={styles.dayArt}>
+          <span className={`${styles.dayArtPlane} ${styles.dayArtPlanePrimary}`} />
+          <span className={`${styles.dayArtPlane} ${styles.dayArtPlaneSecondary}`} />
+          <span className={styles.dayArtGrid} />
+          <span className={`${styles.dayArtArc} ${styles.dayArtArcOne}`} />
+          <span className={`${styles.dayArtArc} ${styles.dayArtArcTwo}`} />
+          <span className={`${styles.dayArtBlock} ${styles.dayArtBlockOne}`} />
+          <span className={`${styles.dayArtBlock} ${styles.dayArtBlockTwo}`} />
+          <span className={styles.dayArtNumber}>01</span>
+          <span className={styles.dayArtLabel}>FIELD STUDY / 01</span>
+        </div>
+        <span className={styles.heroArtRule} />
+        <svg className={styles.heroArtRays} viewBox="0 0 1000 860" preserveAspectRatio="none">
+          <g>
+            {heroRays.map((ray, index) => (
+              <line key={index} x1="520" y1="430" x2={ray.x2} y2={ray.y2} opacity={ray.opacity} />
+            ))}
+          </g>
+        </svg>
       </div>
+
       <div className={styles.heroContent}>
         <div className="container">
-          <div className={styles.heroLayout}>
-          <div className={styles.heroCopy}>
-            <p className={styles.kicker}>CUI-ANIMA / 教程</p>
-            <Heading as="h1" aria-label={siteConfig.title}>
-              <span>Cui-Anima</span><wbr /><span>集合教程</span>
-            </Heading>
-            <p className={styles.heroTitle}>
-              <span>ComfyUI 与 Anima</span>{' '}<span>的使用指南</span>
-            </p>
-            <p className={styles.heroSubtitle}>
-              涵盖本地安装、节点连接、模型配置和图像生成，提供可直接复现的步骤与示例。
-            </p>
-            <div className={styles.actions}>
-              <Link className={styles.primaryAction} to="/docs/intro">
-                <span>开始阅读</span>
-                <span aria-hidden="true">→</span>
-              </Link>
-              <button className={styles.secondaryAction} type="button" disabled title="暂未开放">
-                原理篇
-              </button>
-            </div>
+          <div className={styles.heroTopline}>
+            <span>ANIMA DOCUMENTATION SYSTEM</span>
+            <span>REV. 2026 / 08</span>
           </div>
+          <div className={styles.heroLayout}>
+            <div className={styles.heroCopy}>
+              <p className={styles.kicker}>CUI-ANIMA / 教程首页</p>
+              <Heading as="h1" aria-label={siteConfig.title}>
+                <span>Cui-Anima</span>
+                <span>集合教程</span>
+              </Heading>
+              <p className={styles.heroTitle}>ComfyUI 与 Anima 的使用指南</p>
+              <p className={styles.heroSubtitle}>
+                从本地安装到图像生成，按可复现的步骤学习节点、模型与工作流配置。
+              </p>
+              <div className={styles.actions}>
+                <Link className={styles.primaryAction} to="/docs/intro">
+                  <span>开始阅读</span>
+                  <span aria-hidden="true">↗</span>
+                </Link>
+                <Link className={styles.secondaryAction} to="/docs/theory/anima">
+                  <span>查看原理</span>
+                  <span aria-hidden="true">＋</span>
+                </Link>
+              </div>
+            </div>
 
-          <aside className={styles.signalPanel} aria-label="文档目录">
-            <span className={styles.panelRibbon} aria-hidden="true">目录 / 01</span>
-            <div className={styles.panelTopline}>
-              <span>内容目录</span>
-              <span>01 / 03</span>
-            </div>
-            <div className={styles.panelDiagram} aria-hidden="true">
-              <span className={styles.panelDiagramDisc} />
-              <span className={styles.panelDiagramOrbit} />
-              <span className={styles.panelDiagramOrbitSecondary} />
-              <span className={styles.panelDiagramCore}>A</span>
-              <span className={styles.panelDiagramAxis} />
-              <span className={styles.panelDiagramCaption}>模型 / 2B</span>
-            </div>
-            <p className={styles.panelTitle}>ComfyUI / Anima</p>
-            <ol className={styles.indexList}>
-              <li className={styles.indexItemActive}>
-                <span>01</span>
-                <span>基础教程</span>
-              </li>
-              <li>
-                <span>02</span>
-                <span>原理讲解</span>
-              </li>
-              <li>
-                <span>03</span>
-                <span>第三方工具推荐</span>
-              </li>
-            </ol>
-            <div className={styles.panelStats} aria-label="项目统计">
-              <span><strong>{tutorialCount}</strong><small>教程篇数</small></span>
-              <span><strong>{contributorCount}</strong><small>贡献人数</small></span>
-              <span><strong>{thirdPartyToolCount}</strong><small>第三方工具</small></span>
-            </div>
-            <div className={styles.panelFooter}>
-              <span>状态</span>
-              <strong>持续更新</strong>
-            </div>
-          </aside>
+            <DirectoryPanel tutorialCount={tutorialCount} />
           </div>
 
           <div className={styles.signalBar} aria-label="内容分类">
@@ -141,9 +171,7 @@ export default function Home(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
 
   return (
-    <Layout
-      title={siteConfig.title}
-      description={siteConfig.tagline}>
+    <Layout title={siteConfig.title} description={siteConfig.tagline}>
       <HomepageHeader />
       <main>
         <HomepageFeatures />

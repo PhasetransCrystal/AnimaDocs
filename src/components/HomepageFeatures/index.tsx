@@ -11,16 +11,18 @@ type SectionItem = {
   description: string;
   to: string;
   action: string;
+  meta: string;
 };
 
 type WorkflowNode = {
   index: string;
+  key: string;
   title: string;
   detail: string;
-  tone: 'blue' | 'red' | 'gold' | 'ink';
+  tone: 'model' | 'support' | 'canvas' | 'text' | 'core' | 'output';
 };
 
-type NoiseIsland = {
+type PixelIsland = {
   x: number;
   y: number;
   opacity: number;
@@ -33,9 +35,10 @@ const sectionItems: SectionItem[] = [
     index: '01',
     label: '部署',
     title: '本地环境与首次运行',
-    description: '完成 ComfyUI 与 Anima 的安装，确认显存、模型文件和运行环境。',
+    description: '安装 ComfyUI 与 Anima，确认显存、模型文件和运行环境。',
     to: '/docs/intro',
     action: '开始部署',
+    meta: '基础环境 / 01',
   },
   {
     index: '02',
@@ -44,6 +47,7 @@ const sectionItems: SectionItem[] = [
     description: '按输入、处理和输出理解常用节点，搭建可复用的基础工作流。',
     to: '/docs/theory/anima',
     action: '查看节点原理',
+    meta: '节点逻辑 / 02',
   },
   {
     index: '03',
@@ -52,10 +56,11 @@ const sectionItems: SectionItem[] = [
     description: '记录采样参数、第三方节点和本地训练的测试结果。',
     to: '/blog',
     action: '进入实践记录',
+    meta: '实验记录 / 03',
   },
 ];
 
-const learningTopics = [
+const scopeItems = [
   {index: '01', title: '本地部署', detail: '安装 ComfyUI 与 Anima'},
   {index: '02', title: '原版节点', detail: '理解输入、处理与输出'},
   {index: '03', title: '画风调试', detail: '记录参数并复现结果'},
@@ -64,297 +69,278 @@ const learningTopics = [
 ];
 
 const workflowNodes: WorkflowNode[] = [
-  {index: '01', title: '加载主模型', detail: 'MODEL', tone: 'blue'},
-  {index: '02', title: '应用附件', detail: 'LoRA / ControlNet 等', tone: 'red'},
-  {index: '03', title: '构造画布', detail: 'Latent / 空白或已有图像', tone: 'gold'},
-  {index: '04', title: '加载文本编码器', detail: 'TEXT ENCODER', tone: 'gold'},
-  {index: '05', title: '编码提示词', detail: 'CONDITIONING', tone: 'red'},
-  {index: '06', title: '图形绘制', detail: '采样器 / 出图核心', tone: 'ink'},
-  {index: '07', title: '图片保存', detail: 'OUTPUT', tone: 'blue'},
+  {index: '01', key: 'model', title: '加载主模型', detail: 'MODEL', tone: 'model'},
+  {index: '02', key: 'attachments', title: '应用附件', detail: 'LoRA / ControlNet 等', tone: 'support'},
+  {index: '03', key: 'canvas', title: '构造画布', detail: 'Latent / 空白或已有图像', tone: 'canvas'},
+  {index: '04', key: 'encoder', title: '加载文本编码器', detail: 'TEXT ENCODER', tone: 'text'},
+  {index: '05', key: 'prompt', title: '编码提示词', detail: 'CONDITIONING', tone: 'support'},
+  {index: '06', key: 'draw', title: '图形绘制', detail: '采样器 / 出图核心', tone: 'core'},
+  {index: '07', key: 'save', title: '图片保存', detail: 'OUTPUT', tone: 'output'},
 ];
 
-// Stable, neighbourhood-sampled islands keep the texture reproducible while
-// preserving the irregular silhouette of a small pixel cluster.
-const workflowIslands: NoiseIsland[] = [
+const nodePositionClasses: Record<string, string> = {
+  model: styles.nodeModel,
+  attachments: styles.nodeAttachments,
+  canvas: styles.nodeCanvas,
+  encoder: styles.nodeEncoder,
+  prompt: styles.nodePrompt,
+  draw: styles.nodeDraw,
+  save: styles.nodeSave,
+};
+
+const nodeToneClasses: Record<WorkflowNode['tone'], string> = {
+  model: styles.toneModel,
+  support: styles.toneSupport,
+  canvas: styles.toneCanvas,
+  text: styles.toneText,
+  core: styles.toneCore,
+  output: styles.toneOutput,
+};
+
+const nightIslands: PixelIsland[] = [
   {
-    x: 76,
-    y: 42,
-    opacity: 0.62,
-    rotation: -8,
-    cells: [
-      '......s....',
-      '....o##....',
-      '...#####...',
-      '..######s..',
-      '..###@##...',
-      '.#######...',
-      '..######...',
-      '...####....',
-      '....##.s...',
-    ],
-  },
-  {
-    x: 63,
-    y: 66,
-    opacity: 0.36,
-    rotation: 12,
-    cells: [
-      '....s....',
-      '...o##...',
-      '..#####..',
-      '.######..',
-      '..##@##..',
-      '...####..',
-      '....#s...',
-    ],
-  },
-  {
-    x: 86,
+    x: 71,
     y: 24,
-    opacity: 0.34,
-    rotation: -18,
-    cells: [
-      '.....s...',
-      '....#....',
-      '...o###..',
-      '..#####..',
-      '...###...',
-      '....##...',
-    ],
+    opacity: 0.58,
+    rotation: -8,
+    cells: ['....o....', '...###...', '..#####..', '.######..', '.###@##..', '..######.', '...####..', '....##...'],
+  },
+  {
+    x: 78,
+    y: 73,
+    opacity: 0.38,
+    rotation: 9,
+    cells: ['.....', '..o..', '.###.', '#####', '.###.', '..#..'],
   },
   {
     x: 57,
-    y: 51,
-    opacity: 0.28,
-    rotation: 5,
-    cells: [
-      '....s....',
-      '...##....',
-      '..####...',
-      '.##o##...',
-      '..###....',
-    ],
+    y: 82,
+    opacity: 0.26,
+    rotation: -4,
+    cells: ['..s....', '.###...', '#####..', '.####..', '..##s..'],
   },
 ];
 
-const polarOrigin = {x: 1060, y: 190};
-const polarRings = [
-  {radius: 220, dash: '260 72', offset: 0, opacity: 0.74},
-  {radius: 430, dash: '330 108', offset: 64, opacity: 0.52},
-  {radius: 690, dash: '430 158', offset: 124, opacity: 0.32},
+const dayIslands: PixelIsland[] = [
+  {
+    x: 22,
+    y: 26,
+    opacity: 0.34,
+    rotation: -7,
+    cells: ['....', '.##.', '####', '.###', '..#.', '..s.'],
+  },
+  {
+    x: 76,
+    y: 76,
+    opacity: 0.28,
+    rotation: 10,
+    cells: ['..s...', '.###..', '#####.', '..###.', '...#..'],
+  },
+  {
+    x: 48,
+    y: 18,
+    opacity: 0.2,
+    rotation: 3,
+    cells: ['..', '.#', '##', '.s'],
+  },
 ];
-const polarRayPoints = Array.from({length: 5}, (_, index) => {
-  const angle = (148 + index * 12) * Math.PI / 180;
-  return {
-    x: polarOrigin.x + Math.cos(angle) * 1040,
-    y: polarOrigin.y + Math.sin(angle) * 1040,
-    opacity: 0.34 - index * 0.024,
-  };
-});
+
+function IslandLayer({islands, mode}: {islands: PixelIsland[]; mode: 'night' | 'day'}): ReactNode {
+  return (
+    <div className={mode === 'night' ? styles.nightIslandLayer : styles.dayIslandLayer}>
+      {islands.map((island, islandIndex) => {
+        const columnCount = Math.max(...island.cells.map((row) => row.length));
+        return (
+          <span
+            className={styles.pixelIsland}
+            key={`${mode}-${island.x}-${island.y}-${islandIndex}`}
+            style={{
+              left: `${island.x}%`,
+              top: `${island.y}%`,
+              opacity: island.opacity,
+              transform: `translate(-50%, -50%) rotate(${island.rotation}deg)`,
+              gridTemplateColumns: `repeat(${columnCount}, 0.58rem)`,
+              gridTemplateRows: `repeat(${island.cells.length}, 0.58rem)`,
+            } as CSSProperties}
+          >
+            {island.cells.flatMap((row, rowIndex) =>
+              [...row].map((cell, columnIndex) =>
+                cell === '.' ? null : (
+                  <i
+                    className={`${styles.pixelCell} ${cell === 'o' ? styles.pixelHollow : ''} ${cell === 's' ? styles.pixelSoft : ''} ${cell === '@' ? styles.pixelAccent : ''}`}
+                    key={`${rowIndex}-${columnIndex}`}
+                    style={{gridColumnStart: columnIndex + 1, gridRowStart: rowIndex + 1}}
+                  />
+                ),
+              ),
+            )}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function WorkflowBoard(): ReactNode {
+  return (
+    <div className={styles.workflowBoard}>
+      <div className={styles.workflowNightArt} aria-hidden="true">
+        <svg viewBox="0 0 1200 520" preserveAspectRatio="none">
+          <g>
+            <circle cx="-150" cy="270" r="190" />
+            <circle cx="-150" cy="270" r="350" />
+            <circle cx="-150" cy="270" r="560" />
+            <line x1="-150" y1="270" x2="1030" y2="20" />
+            <line x1="-150" y1="270" x2="1120" y2="130" />
+            <line x1="-150" y1="270" x2="1190" y2="270" />
+            <line x1="-150" y1="270" x2="1120" y2="410" />
+            <line x1="-150" y1="270" x2="1030" y2="500" />
+          </g>
+        </svg>
+        <IslandLayer islands={nightIslands} mode="night" />
+      </div>
+      <div className={styles.workflowDayArt} aria-hidden="true">
+        <span className={styles.dayWorkflowPlane} />
+        <span className={styles.dayWorkflowGrid} />
+        <span className={`${styles.dayWorkflowRule} ${styles.dayWorkflowRuleOne}`} />
+        <span className={`${styles.dayWorkflowRule} ${styles.dayWorkflowRuleTwo}`} />
+        <IslandLayer islands={dayIslands} mode="day" />
+      </div>
+      <div className={styles.workflowEdgeCopy} aria-hidden="true">
+        <span className={styles.edgeCopyInput}>TEXT<br />CONDITIONING</span>
+        <span className={styles.edgeCopyOutput}>IMAGE<br />RESULT</span>
+      </div>
+      <div className={styles.workflowGraph} role="list" aria-label="三路输入汇合到图形绘制，再输出图片">
+        {workflowNodes.map((node) => (
+          <div
+            className={`${styles.workflowNode} ${nodePositionClasses[node.key]} ${nodeToneClasses[node.tone]}`}
+            key={node.key}
+            role="listitem"
+          >
+            <span className={styles.workflowNodeIndex}>{node.index}</span>
+            <span className={styles.workflowNodeTitle}>{node.title}</span>
+            <span className={styles.workflowNodeDetail}>{node.detail}</span>
+          </div>
+        ))}
+        <svg className={styles.workflowConnections} viewBox="0 0 1000 320" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <marker id="workflow-arrow-desktop" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8" />
+            </marker>
+          </defs>
+          <g>
+            <path d="M210 52 H286" />
+            <path d="M454 52 H530 V160 H610" />
+            <path d="M210 160 H610" />
+            <path d="M210 268 H286" />
+            <path d="M454 268 H530 V160 H610" />
+            <path d="M795 160 H870" />
+          </g>
+        </svg>
+        <svg className={styles.workflowConnectionsMobile} viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <marker id="workflow-arrow-mobile-v2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8" />
+            </marker>
+          </defs>
+          <g>
+            <path d="M420 46 H580" />
+            <path d="M790 88 V138" />
+            <path d="M420 190 H580" />
+            <path d="M420 328 H580" />
+            <path d="M790 330 V280" />
+            <path d="M790 365 V490" />
+          </g>
+        </svg>
+      </div>
+      <div className={styles.workflowEdgeLabels}>
+        <span className={styles.edgeLabelInput}><strong>文本条件</strong><small>提示词经过编码后进入绘制</small></span>
+        <span className={styles.edgeLabelLine} aria-hidden="true" />
+        <span className={styles.edgeLabelOutput}><strong>图像结果</strong><small>采样完成后保存输出</small></span>
+      </div>
+    </div>
+  );
+}
 
 export default function HomepageFeatures(): ReactNode {
   return (
     <section className={styles.features}>
       <div className="container">
-        <div className={styles.workflowBand}>
-          <span className={styles.workflowStamp} aria-hidden="true">流程 / 05</span>
-          <div className={styles.workflowHeader}>
-            <span className={styles.workflowKicker}>工作流 / 图像生成流程</span>
-            <span className={styles.workflowMeta}>3 路输入 · 1 个核心 · 1 个输出</span>
+        <section className={styles.workflowSection} aria-labelledby="workflow-title">
+          <div className={styles.sectionRail} aria-hidden="true">
+            <span>01</span>
+            <i />
+            <span>FLOW</span>
           </div>
-          <div className={styles.workflowDiagram} aria-label="ComfyUI 图像生成基础工作流">
-            <span className={styles.workflowPolarGrid} aria-hidden="true">
-              <svg className={styles.workflowPolarGridSvg} viewBox="0 0 1000 1000" preserveAspectRatio="xMaxYMid meet">
-                <g>
-                  {polarRings.map((ring) => (
-                    <circle
-                      key={ring.radius}
-                      cx={polarOrigin.x}
-                      cy={polarOrigin.y}
-                      r={ring.radius}
-                      opacity={ring.opacity}
-                      strokeDasharray={ring.dash}
-                      strokeDashoffset={ring.offset}
-                    />
-                  ))}
-                  {polarRayPoints.map((point, index) => (
-                    <line
-                      key={index}
-                      x1={polarOrigin.x}
-                      y1={polarOrigin.y}
-                      x2={point.x}
-                      y2={point.y}
-                      opacity={point.opacity}
-                    />
-                  ))}
-                </g>
-              </svg>
-            </span>
-            <span className={styles.workflowNoiseField} aria-hidden="true">
-              {workflowIslands.map((island, islandIndex) => (
-                <span
-                  className={styles.workflowNoiseIsland}
-                  key={`${island.x}-${island.y}-${islandIndex}`}
-                  style={{
-                    left: `${island.x}%`,
-                    top: `${island.y}%`,
-                    opacity: island.opacity,
-                    transform: `translate(-50%, -50%) rotate(${island.rotation}deg)`,
-                    gridTemplateColumns: `repeat(${Math.max(...island.cells.map((row) => row.length))}, var(--island-cell))`,
-                    gridTemplateRows: `repeat(${island.cells.length}, var(--island-cell))`,
-                  } as CSSProperties}
-                >
-                  {island.cells.flatMap((row, rowIndex) =>
-                    [...row].map((cell, columnIndex) =>
-                      cell === '.' ? null : (
-                        <i
-                          className={`${styles.workflowNoiseCell} ${cell === 'o' ? styles.noiseHollow : styles.noiseSolid} ${cell === '@' ? styles.noiseMarker : ''}`}
-                          key={`${rowIndex}-${columnIndex}`}
-                          style={{
-                            gridColumnStart: columnIndex + 1,
-                            gridRowStart: rowIndex + 1,
-                            opacity: cell === 's' ? 0.45 : 1,
-                          }}
-                        />
-                      ),
-                    ),
-                  )}
-                </span>
-              ))}
-            </span>
-            <span className={styles.workflowDecorativeCopy} aria-hidden="true">
-              <span className={styles.decorativeInput}>TEXT<br />CONDITIONING</span>
-              <span className={styles.decorativeResult}>IMAGE<br />RESULT</span>
-            </span>
-            <div className={styles.workflowGraph} role="list" aria-label="三路输入汇合到图形绘制">
-              <div className={`${styles.workflowNode} ${styles[`tone${workflowNodes[0].tone}`]} ${styles.nodeModel}`} role="listitem">
-                <span className={styles.workflowNodeIndex}>{workflowNodes[0].index}</span>
-                <span className={styles.workflowNodeTitle}>{workflowNodes[0].title}</span>
-                <span className={styles.workflowNodeDetail}>{workflowNodes[0].detail}</span>
-              </div>
-              <div className={`${styles.workflowNode} ${styles[`tone${workflowNodes[1].tone}`]} ${styles.nodeAttachments}`} role="listitem">
-                <span className={styles.workflowNodeIndex}>{workflowNodes[1].index}</span>
-                <span className={styles.workflowNodeTitle}>{workflowNodes[1].title}</span>
-                <span className={styles.workflowNodeDetail}>{workflowNodes[1].detail}</span>
-              </div>
-              <div className={`${styles.workflowNode} ${styles[`tone${workflowNodes[2].tone}`]} ${styles.nodeCanvas}`} role="listitem">
-                <span className={styles.workflowNodeIndex}>{workflowNodes[2].index}</span>
-                <span className={styles.workflowNodeTitle}>{workflowNodes[2].title}</span>
-                <span className={styles.workflowNodeDetail}>{workflowNodes[2].detail}</span>
-              </div>
-              <div className={`${styles.workflowNode} ${styles[`tone${workflowNodes[3].tone}`]} ${styles.nodeEncoder}`} role="listitem">
-                <span className={styles.workflowNodeIndex}>{workflowNodes[3].index}</span>
-                <span className={styles.workflowNodeTitle}>{workflowNodes[3].title}</span>
-                <span className={styles.workflowNodeDetail}>{workflowNodes[3].detail}</span>
-              </div>
-              <div className={`${styles.workflowNode} ${styles[`tone${workflowNodes[4].tone}`]} ${styles.nodePrompt}`} role="listitem">
-                <span className={styles.workflowNodeIndex}>{workflowNodes[4].index}</span>
-                <span className={styles.workflowNodeTitle}>{workflowNodes[4].title}</span>
-                <span className={styles.workflowNodeDetail}>{workflowNodes[4].detail}</span>
-              </div>
-              <div className={`${styles.workflowNode} ${styles[`tone${workflowNodes[5].tone}`]} ${styles.nodeDraw}`} role="listitem">
-                <span className={styles.workflowNodeIndex}>{workflowNodes[5].index}</span>
-                <span className={styles.workflowNodeTitle}>{workflowNodes[5].title}</span>
-                <span className={styles.workflowNodeDetail}>{workflowNodes[5].detail}</span>
-              </div>
-              <div className={`${styles.workflowNode} ${styles[`tone${workflowNodes[6].tone}`]} ${styles.nodeSave}`} role="listitem">
-                <span className={styles.workflowNodeIndex}>{workflowNodes[6].index}</span>
-                <span className={styles.workflowNodeTitle}>{workflowNodes[6].title}</span>
-                <span className={styles.workflowNodeDetail}>{workflowNodes[6].detail}</span>
-              </div>
-              <svg className={styles.workflowConnections} viewBox="0 0 1000 320" preserveAspectRatio="none" aria-hidden="true">
-                <defs>
-                  <marker id="workflow-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-                    <path d="M0,0 L8,4 L0,8" />
-                  </marker>
-                </defs>
-                <g>
-                  <path d="M220 58 H245" />
-                  <path d="M445 58 H510 V164 H575" />
-                  <path d="M220 164 H575" />
-                  <path d="M220 270 H245" />
-                  <path d="M445 270 H510 V164 H575" />
-                  <path d="M785 164 H810" />
-                </g>
-              </svg>
-              <svg className={styles.workflowConnectionsMobile} viewBox="0 0 1000 500" preserveAspectRatio="none" aria-hidden="true">
-                <defs>
-                  <marker id="workflow-arrow-mobile" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-                    <path d="M0,0 L8,4 L0,8" />
-                  </marker>
-                </defs>
-                <g>
-                  <path d="M430 55 H570" />
-                  <path d="M785 100 V145" />
-                  <path d="M430 190 H570" />
-                  <path d="M430 325 H570" />
-                  <path d="M785 325 V250" />
-                  <path d="M785 235 V415" />
-                </g>
-              </svg>
+          <div className={styles.workflowHeading}>
+            <div>
+              <p className={styles.sectionKicker}>工作流 / 图像生成流程</p>
+              <Heading as="h2" id="workflow-title">从输入到图像输出</Heading>
             </div>
+            <p className={styles.workflowMeta}>三路输入 · 一个绘制核心 · 一个输出</p>
           </div>
-          <div className={styles.workflowFooter}>
-            <span className={`${styles.workflowEdgeLabel} ${styles.workflowTextInput}`}>
-              <span className={styles.workflowEdgeDecor} aria-hidden="true">TEXT CONDITIONING</span>
-              <span>文本条件</span>
-            </span>
-            <span className={styles.workflowFooterLine} aria-hidden="true" />
-            <span className={`${styles.workflowEdgeLabel} ${styles.workflowImageOutput}`}>
-              <span className={styles.workflowEdgeDecor} aria-hidden="true">IMAGE RESULT</span>
-              <span>图像结果</span>
-            </span>
-          </div>
-        </div>
-        <div className={styles.sectionHeader}>
-          <span className={styles.sectionHeaderMark} aria-hidden="true">02</span>
-          <p className={styles.sectionKicker}>内容导航 / 00</p>
-          <Heading as="h2">
-            <span className={styles.headingLine}>按顺序学习</span>
-            <span className={styles.headingLine}>ComfyUI 与 Anima</span>
-          </Heading>
-          <p>
-            从基础概念和安装配置开始，逐步学习节点工作流、模型参数与实践方法。
+          <p className={styles.workflowLead}>
+            主模型、画布和文本条件分别准备，统一交给采样器完成图形绘制。
           </p>
-        </div>
+          <WorkflowBoard />
+        </section>
 
-        <div className={styles.sectionList}>
-          {sectionItems.map((item) => (
-            <Link className={styles.sectionItem} key={item.index} to={item.to}>
-              <span className={styles.sectionIndex}>{item.index}</span>
-              <span className={styles.sectionSignal} aria-hidden="true" />
-              <span className={styles.sectionBody}>
-                <span className={styles.sectionLabel}>{item.label}</span>
-                <span className={styles.sectionTitle}>{item.title}</span>
-                <span className={styles.sectionDescription}>{item.description}</span>
-              </span>
-              <span className={styles.sectionAction}>
-                <span>{item.action}</span>
-                <span aria-hidden="true">→</span>
-              </span>
-            </Link>
-          ))}
-        </div>
+        <section className={styles.learningSection} aria-labelledby="learning-title">
+          <div className={styles.learningHeader}>
+            <div className={styles.learningHeaderMark} aria-hidden="true">02</div>
+            <div>
+              <p className={styles.sectionKicker}>内容导航 / 学习路径</p>
+              <Heading as="h2" id="learning-title">
+                <span>按顺序学习</span>
+                <span>ComfyUI 与 Anima</span>
+              </Heading>
+            </div>
+            <p className={styles.learningLead}>从环境配置开始，逐步掌握节点连接、模型参数和实践方法。</p>
+          </div>
 
-        <div className={styles.learningScope}>
-          <span className={styles.learningScopeTitle}>教程范围</span>
-          <ol className={styles.learningScopeList}>
-            {learningTopics.map((topic) => (
-              <li key={topic.index}>
-                <span className={styles.learningScopeIndex}>{topic.index}</span>
-                <span className={styles.learningScopeBody}>
-                  <strong>{topic.title}</strong>
-                  <span>{topic.detail}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
-        </div>
+          <div className={styles.learningLayout}>
+            <div className={styles.learningIntro}>
+              <span className={styles.learningIntroIndex}>ROUTE / 03</span>
+              <p>三条入口对应文档、原理和实践记录。每一项都提供可直接执行的下一步。</p>
+              <div className={styles.learningLegend}>
+                <span><i className={styles.legendBlue} />必修内容</span>
+                <span><i className={styles.legendRed} />实验内容</span>
+              </div>
+            </div>
+            <nav className={styles.learningRoutes} aria-label="学习路径">
+              {sectionItems.map((item) => (
+                <Link className={styles.learningRoute} key={item.index} to={item.to}>
+                  <span className={styles.routeIndex}>{item.index}</span>
+                  <span className={styles.routeSignal} aria-hidden="true" />
+                  <span className={styles.routeCopy}>
+                    <span className={styles.routeMeta}>{item.meta}</span>
+                    <strong>{item.title}</strong>
+                    <span>{item.description}</span>
+                  </span>
+                  <span className={styles.routeAction}><span>{item.action}</span><span aria-hidden="true">↗</span></span>
+                </Link>
+              ))}
+            </nav>
+          </div>
 
-        <div className={styles.sectionFootnote}>
-          <span>CUI-ANIMA / 内容索引</span>
-          <span>持续更新</span>
-        </div>
+          <div className={styles.scopeRail}>
+            <span className={styles.scopeTitle}>教程范围</span>
+            <ol className={styles.scopeList}>
+              {scopeItems.map((item) => (
+                <li key={item.index}>
+                  <span>{item.index}</span>
+                  <strong>{item.title}</strong>
+                  <small>{item.detail}</small>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div className={styles.sectionFootnote}>
+            <span>CUI-ANIMA / 内容索引</span>
+            <span>持续更新</span>
+          </div>
+        </section>
       </div>
     </section>
   );

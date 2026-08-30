@@ -1,274 +1,261 @@
 .features {
-  background:
-    linear-gradient(90deg, color-mix(in srgb, var(--anima-blue) 9%, transparent) 0 22%, transparent 22% 100%),
-    var(--anima-paper);
-  border-top: 1px solid var(--anima-line);
+  background: var(--anima-paper);
+  color: var(--anima-ink);
   overflow: hidden;
-  padding: clamp(4rem, 8vw, 7rem) 0 5rem;
+  padding: clamp(3.5rem, 7vw, 7rem) 0 6rem;
   position: relative;
+}
+
+.features::before,
+.features::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
 }
 
 .features::before {
-  background:
-    linear-gradient(to right, var(--anima-grid) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--anima-grid) 1px, transparent 1px);
-  background-size: 3rem 3rem;
-  content: "";
-  height: 18rem;
-  opacity: 0.55;
-  pointer-events: none;
-  position: absolute;
-  right: -3rem;
-  top: 2.5rem;
+  background: var(--anima-blue);
+  height: 11rem;
+  left: -5rem;
+  opacity: 0.08;
+  top: 9rem;
   transform: rotate(-8deg);
-  width: min(48vw, 40rem);
+  width: 30rem;
 }
 
 .features::after {
-  background: var(--anima-blue);
-  content: "";
-  height: 8px;
-  left: 0;
-  opacity: 0.9;
-  position: absolute;
-  top: 0;
-  width: min(22vw, 18rem);
+  border: 1px solid var(--anima-line);
+  height: 29rem;
+  right: -17rem;
+  top: 3rem;
+  transform: rotate(12deg);
+  width: 29rem;
 }
 
-.workflowBand {
-  background:
-    linear-gradient(135deg, transparent 0 76%, color-mix(in srgb, var(--anima-blue) 18%, transparent) 76% 100%),
-    var(--anima-surface);
-  border: 1px solid var(--anima-line-strong);
-  margin-bottom: 4.5rem;
-  overflow: hidden;
-  padding: 1.25rem 1.35rem 1.1rem;
+.workflowSection,
+.learningSection {
   position: relative;
   z-index: 1;
 }
 
-.workflowStamp {
-  border: 1px solid var(--anima-gold);
-  color: var(--anima-gold);
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 0.62rem;
-  letter-spacing: 0.12em;
-  padding: 0.3rem 0.5rem;
-  pointer-events: none;
-  position: absolute;
-  right: 1rem;
-  top: 2.7rem;
-  transform: rotate(-7deg);
-  z-index: 2;
-}
-
-.workflowBand::before {
-  background: var(--anima-blue);
-  content: "";
-  height: 100%;
-  left: 0;
-  opacity: 0.9;
-  position: absolute;
-  top: 0;
-  width: 0.35rem;
-}
-
-.workflowBand::after {
-  border: 1px solid var(--anima-line);
-  content: "";
-  height: 11rem;
-  pointer-events: none;
-  position: absolute;
-  right: -4rem;
-  top: -5rem;
-  transform: rotate(24deg);
-  width: 11rem;
-}
-
-.workflowHeader,
-.workflowFooter {
+.sectionRail {
   align-items: center;
   color: var(--anima-ink-soft);
   display: flex;
   font-family: var(--ifm-font-family-monospace);
-  font-size: 0.65rem;
-  gap: 1rem;
-  justify-content: space-between;
-  letter-spacing: 0.1em;
-  position: relative;
-  text-transform: uppercase;
-  z-index: 1;
+  font-size: 0.62rem;
+  gap: 0.7rem;
+  left: -3.2rem;
+  letter-spacing: 0.14em;
+  position: absolute;
+  top: 0.25rem;
+  transform: rotate(-90deg) translateX(-100%);
+  transform-origin: left top;
 }
 
-.workflowKicker {
+.sectionRail i {
+  background: var(--anima-gold);
+  display: block;
+  height: 0.42rem;
+  width: 0.42rem;
+}
+
+.workflowHeading {
+  align-items: end;
+  border-bottom: 1px solid var(--anima-line-strong);
+  display: flex;
+  gap: 2rem;
+  justify-content: space-between;
+  padding-bottom: 1.15rem;
+}
+
+.sectionKicker,
+.workflowMeta,
+.learningIntroIndex,
+.routeMeta,
+.scopeTitle,
+.sectionFootnote {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.sectionKicker {
   color: var(--anima-blue);
-  font-weight: 700;
+  margin: 0 0 0.7rem;
+}
+
+.workflowHeading h2,
+.learningHeader h2 {
+  color: var(--anima-ink);
+  font-family: var(--ifm-heading-font-family);
+  font-size: clamp(1.8rem, 3.2vw, 3.4rem);
+  font-weight: 760;
+  letter-spacing: 0;
+  line-height: 1;
+  margin: 0;
 }
 
 .workflowMeta {
-  text-align: right;
+  color: var(--anima-ink-soft);
+  margin: 0 0 0.15rem;
+  white-space: nowrap;
 }
 
-.workflowTrack {
-  align-items: center;
-  display: flex;
-  margin: 1.25rem 0 1.1rem;
-  min-width: 0;
+.workflowLead {
+  color: var(--anima-ink-soft);
+  font-size: 0.98rem;
+  line-height: 1.7;
+  margin: 1rem 0 1.6rem;
+  max-width: 44rem;
+}
+
+.workflowBoard {
+  border: 1px solid var(--anima-line-strong);
+  min-height: 560px;
+  overflow: hidden;
   position: relative;
-  z-index: 3;
 }
 
-.workflowDiagram {
-  min-height: 15.5rem;
-  min-width: 0;
-  position: relative;
+.workflowBoard::before,
+.workflowBoard::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
 }
 
-.workflowPolarGrid,
-.workflowNoiseField,
-.workflowDecorativeCopy {
+.workflowBoard::before {
+  border: 1px solid color-mix(in srgb, var(--anima-ink) 20%, transparent);
+  inset: 0.8rem;
+}
+
+.workflowBoard::after {
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--anima-paper) 65%, transparent), transparent);
+  bottom: 0;
+  height: 2.5rem;
+  left: 0;
+  opacity: 0.6;
+  right: 0;
+}
+
+.workflowNightArt,
+.workflowDayArt {
   inset: 0;
+  overflow: hidden;
   pointer-events: none;
   position: absolute;
 }
 
-/* Day mode: a tilted, pale-blue Cartesian registration plane. */
-.workflowPolarGrid {
-  background-image:
-    linear-gradient(90deg, color-mix(in srgb, var(--anima-blue) 19%, transparent) 1px, transparent 1px),
-    linear-gradient(0deg, color-mix(in srgb, var(--anima-blue) 19%, transparent) 1px, transparent 1px);
-  background-size: 2.8rem 2.8rem;
-  opacity: 0.62;
-  transform: rotate(-6deg) scale(1.08);
-  transform-origin: 50% 50%;
-  z-index: 0;
+.workflowNightArt { display: none; background: #16191f; }
+.workflowDayArt { background: #fbfcfb; display: block; }
+
+.workflowNightArt svg {
+  height: 100%;
+  inset: 0;
+  opacity: 0.48;
+  position: absolute;
+  width: 100%;
 }
 
-.workflowNoiseField {
-  z-index: 1;
+.workflowNightArt circle,
+.workflowNightArt line {
+  fill: none;
+  stroke: #ba3b43;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
 }
 
-.workflowNoisePoint {
-  border: 1px solid var(--anima-blue);
+.workflowNightArt circle:nth-child(1) { stroke: rgba(241, 237, 229, 0.38); }
+.workflowNightArt circle:nth-child(2) { stroke: rgba(227, 67, 74, 0.48); }
+.workflowNightArt circle:nth-child(3) { stroke: rgba(241, 237, 229, 0.16); }
+.workflowNightArt line { stroke: rgba(227, 67, 74, 0.34); }
+
+.dayWorkflowPlane,
+.dayWorkflowGrid,
+.dayWorkflowRule {
   display: block;
   position: absolute;
-  transform: translate(-50%, -50%);
 }
 
-.noiseSolid {
+.dayWorkflowPlane {
+  background: linear-gradient(135deg, rgba(36, 93, 204, 0.14), rgba(154, 194, 255, 0.04));
+  height: 80%;
+  right: -8%;
+  top: -26%;
+  transform: rotate(-7deg);
+  width: 66%;
+}
+
+.dayWorkflowGrid {
+  background-image:
+    linear-gradient(to right, rgba(36, 93, 204, 0.2) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(36, 93, 204, 0.2) 1px, transparent 1px);
+  background-size: 2.8rem 2.8rem;
+  inset: -30% -6% -22% 21%;
+  opacity: 0.55;
+  transform: rotate(-7deg);
+}
+
+.dayWorkflowRule {
   background: var(--anima-blue);
+  height: 1px;
+  opacity: 0.58;
+  transform: rotate(-7deg);
+  width: 78%;
 }
 
-.noiseHollow {
-  background: transparent;
-}
+.dayWorkflowRuleOne { right: -7%; top: 31%; }
+.dayWorkflowRuleTwo { bottom: 17%; left: 12%; width: 55%; }
 
-.workflowDecorativeCopy {
-  color: var(--anima-blue);
-  font-family: var(--ifm-heading-font-family);
-  font-size: clamp(1rem, 2.5vw, 2.4rem);
-  font-weight: 850;
-  letter-spacing: 0.08em;
-  line-height: 1;
-  opacity: 0.09;
-  overflow: hidden;
-  text-transform: uppercase;
-  z-index: 1;
-}
-
-.workflowDecorativeCopy > span {
+.workflowGraph {
+  display: grid;
+  gap: 1.1rem 2.4rem;
+  grid-template-columns: minmax(180px, 1fr) minmax(190px, 1fr) minmax(250px, 1.35fr) minmax(140px, 0.75fr);
+  grid-template-rows: repeat(3, minmax(82px, 1fr));
+  inset: 4.5rem 4.25rem 4.2rem;
   position: absolute;
-  white-space: nowrap;
-}
-
-.workflowDecorativeCopy > span:nth-child(1) {
-  left: -0.7rem;
-  top: 38%;
-}
-
-.workflowDecorativeCopy > span:nth-child(2) {
-  left: -0.7rem;
-  top: 51%;
-}
-
-.workflowDecorativeCopy > span:nth-child(3) {
-  right: -0.7rem;
-  top: 38%;
-}
-
-.workflowDecorativeCopy > span:nth-child(4) {
-  right: -0.7rem;
-  top: 51%;
-}
-
-.workflowBranch {
-  align-items: center;
-  display: flex;
-  margin: 0 0 1.1rem 12%;
-  max-width: 62%;
-  min-width: 0;
-  position: relative;
   z-index: 3;
-}
-
-.workflowBranch .workflowNode {
-  min-height: 5rem;
-}
-
-.workflowBranchJoin {
-  border-bottom: 1px dashed var(--anima-line-strong);
-  border-right: 1px dashed var(--anima-line-strong);
-  height: 1.35rem;
-  margin-left: 0.7rem;
-  position: relative;
-  width: 1.35rem;
-}
-
-.workflowBranchJoin::after {
-  background: var(--anima-red);
-  border-radius: 50%;
-  bottom: -0.2rem;
-  content: "";
-  height: 0.35rem;
-  position: absolute;
-  right: -0.2rem;
-  width: 0.35rem;
 }
 
 .workflowNode {
-  background: var(--anima-paper);
+  align-items: start;
+  background: color-mix(in srgb, var(--anima-surface) 92%, transparent);
   border: 1px solid var(--anima-line-strong);
   display: flex;
-  flex: 1 1 0;
   flex-direction: column;
-  gap: 0.25rem;
-  min-height: 7rem;
+  justify-content: center;
   min-width: 0;
-  padding: 0.8rem 0.85rem;
+  padding: 0.85rem 1rem 0.8rem;
   position: relative;
-  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
-  z-index: 3;
-}
-
-.workflowNode:hover {
-  border-color: var(--anima-blue);
-  box-shadow: 0 10px 22px var(--anima-shadow);
-  transform: translateY(-4px);
   z-index: 2;
 }
 
+.workflowNode::before {
+  background: var(--node-accent, var(--anima-blue));
+  content: "";
+  height: 3px;
+  left: -1px;
+  position: absolute;
+  right: -1px;
+  top: -1px;
+}
+
 .workflowNodeIndex {
-  color: var(--anima-ink-soft);
+  color: var(--node-accent, var(--anima-blue));
   font-family: var(--ifm-font-family-monospace);
-  font-size: 0.66rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.35rem;
 }
 
 .workflowNodeTitle {
   color: var(--anima-ink);
-  font-family: var(--ifm-heading-font-family);
-  font-size: 1.05rem;
+  font-size: 0.96rem;
   font-weight: 750;
-  line-height: 1.25;
+  line-height: 1.35;
   overflow-wrap: anywhere;
 }
 
@@ -276,674 +263,26 @@
   color: var(--anima-ink-soft);
   font-family: var(--ifm-font-family-monospace);
   font-size: 0.58rem;
-  letter-spacing: 0.12em;
-  margin-top: auto;
-}
-
-.workflowNode::after {
-  background: var(--anima-blue);
-  content: "";
-  height: 0.3rem;
-  left: 0;
-  position: absolute;
-  top: 0;
-  width: 36%;
-}
-
-.toneblue::after {
-  background: var(--anima-blue);
-}
-
-.tonered::after {
-  background: var(--anima-gold);
-}
-
-.tonegold::after {
-  background: var(--anima-gold);
-}
-
-.toneink::after {
-  background: var(--anima-ink);
-}
-
-.workflowConnector {
-  background: var(--anima-line-strong);
-  flex: 0 0 1.35rem;
-  height: 1px;
-  position: relative;
-}
-
-.workflowConnector::after {
-  border-bottom: 1px solid var(--anima-line-strong);
-  border-right: 1px solid var(--anima-line-strong);
-  content: "";
-  height: 0.4rem;
-  position: absolute;
-  right: 0;
-  top: -0.2rem;
-  transform: rotate(-45deg);
-  width: 0.4rem;
-}
-
-.workflowFooter {
-  color: var(--anima-ink-soft);
-  justify-content: flex-start;
-}
-
-.workflowEdgeLabel {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  min-width: 0;
-  position: relative;
-}
-
-.workflowEdgeDecor {
-  color: color-mix(in srgb, var(--anima-ink) 16%, transparent);
-  font-size: 0.5rem;
-  letter-spacing: 0.08em;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.workflowFooterLine {
-  background: var(--anima-line-strong);
-  flex: 1;
-  height: 1px;
-  max-width: 20rem;
-}
-
-.sectionHeader {
-  border-left: 4px solid var(--anima-blue);
-  background: color-mix(in srgb, var(--anima-surface) 78%, transparent);
-  max-width: 740px;
-  padding: 1.3rem 1.5rem 1.35rem 1.25rem;
-  position: relative;
-  z-index: 1;
-}
-
-.sectionHeaderMark {
-  color: color-mix(in srgb, var(--anima-blue) 24%, transparent);
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 7rem;
-  font-weight: 800;
-  line-height: 0.8;
-  pointer-events: none;
-  position: absolute;
-  right: 1rem;
-  top: 0.8rem;
-}
-
-.sectionKicker {
-  color: var(--anima-gold);
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  line-height: 1.45;
-  margin: 0 0 1rem;
-  text-transform: uppercase;
-}
-
-.sectionHeader h2 {
-  color: var(--anima-ink);
-  font-family: var(--ifm-heading-font-family);
-  font-size: clamp(2.2rem, 5vw, 4.2rem);
-  font-weight: 700;
-  letter-spacing: 0;
-  line-height: 1.12;
-  margin: 0;
-}
-
-.headingLine {
-  display: block;
-}
-
-.sectionHeader > p:last-child {
-  color: var(--ifm-color-content-secondary);
-  font-size: 1rem;
-  line-height: 1.8;
-  margin: 1.4rem 0 0;
-  max-width: 38rem;
-}
-
-.sectionList {
-  border-top: 1px solid var(--anima-line-strong);
-  margin-top: 4rem;
-  position: relative;
-  z-index: 1;
-}
-
-.sectionItem {
-  align-items: stretch;
-  border-bottom: 1px solid var(--anima-line);
-  color: var(--anima-ink);
-  display: grid;
-  gap: 1.25rem;
-  grid-template-columns: 4rem 0.45rem minmax(0, 1fr) auto;
-  padding: 1.7rem 0;
-  position: relative;
-  text-decoration: none;
-  transition: background-color 160ms ease, border-color 160ms ease, padding 160ms ease, transform 160ms ease;
-}
-
-.sectionItem::before {
-  background: var(--anima-blue);
-  content: "";
-  height: 100%;
-  left: 0;
-  opacity: 0;
-  position: absolute;
-  top: 0;
-  transform: scaleY(0.45);
-  transform-origin: center;
-  transition: opacity 160ms ease, transform 160ms ease;
-  width: 3px;
-}
-
-.sectionItem:hover {
-  background: color-mix(in srgb, var(--anima-blue) 8%, transparent);
-  color: var(--anima-ink);
-  padding-left: 0.8rem;
-  padding-right: 0.8rem;
-  text-decoration: none;
-}
-
-.sectionItem:hover::before {
-  opacity: 1;
-  transform: scaleY(1);
-}
-
-.sectionItem:focus-visible {
-  outline: 2px solid var(--anima-blue);
-  outline-offset: 4px;
-}
-
-.sectionIndex {
-  color: var(--anima-blue);
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 0.8rem;
-  font-weight: 700;
-  padding-top: 0.2rem;
-}
-
-.sectionSignal {
-  align-self: center;
-  background: var(--anima-blue);
-  height: 3rem;
-  position: relative;
-  width: 0.45rem;
-}
-
-.sectionSignal::after {
-  background: var(--anima-gold);
-  content: "";
-  height: 0.45rem;
-  left: -0.25rem;
-  position: absolute;
-  top: 0.65rem;
-  width: 0.95rem;
-}
-
-.sectionBody {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  min-width: 0;
-}
-
-.sectionLabel {
-  color: var(--anima-gold);
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 0.68rem;
-  letter-spacing: 0.1em;
-}
-
-.sectionTitle {
-  font-family: var(--ifm-heading-font-family);
-  font-size: clamp(1.35rem, 2.4vw, 2rem);
-  font-weight: 650;
-  letter-spacing: 0;
-}
-
-.sectionDescription {
-  color: var(--ifm-color-content-secondary);
-  font-size: 0.92rem;
-  line-height: 1.65;
-  max-width: 42rem;
-}
-
-.sectionAction {
-  align-items: center;
-  align-self: center;
-  color: var(--anima-blue);
-  display: inline-flex;
-  font-family: var(--ifm-heading-font-family);
-  font-size: 0.76rem;
-  font-weight: 700;
-  gap: 0.7rem;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-
-.sectionItem:hover .sectionAction {
-  color: var(--anima-gold);
-}
-
-.sectionFootnote {
-  color: var(--ifm-color-content-secondary);
-  display: flex;
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 0.68rem;
-  justify-content: space-between;
-  letter-spacing: 0.1em;
-  margin-top: 1.25rem;
-  text-transform: uppercase;
-}
-
-/* The night palette treats each route as a soft observation row. */
-:global([data-theme='dark']) .features::after {
-  background: var(--anima-red);
-  border-radius: 0 0 8px 0;
-}
-
-:global([data-theme='dark']) .features {
-  background:
-    radial-gradient(circle at 86% 12%, color-mix(in srgb, var(--anima-red) 14%, transparent), transparent 26%),
-    var(--anima-paper);
-}
-
-:global([data-theme='dark']) .workflowBand {
-  background:
-    radial-gradient(circle at 88% 35%, color-mix(in srgb, var(--anima-red) 18%, transparent), transparent 24%),
-    var(--anima-surface);
-  border-color: var(--anima-line);
-  border-radius: var(--anima-radius);
-  box-shadow: 0 16px 32px var(--anima-shadow);
-}
-
-:global([data-theme='dark']) .workflowStamp {
-  border-color: var(--anima-red);
-  color: var(--anima-red);
-  border-radius: 8px;
-}
-
-:global([data-theme='dark']) .workflowBand::before {
-  background: var(--anima-red);
-  border-radius: 0 4px 4px 0;
-}
-
-:global([data-theme='dark']) .workflowBand::after {
-  border-color: color-mix(in srgb, var(--anima-red) 48%, transparent);
-  border-radius: 50%;
-}
-
-:global([data-theme='dark']) .workflowKicker {
-  color: var(--anima-red);
-}
-
-:global([data-theme='dark']) .workflowPolarGrid {
-  background: none;
-  opacity: 0.86;
-  transform: none;
-}
-
-:global([data-theme='dark']) .workflowNoisePoint {
-  border-color: var(--anima-red);
-  border-radius: 50%;
-}
-
-:global([data-theme='dark']) .noiseSolid {
-  background: var(--anima-red);
-}
-
-:global([data-theme='dark']) .workflowDecorativeCopy {
-  color: var(--anima-red);
-  opacity: 0.12;
-}
-
-:global([data-theme='dark']) .workflowBranchJoin {
-  border-color: color-mix(in srgb, var(--anima-red) 70%, transparent);
-}
-
-:global([data-theme='dark']) .workflowBranchJoin::after {
-  background: var(--anima-red);
-}
-
-:global([data-theme='dark']) .workflowNode {
-  background: color-mix(in srgb, var(--anima-ink) 5%, var(--anima-paper));
-  border-color: var(--anima-line);
-  border-radius: calc(var(--anima-radius) - 4px);
-}
-
-:global([data-theme='dark']) .workflowNode:hover {
-  border-color: var(--anima-red);
-  box-shadow: 0 12px 26px var(--anima-shadow);
-}
-
-:global([data-theme='dark']) .workflowNode::after {
-  border-radius: 999px;
-}
-
-:global([data-theme='dark']) .toneblue::after {
-  background: var(--anima-blue);
-}
-
-:global([data-theme='dark']) .tonered::after {
-  background: var(--anima-red);
-}
-
-:global([data-theme='dark']) .tonegold::after {
-  background: var(--anima-gold);
-}
-
-:global([data-theme='dark']) .toneink::after {
-  background: var(--anima-gray);
-}
-
-:global([data-theme='dark']) .features::before {
-  background-image:
-    radial-gradient(circle, color-mix(in srgb, var(--anima-red) 34%, transparent) 0 1px, transparent 1.5px),
-    linear-gradient(90deg, color-mix(in srgb, var(--anima-ink) 15%, transparent) 1px, transparent 1px);
-  background-size: 1.8rem 1.8rem, 3.6rem 3.6rem;
-  border: 1px solid color-mix(in srgb, var(--anima-red) 40%, transparent);
-  border-radius: 50%;
-  height: 22rem;
-  opacity: 0.8;
-  right: -8rem;
-  top: 1rem;
-  transform: rotate(12deg);
-  width: 22rem;
-}
-
-:global([data-theme='dark']) .sectionHeader {
-  border-left-color: var(--anima-red);
-  background: color-mix(in srgb, var(--anima-surface) 90%, transparent);
-}
-
-:global([data-theme='dark']) .sectionHeaderMark {
-  color: color-mix(in srgb, var(--anima-red) 28%, transparent);
-}
-
-:global([data-theme='dark']) .sectionKicker,
-:global([data-theme='dark']) .sectionLabel {
-  color: var(--anima-gray);
-}
-
-:global([data-theme='dark']) .sectionList {
-  border-top-color: var(--anima-line-strong);
-}
-
-:global([data-theme='dark']) .sectionItem {
-  border-bottom-color: var(--anima-line);
-  border-radius: var(--anima-radius);
-  margin: 0.7rem 0;
-  padding: 1.25rem 1rem;
-}
-
-:global([data-theme='dark']) .sectionItem::before {
-  background: var(--anima-red);
-  border-radius: 4px;
-  left: 0.35rem;
-  width: 4px;
-}
-
-:global([data-theme='dark']) .sectionSignal {
-  background: var(--anima-red);
-  border-radius: 999px;
-}
-
-:global([data-theme='dark']) .sectionSignal::after {
-  background: var(--anima-gray);
-  border-radius: 50%;
-}
-
-:global([data-theme='dark']) .sectionItem:hover {
-  background: color-mix(in srgb, var(--anima-red) 10%, var(--anima-surface));
-  box-shadow: 0 12px 28px var(--anima-shadow);
-  padding-left: 1.35rem;
-  padding-right: 1.35rem;
-  transform: translateX(3px);
-}
-
-:global([data-theme='dark']) .sectionIndex,
-:global([data-theme='dark']) .sectionAction,
-:global([data-theme='dark']) .sectionItem:hover .sectionAction {
-  color: var(--anima-red);
-}
-
-@media screen and (max-width: 640px) {
-  .workflowBand {
-    margin-bottom: 3.25rem;
-    padding: 1rem 0.85rem 0.9rem;
-  }
-
-  .workflowStamp {
-    right: 0.75rem;
-    top: 3.8rem;
-  }
-
-  .workflowHeader {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  .workflowMeta {
-    text-align: left;
-  }
-
-  .workflowTrack {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .workflowBranch {
-    align-items: stretch;
-    flex-direction: column;
-    margin: 0 0 1rem 1.25rem;
-    max-width: none;
-  }
-
-  .workflowBranch .workflowConnector {
-    flex: 0 0 1rem;
-    height: 1rem;
-  }
-
-  .workflowBranchJoin {
-    align-self: flex-end;
-    margin: 0.3rem 1rem 0 0;
-    transform: rotate(90deg);
-  }
-
-  .workflowNode {
-    min-height: 4.75rem;
-  }
-
-  .workflowConnector {
-    flex: 0 0 1.25rem;
-    height: 1.25rem;
-    margin-left: 1.25rem;
-    width: 1px;
-  }
-
-  .workflowConnector::after {
-    bottom: 0;
-    right: -0.2rem;
-    top: auto;
-    transform: rotate(45deg);
-  }
-
-  .workflowFooter {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.45rem;
-  }
-
-  .workflowFooterLine {
-    flex: 0 0 1px;
-    max-width: none;
-    width: 100%;
-  }
-
-  .sectionList {
-    margin-top: 3rem;
-  }
-
-  .sectionHeaderMark {
-    font-size: 5rem;
-    right: 0.6rem;
-    top: 0.7rem;
-  }
-
-  .sectionItem {
-    gap: 0.7rem;
-    grid-template-columns: 2.4rem 0.35rem minmax(0, 1fr);
-  }
-
-  .sectionAction {
-    grid-column: 3;
-    justify-self: start;
-    margin-top: 0.35rem;
-  }
-
-  :global([data-theme='dark']) .sectionItem {
-    padding: 1.1rem 0.85rem;
-  }
-
-  :global([data-theme='dark']) .sectionItem:hover {
-    padding-left: 1.1rem;
-    padding-right: 1.1rem;
-  }
-
-  .sectionSignal {
-    height: 2.5rem;
-    width: 0.35rem;
-  }
-
-  .sectionFootnote {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sectionItem,
-  .sectionItem::before {
-    transition: none;
-  }
-}
-
-/* Workflow graph v2 ------------------------------------------------------
- * The graph uses fixed semantic positions and a separate SVG connection
- * layer. Keeping the artwork and node layer independent makes both themes
- * replaceable without changing the information structure. */
-.workflowDiagram {
-  margin: 1.25rem -1.35rem 0;
-  min-height: 23rem;
-  overflow: hidden;
-  padding: 0 1.35rem 2.5rem;
-}
-
-.workflowPolarGrid {
-  background-image:
-    linear-gradient(90deg, color-mix(in srgb, var(--anima-blue) 17%, transparent) 1px, transparent 1px),
-    linear-gradient(0deg, color-mix(in srgb, var(--anima-blue) 17%, transparent) 1px, transparent 1px);
-  background-size: 2.8rem 2.8rem;
-  inset: 0;
-  mask-image:
-    linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%),
-    linear-gradient(0deg, transparent 0%, #000 8%, #000 91%, transparent 100%);
-  mask-composite: intersect;
-  opacity: 0.58;
-  transform: rotate(-6deg) scale(1.05);
-  transform-origin: 50% 50%;
-  z-index: 0;
-}
-
-.workflowPolarGridSvg {
-  display: none;
-  height: 100%;
-  overflow: visible;
-  width: 100%;
-}
-
-.workflowGraph {
-  height: 20rem;
-  margin: 0;
-  min-height: 0;
-  position: relative;
-  z-index: 3;
-}
-
-.workflowNode {
-  box-sizing: border-box;
-  display: flex;
-  flex: none;
-  min-height: 6rem;
-  padding: 0.85rem 0.9rem 0.72rem;
-  position: absolute;
-  width: auto;
-}
-
-.nodeModel {
-  left: 1%;
-  top: 3%;
-  width: 21%;
-}
-
-.nodeAttachments {
-  left: 24.5%;
-  top: 3%;
-  width: 20%;
-}
-
-.nodeCanvas {
-  left: 1%;
-  top: 36%;
-  width: 21%;
-}
-
-.nodeEncoder {
-  left: 1%;
-  top: 69%;
-  width: 21%;
-}
-
-.nodePrompt {
-  left: 24.5%;
-  top: 69%;
-  width: 20%;
-}
-
-.nodeDraw {
-  left: 57.5%;
-  top: 36%;
-  width: 22%;
-}
-
-.nodeSave {
-  left: 81%;
-  top: 36%;
-  width: 17%;
-}
-
-.workflowNodeIndex {
-  flex: none;
-}
-
-.workflowNodeTitle {
-  font-size: 1rem;
-  line-height: 1.3;
-}
-
-.workflowNodeDetail {
-  font-size: 0.62rem;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   line-height: 1.4;
-  margin-top: auto;
+  margin-top: 0.4rem;
   overflow-wrap: anywhere;
 }
+
+.nodeModel { grid-column: 1; grid-row: 1; }
+.nodeCanvas { grid-column: 1; grid-row: 2; }
+.nodeEncoder { grid-column: 1; grid-row: 3; }
+.nodeAttachments { grid-column: 2; grid-row: 1; }
+.nodePrompt { grid-column: 2; grid-row: 3; }
+.nodeDraw { grid-column: 3; grid-row: 2; }
+.nodeSave { grid-column: 4; grid-row: 2; }
+
+.toneModel { --node-accent: var(--anima-blue); }
+.toneSupport { --node-accent: var(--anima-red); }
+.toneCanvas { --node-accent: var(--anima-gold); }
+.toneText { --node-accent: var(--anima-gold); }
+.toneCore { --node-accent: var(--anima-ink); }
+.toneOutput { --node-accent: var(--anima-blue); }
 
 .workflowConnections,
 .workflowConnectionsMobile {
@@ -953,664 +292,286 @@
   pointer-events: none;
   position: absolute;
   width: 100%;
-  z-index: 2;
+  z-index: 1;
 }
 
-.workflowConnectionsMobile {
-  display: none;
-}
+.workflowConnectionsMobile { display: none; }
 
-.workflowConnections > g > path,
-.workflowConnectionsMobile > g > path {
+.workflowConnections path,
+.workflowConnectionsMobile path {
   fill: none;
-  marker-end: url(#workflow-arrow);
+  marker-end: url(#workflow-arrow-desktop);
   stroke: var(--anima-line-strong);
-  stroke-width: 1.2;
+  stroke-width: 1.35;
   vector-effect: non-scaling-stroke;
 }
 
-.workflowConnectionsMobile > g > path {
-  marker-end: url(#workflow-arrow-mobile);
-}
+.workflowConnections path:nth-child(2),
+.workflowConnections path:nth-child(5) { stroke: var(--anima-red); }
 
-.workflowConnections marker path,
-.workflowConnectionsMobile marker path {
-  fill: var(--anima-line-strong);
-  stroke: none;
-}
-
-.workflowDecorativeCopy {
+.workflowEdgeCopy {
   inset: 0;
   overflow: hidden;
-  z-index: 1;
-}
-
-.workflowDecorativeCopy > span {
-  font-size: 2.25rem;
-  line-height: 0.92;
-  top: 48%;
-  transform: translateY(-50%);
-}
-
-.workflowDecorativeCopy .decorativeInput {
-  left: -0.18rem;
-  text-align: left;
-}
-
-.workflowDecorativeCopy .decorativeResult {
-  right: -0.18rem;
-  text-align: right;
-}
-
-.workflowNoiseIsland {
-  --island-cell: 0.3rem;
-  display: grid;
-  grid-template-columns: repeat(9, var(--island-cell));
-  position: absolute;
-  transform-origin: center;
-  z-index: 2;
-}
-
-.workflowNoiseCell {
-  border: 1px solid var(--anima-blue);
-  box-sizing: border-box;
-  display: block;
-  height: var(--island-cell);
-  width: var(--island-cell);
-}
-
-.workflowNoiseCell.noiseSolid {
-  background: var(--anima-blue);
-}
-
-.workflowNoiseCell.noiseHollow {
-  background: transparent;
-}
-
-.workflowNoiseCell.noiseMarker {
-  border-radius: 50%;
-}
-
-.workflowFooter {
-  display: block;
-  min-height: 2.9rem;
-  margin: -3.1rem 0 0;
-  padding: 0 1.35rem 0.8rem;
-  position: relative;
-  z-index: 4;
-}
-
-.workflowEdgeLabel {
-  bottom: 0.8rem;
-  position: absolute;
-}
-
-.workflowTextInput {
-  left: 1.35rem;
-}
-
-.workflowImageOutput {
-  right: 1.35rem;
-  text-align: right;
-}
-
-.workflowFooterLine {
-  bottom: 0.95rem;
-  left: 7.2rem;
-  max-width: none;
-  position: absolute;
-  right: 7.2rem;
-}
-
-/* Night mode: straight rays and thin concentric rings. The SVG avoids the
- * moire-like fish-scale artefact produced by overlapping CSS conic bands. */
-:global([data-theme='dark']) .workflowPolarGrid {
-  background: none;
-  mask-image:
-    linear-gradient(90deg, transparent 0%, #000 7%, #000 96%, transparent 100%),
-    linear-gradient(0deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
-  mask-composite: intersect;
-  opacity: 0.86;
-  transform: none;
-}
-
-:global([data-theme='dark']) .workflowPolarGridSvg {
-  display: block;
-}
-
-:global([data-theme='dark']) .workflowPolarGridSvg circle,
-:global([data-theme='dark']) .workflowPolarGridSvg line {
-  fill: none;
-  stroke: color-mix(in srgb, var(--anima-red) 48%, transparent);
-  stroke-linecap: round;
-  stroke-width: 0.9;
-  vector-effect: non-scaling-stroke;
-}
-
-:global([data-theme='dark']) .workflowPolarGridSvg line {
-  stroke: color-mix(in srgb, var(--anima-red) 38%, transparent);
-}
-
-:global([data-theme='dark']) .workflowNoiseIsland {
-  --island-cell: 0.32rem;
-}
-
-:global([data-theme='dark']) .workflowNoiseCell {
-  border-color: var(--anima-red);
-}
-
-:global([data-theme='dark']) .workflowNoiseCell.noiseSolid {
-  background: var(--anima-red);
-}
-
-:global([data-theme='dark']) .workflowNode {
-  border-radius: calc(var(--anima-radius) - 4px);
-}
-
-:global([data-theme='dark']) .workflowConnections > g > path,
-:global([data-theme='dark']) .workflowConnectionsMobile > g > path {
-  stroke: color-mix(in srgb, var(--anima-red) 62%, var(--anima-line));
-}
-
-:global([data-theme='dark']) .workflowConnections marker path,
-:global([data-theme='dark']) .workflowConnectionsMobile marker path {
-  fill: color-mix(in srgb, var(--anima-red) 62%, var(--anima-line));
-}
-
-@media screen and (max-width: 640px) {
-  .workflowDiagram {
-    margin-left: -0.85rem;
-    margin-right: -0.85rem;
-    min-height: 31rem;
-    padding-left: 0.85rem;
-    padding-right: 0.85rem;
-  }
-
-  .workflowGraph {
-    height: 31rem;
-  }
-
-  .workflowNode {
-    min-height: 6rem;
-    padding: 0.72rem 0.7rem 0.62rem;
-  }
-
-  .workflowNodeTitle {
-    font-size: 0.92rem;
-  }
-
-  .workflowNodeDetail {
-    font-size: 0.56rem;
-  }
-
-  .nodeModel {
-    left: 0;
-    top: 0;
-    width: 43%;
-  }
-
-  .nodeAttachments {
-    left: 57%;
-    top: 0;
-    width: 43%;
-  }
-
-  .nodeCanvas {
-    left: 0;
-    top: 27%;
-    width: 43%;
-  }
-
-  .nodeDraw {
-    left: 57%;
-    top: 27%;
-    width: 43%;
-  }
-
-  .nodeEncoder {
-    left: 0;
-    top: 54%;
-    width: 43%;
-  }
-
-  .nodePrompt {
-    left: 57%;
-    top: 54%;
-    width: 43%;
-  }
-
-  .nodeSave {
-    left: 57%;
-    top: 81%;
-    width: 43%;
-  }
-
-  .workflowConnections {
-    display: none;
-  }
-
-  .workflowConnectionsMobile {
-    display: block;
-  }
-
-  .workflowDecorativeCopy > span {
-    font-size: 1.2rem;
-  }
-
-  .workflowFooter {
-    margin-top: -3rem;
-    padding-left: 0.85rem;
-    padding-right: 0.85rem;
-  }
-
-  .workflowTextInput {
-    left: 0.85rem;
-  }
-
-  .workflowImageOutput {
-    right: 0.85rem;
-  }
-
-  .workflowFooterLine {
-    left: 5.8rem;
-    right: 5.8rem;
-  }
-}
-
-/* Night material pass for the workflow module (kept here because CSS module
- * class names are scoped per file). */
-:global([data-theme='dark']) .workflowBand {
-  background:
-    radial-gradient(circle at 88% 40%, color-mix(in srgb, var(--anima-red) 13%, transparent), transparent 27%),
-    color-mix(in srgb, var(--anima-surface) 94%, #000);
-  border-radius: 16px;
-  box-shadow: 0 20px 42px var(--anima-shadow), 0 0 0 1px color-mix(in srgb, var(--anima-red) 8%, transparent);
-}
-
-:global([data-theme='dark']) .workflowBand::after {
-  border-color: color-mix(in srgb, var(--anima-ink) 24%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--anima-red) 16%, transparent);
-}
-
-:global([data-theme='dark']) .workflowStamp {
-  background: color-mix(in srgb, var(--anima-red) 6%, transparent);
-  border-radius: 999px;
-}
-
-:global([data-theme='dark']) .workflowNode {
-  background: color-mix(in srgb, var(--anima-surface) 88%, #000);
-  border-radius: 10px;
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--anima-ink) 7%, transparent);
-}
-
-:global([data-theme='dark']) .workflowNode:hover {
-  background: color-mix(in srgb, var(--anima-red) 7%, var(--anima-surface));
-}
-
-:global([data-theme='dark']) .toneblue::after,
-:global([data-theme='dark']) .tonegold::after {
-  background: var(--anima-ink-soft);
-}
-
-:global([data-theme='dark']) .toneink::after {
-  background: var(--anima-ink);
-}
-
-:global([data-theme='dark']) .workflowNoiseCell.noiseMarker {
-  background: var(--anima-ink);
-  border-color: var(--anima-ink);
-}
-
-:global([data-theme='dark']) .workflowNoiseCell.noiseHollow {
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--anima-red) 18%, transparent);
-}
-
-:global([data-theme='dark']) .workflowDiagram::after {
-  background: color-mix(in srgb, var(--anima-ink) 20%, transparent);
-  clip-path: polygon(14% 0, 100% 0, 100% 74%, 84% 100%, 0 100%, 0 26%);
-  content: "";
-  height: 4rem;
-  opacity: 0.34;
   pointer-events: none;
   position: absolute;
-  right: 4%;
-  top: 8%;
-  transform: rotate(-8deg);
-  width: 6rem;
   z-index: 1;
 }
 
-:global([data-theme='dark']) .workflowEdgeDecor {
-  color: color-mix(in srgb, var(--anima-ink) 24%, transparent);
-}
-
-/* Day material pass: hard registration edges, layered paper blocks and a
- * restrained brass calibration mark. */
-:global([data-theme='light']) .workflowBand {
-  box-shadow: 8px 8px 0 color-mix(in srgb, var(--anima-blue) 8%, transparent);
-}
-
-:global([data-theme='light']) .workflowNode {
-  box-shadow: 5px 5px 0 color-mix(in srgb, var(--anima-blue) 7%, transparent);
-}
-
-:global([data-theme='light']) .nodeAttachments,
-:global([data-theme='light']) .nodePrompt {
-  box-shadow: 5px 5px 0 color-mix(in srgb, var(--anima-gold) 12%, transparent);
-}
-
-:global([data-theme='light']) .nodeDraw {
-  box-shadow: 6px 6px 0 color-mix(in srgb, var(--anima-ink) 8%, transparent);
-}
-
-:global([data-theme='light']) .workflowNoiseCell.noiseMarker {
-  background: var(--anima-gold);
-  border-color: var(--anima-gold);
-}
-
-:global([data-theme='light']) .workflowConnections > g > path {
-  stroke: color-mix(in srgb, var(--anima-ink) 52%, var(--anima-blue));
-}
-
-:global([data-theme='light']) .workflowConnections > g > path:nth-child(2),
-:global([data-theme='light']) .workflowConnections > g > path:nth-child(5) {
-  stroke: var(--anima-blue);
-}
-
-:global([data-theme='light']) .workflowBand::after {
-  border-color: color-mix(in srgb, var(--anima-blue) 28%, transparent);
-  transform: rotate(18deg);
-}
-
-/* Learning path pass: the introduction and route cards now share the same
- * full-width measure as the workflow frame. */
-.sectionHeader {
-  background: color-mix(in srgb, var(--anima-surface) 84%, transparent);
-  display: grid;
-  gap: 0.7rem 2rem;
-  grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.42fr);
-  max-width: none;
-  padding: 1.5rem 2rem 1.65rem 1.45rem;
-  width: 100%;
-}
-
-.sectionKicker,
-.sectionHeader h2,
-.sectionHeader > p:last-child {
-  grid-column: 1;
-}
-
-.sectionKicker {
-  grid-row: 1;
-  margin-bottom: 0.35rem;
-}
-
-.sectionHeader h2 {
-  grid-row: 2;
-}
-
-.sectionHeader > p:last-child {
-  grid-row: 3;
-  margin-top: 0.65rem;
-  max-width: 48rem;
-}
-
-.sectionHeaderMark {
-  font-size: 9rem;
-  right: 2rem;
-  top: 1.2rem;
-}
-
-.sectionList {
-  border-top: 0;
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: 2.4rem;
-}
-
-.sectionItem,
-.sectionItem:hover {
-  background: var(--anima-surface);
-  border: 1px solid var(--anima-line);
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  min-height: 15rem;
-  padding: 1.35rem;
-  transform: none;
-}
-
-.sectionItem:hover {
-  border-color: var(--anima-blue);
-  box-shadow: 0 12px 24px var(--anima-shadow);
-  transform: translateY(-4px);
-}
-
-.sectionIndex {
-  font-size: 0.75rem;
-}
-
-.sectionSignal {
-  height: 0.35rem;
-  margin: 0.1rem 0 0.6rem;
-  width: 3.4rem;
-}
-
-.sectionSignal::after {
-  height: 0.35rem;
-  left: auto;
-  right: -0.5rem;
-  top: 0;
-  width: 0.35rem;
-}
-
-.sectionBody {
-  gap: 0.5rem;
-}
-
-.sectionTitle {
-  font-size: 1.45rem;
-}
-
-.sectionDescription {
-  max-width: none;
-}
-
-.sectionAction {
-  justify-content: space-between;
-  margin-top: auto;
-  width: 100%;
-}
-
-.learningScope {
-  border-bottom: 1px solid var(--anima-line);
-  border-top: 1px solid var(--anima-line);
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: 7rem minmax(0, 1fr);
-  margin-top: 2.2rem;
-  padding: 1rem 0;
-}
-
-.learningScopeTitle {
-  color: var(--anima-gold);
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 0.68rem;
-  letter-spacing: 0.1em;
-  padding-top: 0.2rem;
-}
-
-.learningScopeList {
-  display: grid;
-  gap: 0;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.learningScopeList li {
-  border-left: 1px solid var(--anima-line);
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-width: 0;
-  padding: 0 0.8rem;
-}
-
-.learningScopeList li:first-child {
-  border-left: 0;
-  padding-left: 0;
-}
-
-.learningScopeIndex {
-  color: var(--anima-blue);
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 0.62rem;
-}
-
-.learningScopeBody {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  min-width: 0;
-}
-
-.learningScopeBody strong {
+.edgeCopyInput,
+.edgeCopyOutput {
   color: var(--anima-ink);
-  font-size: 0.78rem;
+  font-family: var(--ifm-heading-font-family);
+  font-size: clamp(2rem, 5vw, 5.5rem);
+  font-weight: 800;
+  line-height: 0.82;
+  opacity: 0.06;
+  position: absolute;
   white-space: nowrap;
 }
 
-.learningScopeBody span {
+.edgeCopyInput { left: -0.2rem; top: 46%; transform: translateY(-50%); }
+.edgeCopyOutput { right: -0.2rem; top: 48%; transform: translateY(-50%); text-align: right; }
+
+.workflowEdgeLabels {
+  align-items: end;
+  bottom: 1.1rem;
+  display: grid;
+  gap: 1.2rem;
+  grid-template-columns: minmax(11rem, 0.45fr) 1fr minmax(11rem, 0.45fr);
+  left: 4.25rem;
+  position: absolute;
+  right: 4.25rem;
+  z-index: 4;
+}
+
+.edgeLabelInput,
+.edgeLabelOutput {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.edgeLabelOutput { text-align: right; }
+.edgeLabelInput strong,
+.edgeLabelOutput strong { color: var(--anima-ink); font-size: 0.8rem; }
+.edgeLabelInput small,
+.edgeLabelOutput small { color: var(--anima-ink-soft); font-size: 0.62rem; line-height: 1.35; }
+.edgeLabelLine { background: var(--anima-line-strong); height: 1px; margin-bottom: 0.45rem; }
+
+.nightIslandLayer,
+.dayIslandLayer {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.pixelIsland {
+  display: grid;
+  position: absolute;
+}
+
+.pixelCell {
+  background: var(--island-color, var(--anima-blue));
+  display: block;
+  height: 0.58rem;
+  width: 0.58rem;
+}
+
+.pixelHollow { background: transparent; border: 1px solid var(--island-color, var(--anima-blue)); }
+.pixelSoft { opacity: 0.48; }
+.pixelAccent { background: var(--anima-red); }
+
+.learningSection {
+  border-top: 1px solid var(--anima-line-strong);
+  margin-top: clamp(4rem, 9vw, 9rem);
+  padding-top: clamp(2rem, 4vw, 4rem);
+}
+
+.learningHeader {
+  align-items: end;
+  display: grid;
+  gap: 1.5rem 2rem;
+  grid-template-columns: 6.5rem minmax(18rem, 1fr) minmax(17rem, 0.8fr);
+}
+
+.learningHeaderMark {
+  color: var(--anima-blue);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 5.5rem;
+  font-weight: 800;
+  line-height: 0.75;
+  opacity: 0.2;
+}
+
+.learningHeader h2 span { display: block; }
+.learningLead { color: var(--anima-ink-soft); font-size: 0.95rem; line-height: 1.7; margin: 0 0 0.15rem; max-width: 25rem; }
+
+.learningLayout {
+  display: grid;
+  gap: 2.5rem;
+  grid-template-columns: minmax(200px, 0.58fr) minmax(0, 1.42fr);
+  margin-top: 3rem;
+}
+
+.learningIntro {
+  border-left: 3px solid var(--anima-gold);
+  padding: 0.35rem 1.25rem 0.5rem;
+}
+
+.learningIntroIndex { color: var(--anima-gold); }
+.learningIntro p { color: var(--anima-ink-soft); font-size: 0.9rem; line-height: 1.8; margin: 1.1rem 0 2.2rem; }
+
+.learningLegend { display: flex; flex-direction: column; gap: 0.6rem; }
+.learningLegend span { align-items: center; color: var(--anima-ink-soft); display: flex; font-family: var(--ifm-font-family-monospace); font-size: 0.62rem; gap: 0.55rem; }
+.learningLegend i { display: inline-block; height: 0.55rem; width: 0.55rem; }
+.legendBlue { background: var(--anima-blue); }
+.legendRed { background: var(--anima-red); }
+
+.learningRoutes { display: grid; gap: 0.75rem; }
+
+.learningRoute {
+  align-items: center;
+  background: var(--anima-surface);
+  border: 1px solid var(--anima-line);
+  color: var(--anima-ink);
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 2.3rem 0.28rem minmax(0, 1fr) auto;
+  min-height: 7.4rem;
+  padding: 1rem 1.15rem;
+  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.learningRoute:hover { border-color: var(--anima-blue); color: var(--anima-ink); text-decoration: none; transform: translateX(0.35rem); }
+.routeIndex { color: var(--anima-blue); font-family: var(--ifm-font-family-monospace); font-size: 0.76rem; font-weight: 700; align-self: start; }
+.routeSignal { background: var(--anima-blue); height: 3.4rem; width: 0.28rem; }
+.routeCopy { display: flex; flex-direction: column; min-width: 0; }
+.routeMeta { color: var(--anima-ink-soft); font-size: 0.57rem; margin-bottom: 0.35rem; }
+.routeCopy strong { font-size: 1rem; line-height: 1.35; }
+.routeCopy > span:last-child { color: var(--anima-ink-soft); font-size: 0.78rem; line-height: 1.5; margin-top: 0.28rem; }
+.routeAction { align-items: center; color: var(--anima-blue); display: inline-flex; font-family: var(--ifm-font-family-monospace); font-size: 0.65rem; gap: 0.6rem; white-space: nowrap; }
+
+.scopeRail {
+  border-bottom: 1px solid var(--anima-line-strong);
+  border-top: 1px solid var(--anima-line);
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  margin-top: 3.6rem;
+  padding: 1.15rem 0;
+}
+
+.scopeTitle { color: var(--anima-gold); padding-top: 0.25rem; }
+.scopeList { display: grid; gap: 0.65rem; grid-template-columns: repeat(5, minmax(0, 1fr)); list-style: none; margin: 0; padding: 0; }
+.scopeList li { border-left: 1px solid var(--anima-line); display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; padding: 0 0.8rem; }
+.scopeList li > span { color: var(--anima-blue); font-family: var(--ifm-font-family-monospace); font-size: 0.6rem; }
+.scopeList strong { font-size: 0.77rem; line-height: 1.35; }
+.scopeList small { color: var(--anima-ink-soft); font-size: 0.62rem; line-height: 1.4; }
+
+.sectionFootnote {
   color: var(--anima-ink-soft);
-  font-size: 0.68rem;
-  line-height: 1.4;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.8rem;
 }
 
-:global([data-theme='dark']) .sectionHeader {
-  border-radius: var(--anima-radius);
+/* Explicit material adapters. The semantic DOM above stays identical. */
+:global([data-theme='dark']) .features {
+  background: #101318;
 }
 
-:global([data-theme='dark']) .sectionItem,
-:global([data-theme='dark']) .sectionItem:hover {
-  border-radius: var(--anima-radius);
-  margin: 0;
-  padding: 1.35rem;
+:global([data-theme='dark']) .features::before {
+  background: var(--anima-red);
+  opacity: 0.1;
 }
 
-:global([data-theme='dark']) .sectionItem:hover {
-  transform: translateY(-4px);
+:global([data-theme='dark']) .features::after {
+  border-color: rgba(227, 67, 74, 0.28);
+  border-radius: 50%;
 }
 
-:global([data-theme='dark']) .learningScope {
-  border-color: var(--anima-line);
+:global([data-theme='dark']) .workflowNightArt { display: block; }
+:global([data-theme='dark']) .workflowDayArt { display: none; }
+:global([data-theme='dark']) .workflowBoard { background: #16191f; border-color: #4b4e55; border-radius: 20px; box-shadow: 0 24px 55px rgba(0, 0, 0, 0.35); }
+:global([data-theme='dark']) .workflowBoard::before { border-color: rgba(241, 237, 229, 0.16); border-radius: 14px; }
+:global([data-theme='dark']) .workflowBoard::after { background: linear-gradient(90deg, transparent, rgba(16, 19, 24, 0.85), transparent); }
+:global([data-theme='dark']) .workflowNode { background: rgba(24, 27, 33, 0.94); border-color: #4b4e55; border-radius: 14px; box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2); }
+:global([data-theme='dark']) .workflowNode::before { border-radius: 14px 14px 0 0; }
+:global([data-theme='dark']) .toneCore { --node-accent: #f1eee7; }
+:global([data-theme='dark']) .workflowConnections path { stroke: rgba(241, 237, 229, 0.55); }
+:global([data-theme='dark']) .workflowConnections path:nth-child(2),
+:global([data-theme='dark']) .workflowConnections path:nth-child(5) { stroke: var(--anima-red); }
+:global([data-theme='dark']) .edgeCopyInput,
+:global([data-theme='dark']) .edgeCopyOutput { color: #f1eee7; opacity: 0.08; }
+:global([data-theme='dark']) .pixelCell { --island-color: var(--anima-red); }
+:global([data-theme='dark']) .pixelHollow { border-color: var(--anima-red); }
+:global([data-theme='dark']) .pixelAccent { background: #f1eee7; }
+:global([data-theme='dark']) .learningRoute { background: #171a20; border-color: #454950; border-radius: 14px; }
+:global([data-theme='dark']) .learningRoute:hover { box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28); }
+:global([data-theme='dark']) .learningIntro { border-left-color: var(--anima-red); }
+:global([data-theme='dark']) .legendBlue { background: #f1eee7; }
+:global([data-theme='dark']) .legendRed { background: var(--anima-red); }
+:global([data-theme='dark']) .sectionKicker,
+:global([data-theme='dark']) .routeIndex,
+:global([data-theme='dark']) .routeAction { color: var(--anima-red); }
+
+:global([data-theme='light']) .workflowBoard { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%); }
+:global([data-theme='light']) .learningRoute { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%); }
+:global([data-theme='light']) .learningRoute:hover { box-shadow: 0.55rem 0.55rem 0 color-mix(in srgb, var(--anima-blue) 10%, transparent); }
+:global([data-theme='light']) .pixelCell { --island-color: var(--anima-blue); }
+:global([data-theme='light']) .pixelHollow { border-color: var(--anima-blue); }
+:global([data-theme='light']) .pixelAccent { background: var(--anima-gold); }
+
+@media screen and (max-width: 1100px) {
+  .sectionRail { display: none; }
+  .workflowGraph { gap: 0.8rem 1.4rem; inset-inline: 2.7rem; }
+  .workflowEdgeLabels { inset-inline: 2.7rem; }
+  .learningHeader { grid-template-columns: 5.5rem minmax(0, 1fr); }
+  .learningLead { grid-column: 2; }
+  .learningLayout { grid-template-columns: 1fr; }
+  .learningIntro { display: grid; gap: 1rem 2rem; grid-template-columns: 1fr 1fr; }
+  .learningIntro p { margin: 0; }
+  .learningLegend { align-items: end; }
 }
 
-@media screen and (max-width: 900px) {
-  .sectionList {
-    grid-template-columns: 1fr;
-  }
-
-  .sectionItem,
-  .sectionItem:hover {
-    min-height: 0;
-  }
-
-  .learningScopeList {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    row-gap: 1rem;
-  }
-
-  .learningScopeList li:nth-child(4) {
-    border-left: 0;
-    padding-left: 0;
-  }
+@media screen and (max-width: 760px) {
+  .features { padding-top: 3rem; }
+  .workflowHeading { align-items: start; flex-direction: column; gap: 0.75rem; }
+  .workflowMeta { white-space: normal; }
+  .workflowBoard { min-height: 720px; }
+  .workflowGraph { gap: 0.85rem 1rem; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(5, minmax(76px, 1fr)); inset: 3.8rem 1.4rem 4.5rem; }
+  .nodeModel { grid-column: 1; grid-row: 1; }
+  .nodeAttachments { grid-column: 2; grid-row: 1; }
+  .nodeCanvas { grid-column: 1; grid-row: 2; }
+  .nodeEncoder { grid-column: 1; grid-row: 3; }
+  .nodePrompt { grid-column: 2; grid-row: 3; }
+  .nodeDraw { grid-column: 1 / span 2; grid-row: 4; }
+  .nodeSave { grid-column: 1 / span 2; grid-row: 5; }
+  .workflowConnections { display: none; }
+  .workflowConnectionsMobile { display: block; }
+  .workflowConnectionsMobile path { marker-end: url(#workflow-arrow-mobile-v2); stroke: var(--anima-line-strong); }
+  .workflowConnectionsMobile path:nth-child(2),
+  .workflowConnectionsMobile path:nth-child(5) { stroke: var(--anima-red); }
+  .workflowEdgeCopy { display: none; }
+  .workflowEdgeLabels { bottom: 1rem; gap: 0.7rem; grid-template-columns: 1fr; inset-inline: 1.4rem; }
+  .edgeLabelLine { display: none; }
+  .edgeLabelOutput { text-align: left; }
+  .edgeLabelInput small, .edgeLabelOutput small { font-size: 0.58rem; }
+  .learningHeader { gap: 1rem; grid-template-columns: 4.2rem 1fr; }
+  .learningHeaderMark { font-size: 3.9rem; }
+  .learningHeader h2 { font-size: 2rem; }
+  .learningLead { grid-column: 2; }
+  .learningIntro { display: flex; flex-direction: column; gap: 0; }
+  .learningIntro p { margin: 0.9rem 0 1.3rem; }
+  .learningLegend { align-items: start; }
+  .learningRoute { gap: 0.65rem; grid-template-columns: 1.8rem 0.24rem minmax(0, 1fr); min-height: 7.1rem; padding: 0.9rem 0.8rem; }
+  .routeAction { align-self: end; grid-column: 3; justify-self: start; }
+  .scopeRail { gap: 1rem; grid-template-columns: 1fr; margin-top: 2.5rem; }
+  .scopeList { gap: 0; grid-template-columns: repeat(5, minmax(7rem, 1fr)); overflow-x: auto; padding-bottom: 0.2rem; }
+  .scopeList li { min-height: 4.6rem; padding-inline: 0.65rem; }
+  .sectionFootnote { font-size: 0.57rem; }
 }
 
-@media screen and (max-width: 640px) {
-  .sectionHeader {
-    display: block;
-    padding: 1.2rem 1rem 1.3rem 1.05rem;
-  }
-
-  .sectionHeaderMark {
-    font-size: 5rem;
-    right: 0.6rem;
-    top: 0.7rem;
-  }
-
-  .sectionHeader > p:last-child {
-    margin-top: 1.1rem;
-  }
-
-  .sectionList {
-    gap: 0.75rem;
-    margin-top: 2rem;
-  }
-
-  .sectionItem,
-  .sectionItem:hover {
-    display: grid;
-    gap: 0.6rem 0.75rem;
-    grid-template-columns: 2.4rem 3rem minmax(0, 1fr);
-    grid-template-rows: auto auto auto;
-    padding: 1rem;
-  }
-
-  .sectionIndex {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .sectionSignal {
-    grid-column: 2;
-    grid-row: 1;
-    margin: 0.2rem 0 0;
-  }
-
-  .sectionBody {
-    grid-column: 3;
-    grid-row: 1 / span 2;
-  }
-
-  .sectionAction {
-    grid-column: 3;
-    grid-row: 3;
-    margin-top: 0.35rem;
-  }
-
-  .sectionTitle {
-    font-size: 1.2rem;
-  }
-
-  .learningScope {
-    display: block;
-    padding: 0.9rem 0;
-  }
-
-  .learningScopeTitle {
-    display: block;
-    margin-bottom: 0.8rem;
-  }
-
-  .learningScopeList {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    row-gap: 0.9rem;
-  }
-
-  .learningScopeList li:nth-child(odd),
-  .learningScopeList li:nth-child(4) {
-    border-left: 0;
-    padding-left: 0;
-  }
-
-  .learningScopeList li:nth-child(even) {
-    padding-right: 0;
-  }
-
-  .learningScopeBody strong {
-    white-space: normal;
-  }
+@media (prefers-reduced-motion: reduce) {
+  .learningRoute { transition: none; }
 }
