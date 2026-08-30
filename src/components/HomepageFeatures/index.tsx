@@ -244,12 +244,12 @@ function WorkflowBoard(): ReactNode {
             </marker>
           </defs>
           <g>
-            <path d="M420 46 H580" />
-            <path d="M790 88 V138" />
-            <path d="M420 190 H580" />
-            <path d="M420 328 H580" />
-            <path d="M790 330 V280" />
-            <path d="M790 365 V490" />
+            <path d="M471 51 H529" />
+            <path d="M1000 51 H500 V344" />
+            <path d="M471 165 H500 V344" />
+            <path d="M471 280 H529" />
+            <path d="M1000 280 H500 V344" />
+            <path d="M500 445 V459" />
           </g>
         </svg>
       </div>

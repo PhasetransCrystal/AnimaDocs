@@ -451,6 +451,11 @@
 .routeCopy > span:last-child { color: var(--anima-ink-soft); font-size: 0.78rem; line-height: 1.5; margin-top: 0.28rem; }
 .routeAction { align-items: center; color: var(--anima-blue); display: inline-flex; font-family: var(--ifm-font-family-monospace); font-size: 0.65rem; gap: 0.6rem; white-space: nowrap; }
 
+.learningRoute:nth-child(2) { transform: translateX(1.4rem); }
+.learningRoute:nth-child(3) { transform: translateX(2.8rem); }
+.learningRoute:nth-child(2):hover { transform: translateX(1.75rem); }
+.learningRoute:nth-child(3):hover { transform: translateX(3.15rem); }
+
 .scopeRail {
   border-bottom: 1px solid var(--anima-line-strong);
   border-top: 1px solid var(--anima-line);
@@ -565,6 +570,7 @@
   .learningIntro p { margin: 0.9rem 0 1.3rem; }
   .learningLegend { align-items: start; }
   .learningRoute { gap: 0.65rem; grid-template-columns: 1.8rem 0.24rem minmax(0, 1fr); min-height: 7.1rem; padding: 0.9rem 0.8rem; }
+  .learningRoute:nth-child(2), .learningRoute:nth-child(3), .learningRoute:nth-child(2):hover, .learningRoute:nth-child(3):hover { transform: none; }
   .routeAction { align-self: end; grid-column: 3; justify-self: start; }
   .scopeRail { gap: 1rem; grid-template-columns: 1fr; margin-top: 2.5rem; }
   .scopeList { gap: 0; grid-template-columns: repeat(5, minmax(7rem, 1fr)); overflow-x: auto; padding-bottom: 0.2rem; }
