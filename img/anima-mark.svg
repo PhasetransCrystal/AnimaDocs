@@ -1,0 +1,8 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">AnimaDocs mark</title>
+  <desc id="desc">A geometric AnimaDocs mark made from offset document brackets.</desc>
+  <rect width="64" height="64" fill="#172832"/>
+  <path d="M12 12H36V19H19V36H12V12Z" fill="#C84E48"/>
+  <path d="M28 28H52V52H28V45H45V35H28V28Z" fill="#78B8AC"/>
+  <path d="M19 36H28V45H19V36Z" fill="#3158C7"/>
+</svg>
