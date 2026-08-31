@@ -7,6 +7,7 @@ const sidebars: SidebarsConfig = {
   tutorialSidebar: [
     {type: 'doc', id: 'intro', label: '序'},
     {type: 'doc', id: 'install', label: '安装'},
+    {type: 'doc', id: 'first_workflow', label: '第一个工作流'},
   ],
 };
 
