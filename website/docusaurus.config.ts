@@ -86,7 +86,7 @@ const config: Config = {
         srcDark: 'img/anima-mark-night.svg',
       },
       items: [
-        {to: '/', label: '主页', position: 'left'},
+        {to: '/', label: '主页', position: 'left', exact: true},
         {
           type: 'docSidebar',
           sidebarId: 'tutorialSidebar',
