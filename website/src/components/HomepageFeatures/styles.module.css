@@ -334,6 +334,23 @@
   vector-effect: non-scaling-stroke;
 }
 
+.workflowConnectionsMobile marker path {
+  fill: var(--anima-line-strong);
+  stroke: none;
+}
+
+.workflowPorts circle {
+  fill: var(--anima-line-strong);
+  stroke: var(--anima-paper);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.workflowPorts circle:nth-child(3),
+.workflowPorts circle:nth-child(7) {
+  fill: var(--anima-red);
+}
+
 .workflowConnections path:nth-child(2),
 .workflowConnections path:nth-child(5) { stroke: var(--anima-red); }
 
@@ -580,7 +597,7 @@
   .nodeSave { grid-column: 1 / span 2; grid-row: 5; }
   .workflowConnections { display: none; }
   .workflowConnectionsMobile { display: block; }
-  .workflowConnectionsMobile path { marker-end: url(#workflow-arrow-mobile-v2); stroke: var(--anima-line-strong); }
+  .workflowConnectionsMobile path { marker-end: url(#workflow-arrow-mobile-v2); stroke: var(--anima-line-strong); stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.8; }
   .workflowConnectionsMobile path:nth-child(2),
   .workflowConnectionsMobile path:nth-child(5) { stroke: var(--anima-red); }
   .workflowEdgeCopy { display: none; }

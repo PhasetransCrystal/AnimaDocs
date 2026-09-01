@@ -86,6 +86,7 @@ const config: Config = {
         srcDark: 'img/anima-mark-night.svg',
       },
       items: [
+        {to: '/', label: '主页', position: 'left'},
         {
           type: 'docSidebar',
           sidebarId: 'tutorialSidebar',
@@ -96,6 +97,7 @@ const config: Config = {
         {
           href: 'https://github.com/Mon-Landis/AnimaDocs',
           label: 'GitHub',
+          className: 'githubNavLink',
           position: 'right',
         },
       ],

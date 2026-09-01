@@ -828,6 +828,76 @@ a:focus-visible {
 }
 
 @media screen and (max-width: 996px) {
+  /* Keep the compact navbar useful: global pages stay one tap away while
+   * GitHub and the theme control remain visible beside the brand. */
+  .navbar,
+  [data-theme='light'] .navbar {
+    backdrop-filter: none;
+    background: var(--ifm-navbar-background-color);
+    clip-path: none !important;
+  }
+
+  .navbar__items--right {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 0.15rem;
+    margin-left: auto;
+  }
+
+  .navbar__items--right > .navbar__item {
+    display: flex;
+    padding: 0.25rem;
+  }
+
+  .navbar__items--right > .navbar__item > .navbar__link {
+    font-size: 0.68rem;
+    padding-inline: 0.25rem;
+  }
+
+  .navbar__items--right [class*="colorModeToggle"] {
+    display: flex;
+  }
+
+  .navbar-sidebar {
+    bottom: 0;
+    height: calc(100vh - var(--ifm-navbar-height));
+    max-height: calc(100vh - var(--ifm-navbar-height));
+    overflow: hidden;
+    top: var(--ifm-navbar-height);
+    z-index: 200;
+  }
+
+  .navbar-sidebar__backdrop {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: var(--ifm-navbar-height);
+    z-index: 199;
+  }
+
+  .navbar-sidebar__brand {
+    display: none;
+  }
+
+  .navbar-sidebar__items {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .navbar-sidebar__item {
+    overflow: hidden;
+  }
+
+  .navbar-sidebar .toggle_vylO,
+  .navbar-sidebar a[href^="https://github.com/"] {
+    display: none;
+  }
+
+  .navbar-sidebar__item:nth-child(2) {
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+
   .navbar__link--active::after {
     display: none;
   }
@@ -979,6 +1049,30 @@ button:focus-visible,
 
   .navbar__title {
     font-size: 0.82rem;
+  }
+
+  .navbar__items--right > a.githubNavLink {
+    font-size: 0;
+    min-width: 2rem;
+  }
+
+  .navbar__items--right > a.githubNavLink::before {
+    align-items: center;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    content: "GH";
+    display: inline-flex;
+    font-family: var(--ifm-font-family-monospace);
+    font-size: 0.48rem;
+    font-weight: 800;
+    height: 1rem;
+    justify-content: center;
+    letter-spacing: 0;
+    width: 1rem;
+  }
+
+  .navbar__items--right > a.githubNavLink svg {
+    display: none;
   }
 
   .theme-doc-markdown {

@@ -236,8 +236,8 @@ function WorkflowBoard(): ReactNode {
         </svg>
         <svg className={styles.workflowConnectionsMobile} viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden="true">
           <defs>
-            <marker id="workflow-arrow-mobile-v2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-              <path d="M0,0 L8,4 L0,8" />
+            <marker id="workflow-arrow-mobile-v2" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" refX="8" refY="5" orient="auto">
+              <path d="M0,0 L10,5 L0,10 Z" />
             </marker>
           </defs>
           <g>
@@ -247,6 +247,18 @@ function WorkflowBoard(): ReactNode {
             <path d="M471 280 H529" />
             <path d="M1000 280 H500 V344" />
             <path d="M500 445 V459" />
+            <g className={styles.workflowPorts}>
+              <circle cx="471" cy="51" r="5" />
+              <circle cx="529" cy="51" r="5" />
+              <circle cx="1000" cy="51" r="5" />
+              <circle cx="471" cy="165" r="5" />
+              <circle cx="471" cy="280" r="5" />
+              <circle cx="529" cy="280" r="5" />
+              <circle cx="1000" cy="280" r="5" />
+              <circle cx="500" cy="344" r="5" />
+              <circle cx="500" cy="445" r="5" />
+              <circle cx="500" cy="459" r="5" />
+            </g>
           </g>
         </svg>
       </div>
