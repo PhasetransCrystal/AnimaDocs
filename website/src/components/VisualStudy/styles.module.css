@@ -1,0 +1,64 @@
+.backgroundArt {
+  --study-signal: var(--anima-blue);
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+}
+
+.diagramArt { height: 100%; position: absolute; width: 100%; }
+.diagramArt :is(path, circle, ellipse, line, polyline) { vector-effect: non-scaling-stroke; }
+.field { background: linear-gradient(105deg, var(--anima-paper) 40%, #e7edf4 100%); }
+.field .diagramArt { height: 120%; left: 31%; opacity: 0.65; top: -17%; transform: rotate(-12deg); width: 85%; }
+.field::after { background: linear-gradient(90deg, var(--anima-paper) 13%, transparent 73%); content: ''; inset: 0; position: absolute; }
+.specimen { background: #eef2f5; }
+.specimen::before {
+  background-image: linear-gradient(#245dcc0d 1px, transparent 1px), linear-gradient(90deg, #245dcc0d 1px, transparent 1px);
+  background-size: 24px 24px;
+  content: '';
+  inset: 0;
+  position: absolute;
+  mask-image: linear-gradient(90deg, #000, transparent 85%);
+}
+.specimen .diagramArt { height: 120%; top: -10%; }
+.paperPlane { fill: #fff; fill-opacity: 0.7; stroke: #245dcc30; }
+.bluePlane { fill: var(--anima-blue); fill-opacity: 0.9; }
+.wireArt { stroke: var(--anima-blue); stroke-opacity: 0.72; stroke-width: 0.65; }
+.draftingLines { stroke: var(--anima-blue); stroke-opacity: 0.45; stroke-width: 0.65; }
+.inkMarks { fill: var(--anima-ink); }
+.signalMarks { fill: var(--anima-gold); }
+.nightArt { display: none; }
+.noiseLayer {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch' seed='17'/%3E%3C/filter%3E%3Cpath fill='%23000' filter='url(%23grain)' opacity='.3' d='M0 0h160v160H0z'/%3E%3C/svg%3E");
+  inset: 0;
+  opacity: 0.1;
+  position: absolute;
+}
+:global([data-theme='dark']) .backgroundArt { --study-signal: var(--anima-red); }
+:global([data-theme='dark']) .dayArt { display: none; }
+:global([data-theme='dark']) .nightArt { display: block; }
+:global([data-theme='dark']) .specimen { background: #14171c; }
+:global([data-theme='dark']) .specimen::before { display: none; }
+:global([data-theme='dark']) .field { background: #121419; }
+:global([data-theme='dark']) .field .diagramArt { opacity: 0.68; transform: rotate(-16deg); }
+:global([data-theme='dark']) .noiseLayer { opacity: 0.18; }
+.signalDisc { fill: var(--study-signal); }
+.orbitLines { stroke: #ece9e3; stroke-opacity: 0.42; stroke-width: 0.65; }
+.mechanicalArt { stroke: #a5a7aa; stroke-width: 0.8; }
+.bodyPlane { fill: #252930; }
+.lensOuter { fill: #171a20; stroke: #ece9e3; stroke-width: 2; }
+.lensInner { fill: #30333a; }
+.aperture { fill: #101216; stroke: #ece9e3; }
+.calibrationMarks { stroke: #ece9e3; stroke-opacity: 0.85; stroke-width: 0.8; }
+.warmMark { fill: var(--anima-gold); }
+@media screen and (max-width: 996px) {
+  .field .diagramArt { height: 65%; left: 27%; top: -8%; width: 110%; }
+  .field::after { background: linear-gradient(90deg, var(--anima-paper), transparent); }
+}
+@media screen and (max-width: 640px) {
+  .field .diagramArt { height: 390px; left: 18%; opacity: 0.38; top: -85px; width: 630px; }
+  :global([data-theme='dark']) .field .diagramArt { opacity: 0.46; }
+}
+@media (forced-colors: active) {
+  .backgroundArt { display: none; }
+}

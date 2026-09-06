@@ -9,6 +9,8 @@
 .docusaurus
 .cache-loader
 /artifacts/screenshots/
+/artifacts/visual-refresh/**/*.png
+/artifacts/visual-refresh/**/report.json
 
 # Misc
 .DS_Store

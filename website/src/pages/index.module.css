@@ -8,21 +8,11 @@
   position: relative;
 }
 
-.heroArt,
-.nightArt,
-.dayArt {
+.heroArt {
   inset: 0;
   overflow: hidden;
   pointer-events: none;
   position: absolute;
-}
-
-.nightArt {
-  display: none;
-}
-
-.dayArt {
-  background: #f3f5f5;
 }
 
 .heroArtRule {
@@ -33,223 +23,6 @@
   position: absolute;
   width: min(21vw, 23rem);
 }
-
-.heroArtRays {
-  bottom: -16rem;
-  height: 70rem;
-  position: absolute;
-  right: -8rem;
-  width: 70rem;
-}
-
-.heroArtRays line {
-  fill: none;
-  stroke: color-mix(in srgb, var(--anima-blue) 34%, transparent);
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-}
-
-/* Night art is an observation field: one focal disc, sparse arcs, and a
- * deliberate diagonal signal. It is a separate layer so day art can be
- * replaced without touching the hero content. */
-.nightArt {
-  background:
-    linear-gradient(90deg, transparent 0 13%, color-mix(in srgb, var(--anima-ink) 5%, transparent) 13% 13.08%, transparent 13.08% 100%),
-    linear-gradient(180deg, transparent 0 41%, color-mix(in srgb, var(--anima-ink) 8%, transparent) 41% 41.1%, transparent 41.1% 100%),
-    #0d1014;
-}
-
-.nightArtDisc,
-.nightArtOrbit,
-.nightArtFrame,
-.nightArtBar,
-.nightArtBlock,
-.nightArtDot,
-.nightArtLabel {
-  display: block;
-  position: absolute;
-}
-
-.nightArtDisc {
-  background: radial-gradient(circle at 43% 43%, #f34b4f 0 16%, #bf3039 47%, rgba(124, 25, 35, 0.3) 72%, transparent 73%);
-  border-radius: 50%;
-  height: clamp(28rem, 54vw, 53rem);
-  opacity: 0.9;
-  right: -15rem;
-  top: -11rem;
-  width: clamp(28rem, 54vw, 53rem);
-}
-
-.nightArtOrbit {
-  border: 1px solid rgba(238, 235, 228, 0.34);
-  border-radius: 50%;
-  height: clamp(31rem, 61vw, 60rem);
-  right: -17rem;
-  top: -14rem;
-  transform: rotate(-13deg);
-  width: clamp(42rem, 76vw, 75rem);
-}
-
-.nightArtOrbitTwo {
-  border-color: rgba(227, 64, 73, 0.38);
-  height: clamp(23rem, 46vw, 46rem);
-  right: -8rem;
-  top: 1rem;
-  transform: rotate(22deg);
-  width: clamp(33rem, 62vw, 61rem);
-}
-
-.nightArtFrame {
-  border: 1px solid rgba(238, 235, 228, 0.28);
-  border-radius: 30px;
-  height: 23rem;
-  right: 9%;
-  top: 15%;
-  transform: rotate(-7deg);
-  width: min(54vw, 56rem);
-}
-
-.nightArtFrame::before,
-.nightArtFrame::after {
-  border: 1px solid rgba(227, 64, 73, 0.35);
-  border-radius: 24px;
-  content: "";
-  inset: 0.85rem;
-  position: absolute;
-}
-
-.nightArtFrame::after {
-  border-color: rgba(238, 235, 228, 0.2);
-  border-radius: 18px;
-  inset: 1.65rem;
-  transform: rotate(2deg);
-}
-
-.nightArtBar {
-  background: linear-gradient(90deg, rgba(227, 64, 73, 0.1), #e3434a 30%, #ff5e60);
-  height: 4.5rem;
-  right: 13%;
-  top: 25%;
-  transform: rotate(-17deg);
-  width: min(27vw, 30rem);
-}
-
-.nightArtBlock {
-  background: #e3434a;
-  bottom: 0;
-  clip-path: polygon(16% 0, 100% 0, 100% 100%, 0 100%, 0 28%);
-  height: 7rem;
-  opacity: 0.92;
-  right: 0;
-  width: min(24vw, 28rem);
-}
-
-.nightArtDot {
-  background: #f2eee7;
-  border-radius: 50%;
-  height: 0.45rem;
-  width: 0.45rem;
-}
-
-.nightArtDotOne { right: 34%; top: 29%; }
-.nightArtDotTwo { right: 22%; top: 63%; opacity: 0.55; }
-
-.nightArtLabel,
-.dayArtLabel {
-  bottom: 1.8rem;
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 0.62rem;
-  letter-spacing: 0.14em;
-  right: 4%;
-  transform: rotate(-90deg);
-  transform-origin: right bottom;
-}
-
-.nightArtLabel { color: #e3434a; }
-
-/* Day art uses measured planes, registration arcs, and offset blocks. */
-.dayArtPlane,
-.dayArtGrid,
-.dayArtArc,
-.dayArtBlock,
-.dayArtNumber,
-.dayArtLabel {
-  display: block;
-  position: absolute;
-}
-
-.dayArtPlanePrimary {
-  background: linear-gradient(135deg, rgba(36, 93, 204, 0.2), rgba(144, 185, 255, 0.1));
-  height: 70%;
-  right: -4%;
-  top: -15%;
-  transform: rotate(-8deg);
-  width: 55%;
-}
-
-.dayArtPlaneSecondary {
-  background: rgba(36, 93, 204, 0.09);
-  bottom: -10%;
-  height: 43%;
-  left: 47%;
-  transform: rotate(-8deg);
-  width: 60%;
-}
-
-.dayArtGrid {
-  background-image:
-    linear-gradient(to right, rgba(17, 24, 32, 0.11) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(17, 24, 32, 0.11) 1px, transparent 1px);
-  background-size: 4rem 4rem;
-  height: 90%;
-  opacity: 0.62;
-  right: -4%;
-  top: -16%;
-  transform: rotate(-8deg);
-  width: 62%;
-}
-
-.dayArtArc {
-  border: 1px solid rgba(36, 93, 204, 0.3);
-  border-radius: 50%;
-  height: 38rem;
-  right: -8rem;
-  top: -4rem;
-  transform: rotate(-15deg);
-  width: 38rem;
-}
-
-.dayArtArcTwo {
-  border-color: rgba(167, 120, 54, 0.28);
-  height: 29rem;
-  right: 2rem;
-  top: 4rem;
-  transform: rotate(25deg);
-  width: 52rem;
-}
-
-.dayArtBlock {
-  background: var(--anima-blue);
-  height: 4.75rem;
-  opacity: 0.88;
-  transform: rotate(-14deg);
-  width: min(27vw, 30rem);
-}
-
-.dayArtBlockOne { right: 14%; top: 25%; }
-.dayArtBlockTwo { background: var(--anima-ink); bottom: 0; right: 0; transform: none; width: min(18vw, 23rem); }
-
-.dayArtNumber {
-  color: rgba(36, 93, 204, 0.13);
-  font-family: var(--ifm-font-family-monospace);
-  font-size: clamp(8rem, 19vw, 19rem);
-  font-weight: 800;
-  line-height: 0.8;
-  right: 9%;
-  top: 13%;
-}
-
-.dayArtLabel { color: var(--anima-blue); }
 
 .heroContent {
   position: relative;
@@ -418,15 +191,6 @@
   position: relative;
 }
 
-.panelNightVisual,
-.panelDayVisual {
-  inset: 0;
-  position: absolute;
-}
-
-.panelDayVisual { display: block; }
-.panelNightVisual { display: none; }
-
 .panelNightHalo,
 .panelNightArc,
 .panelNightCore,
@@ -436,37 +200,6 @@
 .panelDaySquare,
 .panelDayCross {
   position: absolute;
-}
-
-.panelDayVisual {
-  background:
-    linear-gradient(to right, rgba(17, 24, 32, 0.13) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(17, 24, 32, 0.13) 1px, transparent 1px),
-    linear-gradient(135deg, rgba(36, 93, 204, 0.08), transparent 70%);
-  background-size: 2.4rem 2.4rem;
-}
-
-.panelDayPlane {
-  background: var(--anima-blue);
-  height: 5.3rem;
-  left: 19%;
-  opacity: 0.82;
-  top: 28%;
-  transform: rotate(-12deg);
-  width: 11rem;
-}
-
-.panelDaySquare { background: var(--anima-ink); height: 2.6rem; width: 2.6rem; }
-.panelDaySquareOne { right: 18%; top: 20%; }
-.panelDaySquareTwo { background: var(--anima-gold); bottom: 15%; right: 31%; }
-
-.panelDayCross {
-  border: 1px solid var(--anima-blue);
-  height: 9rem;
-  left: 49%;
-  top: 49%;
-  transform: translate(-50%, -50%) rotate(27deg);
-  width: 9rem;
 }
 
 .panelVisualNote {
@@ -562,67 +295,12 @@
 .signalBarLine { background: var(--anima-line-strong); flex: 1; height: 1px; }
 .signalBarMeta { color: var(--anima-ink-soft); font-size: 0.6rem; }
 
-/* Mode adapters --------------------------------------------------------- */
 :global([data-theme='dark']) .heroBanner {
   --hero-accent: var(--anima-red);
   background: #0d1014;
 }
 
-:global([data-theme='dark']) .nightArt { display: block; }
-:global([data-theme='dark']) .dayArt { display: none; }
-:global([data-theme='dark']) .heroArtRays { display: none; }
 :global([data-theme='dark']) .heroArtRule { background: var(--anima-red); }
-:global([data-theme='dark']) .panelNightVisual { display: block; background: #171a20; }
-:global([data-theme='dark']) .panelDayVisual { display: none; }
-:global([data-theme='dark']) .panelNightHalo {
-  background: radial-gradient(circle, #f04a4f 0 32%, rgba(227, 67, 74, 0.48) 33% 57%, transparent 58%);
-  border-radius: 50%;
-  height: 9.4rem;
-  left: 50%;
-  opacity: 0.95;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 9.4rem;
-}
-:global([data-theme='dark']) .panelNightArc {
-  border: 1px solid rgba(238, 235, 228, 0.42);
-  border-radius: 50%;
-  height: 11.8rem;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%) rotate(-18deg);
-  width: 20rem;
-}
-:global([data-theme='dark']) .panelNightArcTwo {
-  border-color: rgba(227, 67, 74, 0.58);
-  height: 13rem;
-  transform: translate(-50%, -50%) rotate(25deg);
-  width: 7rem;
-}
-:global([data-theme='dark']) .panelNightCore {
-  align-items: center;
-  background: #171a20;
-  border: 3px solid #f1eee7;
-  border-radius: 50%;
-  color: #f1eee7;
-  display: flex;
-  font-family: var(--ifm-heading-font-family);
-  font-size: 2.7rem;
-  font-weight: 800;
-  height: 4.5rem;
-  justify-content: center;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 4.5rem;
-}
-:global([data-theme='dark']) .panelNightLine {
-  background: rgba(238, 235, 228, 0.52);
-  height: 1px;
-  left: 9%;
-  top: 50%;
-  width: 82%;
-}
 :global([data-theme='dark']) .panelVisualNote { color: rgba(238, 235, 228, 0.7); }
 :global([data-theme='dark']) .signalPanel {
   background: rgba(24, 27, 33, 0.96);
@@ -641,8 +319,6 @@
   color: var(--anima-interactive);
 }
 
-:global([data-theme='light']) .dayArt { display: block; }
-:global([data-theme='light']) .nightArt { display: none; }
 :global([data-theme='light']) .signalPanel { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%); }
 :global([data-theme='light']) .panelStatus { clip-path: polygon(0 0, 100% 0, 100% 78%, 12% 100%, 0 78%); }
 :global([data-theme='light']) .heroBanner { --hero-accent: var(--anima-blue); }
@@ -658,7 +334,6 @@
   .heroLayout { gap: 3rem; grid-template-columns: 1fr; min-height: 0; padding: 8rem 0 3rem; }
   .heroCopy { align-self: start; max-width: 760px; }
   .signalPanel { justify-self: start; max-width: 560px; }
-  .heroArtRays { bottom: -22rem; right: -17rem; }
 }
 
 @media screen and (max-width: 640px) {
@@ -676,18 +351,47 @@
   .signalBar { flex-wrap: wrap; gap: 0.6rem 0.95rem; }
   .signalBarLine { flex-basis: 100%; order: 4; }
   .signalBarMeta { order: 5; }
-  .nightArtDisc { height: 24rem; right: -23rem; top: 8rem; width: 24rem; }
-  .nightArtOrbit { height: 29rem; right: -20rem; top: 5rem; width: 37rem; }
-  .nightArtFrame { height: 17rem; right: -15rem; top: 23%; width: 30rem; }
-  .nightArtBar { height: 3rem; right: -13rem; top: 31%; width: 16rem; }
-  .dayArtPlanePrimary { right: -28%; width: 78%; }
-  .dayArtPlaneSecondary { left: 67%; width: 75%; }
-  .dayArtBlockOne { right: -8rem; }
-  .dayArtNumber { font-size: 8rem; right: -1rem; top: 17%; }
-  .dayArtGrid { background-size: 2.6rem 2.6rem; height: 78%; right: -21%; top: -5%; width: 86%; }
-  .dayArtArc { height: 23rem; right: -12rem; top: 5rem; width: 23rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .primaryAction, .secondaryAction { transition: none; }
+}
+
+.heroArt::after {
+  background: repeating-linear-gradient(90deg, var(--hero-accent) 0 1px, transparent 1px 12px);
+  content: '';
+  height: 6px;
+  inset: auto 0 0 62%;
+  opacity: 0.45;
+  position: absolute;
+}
+.heroTopline { border-bottom-color: color-mix(in srgb, var(--hero-accent) 28%, transparent); }
+.kicker { color: color-mix(in srgb, var(--anima-gold) 80%, var(--anima-ink)); display: flex; align-items: center; gap: 0.6rem; }
+.kicker::before { background: var(--hero-accent); content: ''; height: 0.45rem; width: 0.45rem; }
+.heroCopy h1 { letter-spacing: -0.045em; line-height: 1.04; }
+.heroCopy h1 span:last-child { letter-spacing: -0.035em; }
+.primaryAction, .secondaryAction { border-radius: var(--anima-radius); }
+.primaryAction { box-shadow: inset 0 0 0 1px #ffffff26, 3px 3px 0 color-mix(in srgb, var(--hero-accent) 20%, transparent); }
+.primaryAction > span:last-child { border-left: 1px solid #ffffff4d; padding-left: 1rem; }
+.primaryAction:hover, .secondaryAction:hover { transform: none; }
+.primaryAction:focus-visible, .secondaryAction:focus-visible { outline: 2px solid var(--anima-focus); outline-offset: 4px; }
+.signalPanel { box-shadow: 7px 7px 0 color-mix(in srgb, var(--hero-accent) 7%, transparent), 0 18px 48px #1118200a; }
+.panelVisual { border-bottom: 1px solid var(--anima-line); }
+.panelVisualNote { position: absolute; bottom: 0.65rem; left: 0.9rem; color: var(--anima-ink-soft); font-family: var(--ifm-font-family-monospace); font-size: 0.58rem; letter-spacing: 0.12em; }
+.panelHeader { background: var(--anima-surface); }
+.panelBody { background: linear-gradient(135deg, var(--anima-surface) 75%, color-mix(in srgb, var(--hero-accent) 5%, var(--anima-surface))); }
+.panelStats { background: color-mix(in srgb, var(--hero-accent) 4%, var(--anima-surface)); }
+.panelStats strong { font-size: 1.25rem; font-weight: 500; }
+.panelStats span { padding-left: 0.7rem; }
+.indexList li > span:first-child { opacity: 0.75; }
+.indexList .indexItemActive { background: linear-gradient(90deg, color-mix(in srgb, var(--hero-accent) 8%, transparent), transparent); }
+:global([data-theme='dark']) .signalPanel { border-radius: 24px 24px 12px 12px; box-shadow: inset 0 1px 0 #ffffff12, 0 18px 40px #00000030; }
+:global([data-theme='dark']) .primaryAction { color: #121419; }
+:global([data-theme='dark']) .primaryAction:hover { background: var(--anima-interactive); color: #121419; }
+:global([data-theme='dark']) .primaryAction > span:last-child { border-color: #12141940; }
+:global([data-theme='dark']) .kicker::before { border-radius: 50%; }
+:global([data-theme='light']) .signalPanel { clip-path: none; }
+@media screen and (max-width: 640px) {
+  .heroCopy h1 { font-size: clamp(2.7rem, 12vw, 3.45rem); }
+  .signalPanel { border-radius: var(--anima-radius); }
 }

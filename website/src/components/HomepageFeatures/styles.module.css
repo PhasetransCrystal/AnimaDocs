@@ -623,3 +623,49 @@
 @media (prefers-reduced-motion: reduce) {
   .learningRoute { transition: none; }
 }
+
+.features { background: var(--anima-art-grain), var(--anima-paper); }
+.features::before { display: none; }
+.features::after { border-color: var(--anima-art-rule); opacity: 0.5; }
+.workflowHeading, .learningSection { border-color: var(--anima-art-rule); }
+.workflowBoard { box-shadow: 5px 5px 0 color-mix(in srgb, var(--anima-art-accent) 6%, transparent); }
+.workflowBoard::before { border-color: color-mix(in srgb, var(--anima-art-accent) 16%, transparent); }
+.workflowBoard::after { display: none; }
+.workflowDayArt { background: var(--anima-art-grain), #fbfcfb; }
+.dayWorkflowGrid { opacity: 0.42; background-size: 2rem 2rem; }
+.dayWorkflowPlane { background: linear-gradient(120deg, #245dcc12, transparent); }
+.workflowNode { background: var(--anima-surface); border-color: var(--anima-art-rule); box-shadow: 3px 3px 0 color-mix(in srgb, var(--anima-art-accent) 7%, transparent); }
+.workflowNode::before { height: 3px; }
+.workflowNodeTitle { letter-spacing: 0.01em; }
+.workflowNodeDetail { font-size: 0.58rem; }
+.workflowNodeIndex { font-size: 0.61rem; }
+.toneCore { background: var(--anima-art-wash); border-color: var(--anima-art-accent); }
+.workflowConnections path, .workflowConnectionsMobile path { stroke-width: 1.5; }
+.workflowEdgeCopy { opacity: 0.6; }
+.learningIntro { background: linear-gradient(110deg, color-mix(in srgb, var(--anima-gold) 6%, transparent), transparent 70%); }
+.learningRoute { box-shadow: var(--anima-art-inset); border-color: var(--anima-art-rule); }
+.learningRoute:not(.learningRouteDisabled) { background: linear-gradient(110deg, var(--anima-art-surface) 86%, var(--anima-art-wash) 86%); }
+.learningRoute:not(.learningRouteDisabled):hover { border-color: var(--anima-interactive); box-shadow: inset 3px 0 var(--anima-interactive); transform: none; }
+.learningRoute:focus-visible { outline: 2px solid var(--anima-focus); outline-offset: 4px; }
+.learningRouteDisabled { opacity: 1; background: color-mix(in srgb, var(--anima-surface) 50%, var(--anima-paper)); border-color: var(--anima-line); }
+.learningRouteDisabled .routeCopy strong { color: var(--anima-ink-soft); }
+.learningRouteDisabled .routeSignal { background: var(--anima-line-strong); }
+.routeIndex { font-size: 1.5rem; font-weight: 400; letter-spacing: -0.07em; }
+.routeMeta { font-size: 0.62rem; }
+.routeSignal { width: 2px; }
+.scopeRail { border-color: var(--anima-art-rule); }
+.scopeList li { border-color: var(--anima-art-rule); }
+:global([data-theme='dark']) .workflowNightArt { background: var(--anima-art-grain), #16191f; }
+:global([data-theme='dark']) .workflowBoard { box-shadow: inset 0 1px 0 #ffffff12, 0 8px 24px #0000001a; }
+:global([data-theme='dark']) .workflowNode { background: #21242b; box-shadow: inset 0 1px 0 #ffffff0a, 0 3px 8px #00000026; }
+:global([data-theme='dark']) .toneCore { background: #302126; border-color: var(--anima-red); }
+:global([data-theme='dark']) .learningRouteDisabled { opacity: 1; }
+:global([data-theme='dark']) .learningRoute:not(.learningRouteDisabled):hover { transform: none; }
+@media (forced-colors: active) {
+  .workflowNightArt, .workflowDayArt, .workflowEdgeCopy { display: none; }
+  .workflowNode { border-color: CanvasText; }
+  .learningRoute:focus-visible { outline-color: Highlight; }
+}
+@media screen and (min-width: 761px) and (max-width: 900px) {
+  .workflowGraph { grid-template-columns: minmax(0, 0.9fr) minmax(0, 0.95fr) minmax(0, 1.2fr) minmax(0, 0.65fr); }
+}
