@@ -278,3 +278,95 @@ html, body { background: var(--anima-paper); }
   .theme-doc-markdown h1::before, .theme-doc-markdown h1::after { display: none; }
   .theme-doc-markdown > header:first-child { background: Canvas; }
 }
+
+/* Docs baseplate ------------------------------------------------------------
+ * One continuous drafting sheet behind the article: day uses a diagonal
+ * lattice with five-square X crossings, night an orthogonal grid with
+ * concentric observation arcs anchored to the viewport. */
+
+:root {
+  --anima-doc-tile-day: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cpath d='M0 0L72 72M72 0L0 72' stroke='%23245dcc' stroke-opacity='.07'/%3E%3Cg fill='%23245dcc' fill-opacity='.18'%3E%3Crect x='34' y='34' width='4' height='4'/%3E%3Crect x='26' y='26' width='4' height='4'/%3E%3Crect x='42' y='42' width='4' height='4'/%3E%3Crect x='26' y='42' width='4' height='4'/%3E%3Crect x='42' y='26' width='4' height='4'/%3E%3Crect x='-2' y='-2' width='4' height='4'/%3E%3Crect x='6' y='6' width='4' height='4'/%3E%3Crect x='70' y='-2' width='4' height='4'/%3E%3Crect x='62' y='6' width='4' height='4'/%3E%3Crect x='-2' y='70' width='4' height='4'/%3E%3Crect x='6' y='62' width='4' height='4'/%3E%3Crect x='70' y='70' width='4' height='4'/%3E%3Crect x='62' y='62' width='4' height='4'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+main[class*='docMainContainer'] {
+  background-image: var(--anima-doc-tile-day);
+  background-size: 72px 72px;
+}
+
+[data-theme='dark'] main[class*='docMainContainer'] {
+  background-image:
+    repeating-linear-gradient(0deg, rgba(236, 233, 227, 0.05) 0 1px, transparent 1px 32px),
+    repeating-linear-gradient(90deg, rgba(236, 233, 227, 0.05) 0 1px, transparent 1px 32px);
+}
+
+main[class*='docMainContainer']::before,
+main[class*='docMainContainer']::after {
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: fixed;
+  z-index: 0;
+}
+
+main[class*='docMainContainer']::before {
+  background:
+    radial-gradient(circle 3px at 88% 150px, rgba(227, 69, 73, 0.5), transparent 4px),
+    repeating-radial-gradient(circle at 88% 150px, rgba(236, 233, 227, 0.08) 0 1px, transparent 1px 24px);
+  mask-image: radial-gradient(circle at 88% 150px, #000 0 300px, transparent 520px);
+}
+
+main[class*='docMainContainer']::after {
+  background: repeating-radial-gradient(circle at 70px calc(100vh - 180px), rgba(236, 233, 227, 0.05) 0 1px, transparent 1px 34px);
+  mask-image: radial-gradient(circle at 70px calc(100vh - 180px), #000 0 220px, transparent 420px);
+}
+
+[data-theme='light'] main[class*='docMainContainer']::before,
+[data-theme='light'] main[class*='docMainContainer']::after {
+  display: none;
+}
+
+main[class*='docMainContainer'] > .container {
+  position: relative;
+  z-index: 1;
+}
+
+.footer { position: relative; z-index: 1; }
+
+/* Sidebar joins the same sheet. */
+.theme-doc-sidebar-container,
+[data-theme='light'] .theme-doc-sidebar-container {
+  background:
+    var(--anima-doc-tile-day) 0 0 / 72px 72px,
+    var(--anima-art-grain),
+    linear-gradient(180deg, var(--anima-art-wash), var(--anima-paper) 700px);
+}
+
+[data-theme='dark'] .theme-doc-sidebar-container {
+  background:
+    repeating-linear-gradient(0deg, rgba(236, 233, 227, 0.045) 0 1px, transparent 1px 32px),
+    repeating-linear-gradient(90deg, rgba(236, 233, 227, 0.045) 0 1px, transparent 1px 32px),
+    var(--anima-art-grain),
+    linear-gradient(180deg, var(--anima-art-wash), var(--anima-paper) 700px);
+}
+
+/* Pagination route markers. */
+.pagination-nav__sublabel { align-items: center; display: inline-flex; gap: 0.45rem; }
+.pagination-nav__sublabel::before {
+  background: var(--anima-art-accent);
+  border-radius: var(--anima-selected-marker-radius);
+  content: '';
+  height: 5px;
+  width: 5px;
+}
+
+@media screen and (max-width: 996px) {
+  main[class*='docMainContainer']::before,
+  main[class*='docMainContainer']::after { display: none; }
+}
+
+@media (forced-colors: active) {
+  main[class*='docMainContainer'] { background-image: none; }
+  main[class*='docMainContainer']::before,
+  main[class*='docMainContainer']::after { display: none; }
+  .theme-doc-sidebar-container { background-image: none; }
+}

@@ -1,18 +1,31 @@
-.card {
+﻿.card {
   display: flex;
   align-items: flex-start;
   gap: 1rem;
   width: 100%;
-  padding: 1rem;
-  border: 1px solid var(--ifm-color-emphasis-300);
-  border-radius: var(--ifm-global-radius);
-  background: var(--ifm-background-surface-color);
+  padding: 1rem 1rem 1rem 1.25rem;
+  border: 1px solid var(--anima-line-strong);
+  border-radius: var(--anima-radius);
+  background: var(--anima-art-surface);
+  box-shadow: var(--anima-art-inset);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  background: var(--anima-art-accent);
+  bottom: 0;
+  content: '';
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 3px;
 }
 
 .avatarLink {
   display: block;
   flex: 0 0 auto;
-  border-radius: 50%;
+  border-radius: var(--anima-selected-marker-radius);
 }
 
 .avatar,
@@ -20,7 +33,7 @@
   display: block;
   width: 4rem;
   height: 4rem;
-  border-radius: 50%;
+  border-radius: var(--anima-selected-marker-radius);
 }
 
 .avatar {
@@ -41,6 +54,8 @@
 }
 
 .name {
+  font-family: var(--ifm-heading-font-family);
+  font-weight: 750;
   margin: 0;
   font-size: 1.05rem;
   line-height: 1.3;
@@ -54,7 +69,11 @@
 }
 
 .githubLink {
+  color: var(--anima-interactive);
   display: inline-flex;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
   align-items: center;
   gap: 0.3rem;
   margin-top: 0.65rem;
