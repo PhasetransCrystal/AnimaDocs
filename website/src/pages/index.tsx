@@ -8,6 +8,7 @@ import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import VisualStudy from '@site/src/components/VisualStudy';
 
 import styles from './index.module.css';
+import useHeroPaging from '@site/src/components/HomepageHeader/useHeroPaging';
 
 const contributorCount = 1;
 const thirdPartyToolCount = 0;
@@ -18,10 +19,6 @@ function DirectoryPanel({tutorialCount}: {tutorialCount: number}): ReactNode {
       <div className={styles.panelHeader}>
         <span className={styles.panelEyebrow}>目录索引 / 01</span>
         <span className={styles.panelStatus}>LIVE</span>
-      </div>
-      <div className={styles.panelVisual} aria-hidden="true">
-        <VisualStudy variant="specimen" />
-        <span className={styles.panelVisualNote}>MODEL / 2B</span>
       </div>
       <div className={styles.panelBody}>
         <div className={styles.panelTitleRow}>
@@ -61,25 +58,30 @@ function DirectoryPanel({tutorialCount}: {tutorialCount: number}): ReactNode {
 
 function HomepageHeader(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
+  const {sectionRef, contentRef, copyRef} = useHeroPaging();
   const docsData = useDocsData(undefined);
   const latestVersion = docsData.versions.find((version) => version.isLast) ?? docsData.versions[0];
   const tutorialCount = latestVersion?.docs.filter((doc) => !doc.unlisted).length ?? 0;
 
   return (
-    <header className={styles.heroBanner}>
+    <header className={styles.heroBanner} ref={sectionRef}>
       <div className={styles.heroArt} aria-hidden="true">
         <VisualStudy />
         <span className={styles.heroArtRule} />
       </div>
 
-      <div className={styles.heroContent}>
+      <div className={styles.heroToplineFrame}>
         <div className="container">
           <div className={styles.heroTopline}>
             <span>ANIMA DOCUMENTATION SYSTEM</span>
             <span>REV. 2026 / 08</span>
           </div>
+        </div>
+      </div>
+      <div className={styles.heroContent}>
+        <div className="container" ref={contentRef}>
           <div className={styles.heroLayout}>
-            <div className={styles.heroCopy}>
+            <div className={styles.heroCopy} ref={copyRef}>
               <p className={styles.kicker}>CUI-ANIMA / 教程首页</p>
               <Heading as="h1" aria-label={siteConfig.title}>
                 <span>Cui-Anima</span>

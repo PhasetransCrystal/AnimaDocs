@@ -1,7 +1,8 @@
-import {type CSSProperties, type ReactNode} from 'react';
+import {type ReactNode} from 'react';
 import Link from '@docusaurus/Link';
 
 import styles from './styles.module.css';
+import WorkflowArt from './WorkflowArt';
 
 type SectionItem = {
   index: string;
@@ -18,16 +19,9 @@ type WorkflowNode = {
   key: string;
   title: string;
   detail: string;
-  tone: 'model' | 'support' | 'canvas' | 'text' | 'core' | 'output';
+  tone: 'input' | 'resource' | 'core' | 'process' | 'output';
 };
 
-type PixelIsland = {
-  x: number;
-  y: number;
-  opacity: number;
-  rotation: number;
-  cells: string[];
-};
 
 const sectionItems: SectionItem[] = [
   {
@@ -66,13 +60,15 @@ const scopeItems = [
 ];
 
 const workflowNodes: WorkflowNode[] = [
-  {index: '01', key: 'model', title: '加载主模型', detail: 'MODEL', tone: 'model'},
-  {index: '02', key: 'attachments', title: '应用附件', detail: 'LoRA / ControlNet 等', tone: 'support'},
-  {index: '03', key: 'canvas', title: '构造画布', detail: 'Latent / 空白或已有图像', tone: 'canvas'},
-  {index: '04', key: 'encoder', title: '加载文本编码器', detail: 'TEXT ENCODER', tone: 'text'},
-  {index: '05', key: 'prompt', title: '编码提示词', detail: 'CONDITIONING', tone: 'support'},
+  {index: '01', key: 'model', title: '加载主模型', detail: 'MODEL', tone: 'resource'},
+  {index: '02', key: 'attachments', title: '应用附件', detail: 'LoRA / ControlNet 等', tone: 'input'},
+  {index: '03', key: 'canvas', title: '构造画布', detail: 'Latent / 空白或已有图像', tone: 'input'},
+  {index: '04', key: 'encoder', title: '加载文本编码器', detail: 'TEXT ENCODER', tone: 'resource'},
+  {index: '05', key: 'prompt', title: '编码提示词', detail: 'CONDITIONING', tone: 'input'},
   {index: '06', key: 'draw', title: '图形绘制', detail: '采样器 / 出图核心', tone: 'core'},
-  {index: '07', key: 'save', title: '图片保存', detail: 'OUTPUT', tone: 'output'},
+  {index: '07', key: 'vae', title: '加载 VAE', detail: 'VAE', tone: 'resource'},
+  {index: '08', key: 'image', title: '图像编码', detail: 'VAE / 图像转换', tone: 'process'},
+  {index: '09', key: 'save', title: '图片保存', detail: 'OUTPUT', tone: 'output'},
 ];
 
 const nodePositionClasses: Record<string, string> = {
@@ -82,139 +78,48 @@ const nodePositionClasses: Record<string, string> = {
   encoder: styles.nodeEncoder,
   prompt: styles.nodePrompt,
   draw: styles.nodeDraw,
+  vae: styles.nodeVae,
+  image: styles.nodeImage,
   save: styles.nodeSave,
 };
 
 const nodeToneClasses: Record<WorkflowNode['tone'], string> = {
-  model: styles.toneModel,
-  support: styles.toneSupport,
-  canvas: styles.toneCanvas,
-  text: styles.toneText,
+  input: styles.toneInput,
+  resource: styles.toneResource,
   core: styles.toneCore,
+  process: styles.toneProcess,
   output: styles.toneOutput,
 };
 
-const nightIslands: PixelIsland[] = [
-  {
-    x: 71,
-    y: 24,
-    opacity: 0.58,
-    rotation: -8,
-    cells: ['....o....', '...###...', '..#####..', '.######..', '.###@##..', '..######.', '...####..', '....##...'],
-  },
-  {
-    x: 78,
-    y: 73,
-    opacity: 0.38,
-    rotation: 9,
-    cells: ['.....', '..o..', '.###.', '#####', '.###.', '..#..'],
-  },
-  {
-    x: 57,
-    y: 82,
-    opacity: 0.26,
-    rotation: -4,
-    cells: ['..s....', '.###...', '#####..', '.####..', '..##s..'],
-  },
-];
+const nodeRoleLabels: Record<WorkflowNode['tone'], string> = {
+  input: '输入准备',
+  resource: '资源加载',
+  core: '绘制核心',
+  process: '图像转换',
+  output: '结果输出',
+};
 
-const dayIslands: PixelIsland[] = [
-  {
-    x: 22,
-    y: 26,
-    opacity: 0.34,
-    rotation: -7,
-    cells: ['....', '.##.', '####', '.###', '..#.', '..s.'],
-  },
-  {
-    x: 76,
-    y: 76,
-    opacity: 0.28,
-    rotation: 10,
-    cells: ['..s...', '.###..', '#####.', '..###.', '...#..'],
-  },
-  {
-    x: 48,
-    y: 18,
-    opacity: 0.2,
-    rotation: 3,
-    cells: ['..', '.#', '##', '.s'],
-  },
-];
-
-function IslandLayer({islands, mode}: {islands: PixelIsland[]; mode: 'night' | 'day'}): ReactNode {
-  return (
-    <div className={mode === 'night' ? styles.nightIslandLayer : styles.dayIslandLayer}>
-      {islands.map((island, islandIndex) => {
-        const columnCount = Math.max(...island.cells.map((row) => row.length));
-        return (
-          <span
-            className={styles.pixelIsland}
-            key={`${mode}-${island.x}-${island.y}-${islandIndex}`}
-            style={{
-              left: `${island.x}%`,
-              top: `${island.y}%`,
-              opacity: island.opacity,
-              transform: `translate(-50%, -50%) rotate(${island.rotation}deg)`,
-              gridTemplateColumns: `repeat(${columnCount}, 0.62rem)`,
-              gridTemplateRows: `repeat(${island.cells.length}, 0.62rem)`,
-            } as CSSProperties}
-          >
-            {island.cells.flatMap((row, rowIndex) =>
-              [...row].map((cell, columnIndex) =>
-                cell === '.' ? null : (
-                  <i
-                    className={`${styles.pixelCell} ${cell === 'o' ? styles.pixelHollow : ''} ${cell === 's' ? styles.pixelSoft : ''} ${cell === '@' ? styles.pixelAccent : ''}`}
-                    key={`${rowIndex}-${columnIndex}`}
-                    style={{gridColumnStart: columnIndex + 1, gridRowStart: rowIndex + 1}}
-                  />
-                ),
-              ),
-            )}
-          </span>
-        );
-      })}
-    </div>
-  );
-}
 
 function WorkflowBoard(): ReactNode {
   return (
     <div className={styles.workflowBoard}>
-      <div className={styles.workflowNightArt} aria-hidden="true">
-        <svg viewBox="0 0 1200 520" preserveAspectRatio="xMaxYMid slice">
-          <g>
-            <circle cx="-150" cy="270" r="190" />
-            <circle cx="-150" cy="270" r="350" />
-            <circle cx="-150" cy="270" r="560" />
-            <line x1="-150" y1="270" x2="1030" y2="20" />
-            <line x1="-150" y1="270" x2="1120" y2="130" />
-            <line x1="-150" y1="270" x2="1190" y2="270" />
-            <line x1="-150" y1="270" x2="1120" y2="410" />
-            <line x1="-150" y1="270" x2="1030" y2="500" />
-          </g>
-        </svg>
-        <IslandLayer islands={nightIslands} mode="night" />
-      </div>
-      <div className={styles.workflowDayArt} aria-hidden="true">
-        <span className={styles.dayWorkflowPlane} />
-        <span className={styles.dayWorkflowGrid} />
-        <span className={`${styles.dayWorkflowRule} ${styles.dayWorkflowRuleOne}`} />
-        <span className={`${styles.dayWorkflowRule} ${styles.dayWorkflowRuleTwo}`} />
-        <IslandLayer islands={dayIslands} mode="day" />
-      </div>
+      <WorkflowArt />
       <div className={styles.workflowEdgeCopy} aria-hidden="true">
         <span className={styles.edgeCopyInput}>TEXT<br />CONDITIONING</span>
         <span className={styles.edgeCopyOutput}>IMAGE<br />RESULT</span>
       </div>
-      <div className={styles.workflowGraph} role="list" aria-label="三路输入汇合到图形绘制，再输出图片">
+      <div className={styles.workflowGraph} role="list" aria-label="三路输入汇合到图形绘制，结合 VAE 完成图像编码后保存图片">
         {workflowNodes.map((node) => (
           <div
             className={`${styles.workflowNode} ${nodePositionClasses[node.key]} ${nodeToneClasses[node.tone]}`}
             key={node.key}
+            data-workflow-node={node.key}
             role="listitem"
           >
-            <span className={styles.workflowNodeIndex}>{node.index}</span>
+            <span className={styles.workflowNodeMeta}>
+              <span className={styles.workflowNodeIndex}>{node.index}</span>
+              <span className={styles.workflowNodeRole}>{nodeRoleLabels[node.tone]}</span>
+            </span>
             <span className={styles.workflowNodeTitle}>{node.title}</span>
             <span className={styles.workflowNodeDetail}>{node.detail}</span>
           </div>
@@ -226,38 +131,46 @@ function WorkflowBoard(): ReactNode {
             </marker>
           </defs>
           <g>
-            <path d="M210 52 H286" />
-            <path d="M454 52 H530 V160 H610" />
-            <path d="M210 160 H610" />
-            <path d="M210 268 H286" />
-            <path d="M454 268 H530 V160 H610" />
-            <path d="M795 160 H870" />
+            <path data-from="model" data-to="attachments" d="M180 44.8 H210" />
+            <path data-from="attachments" data-to="draw" d="M390 44.8 H405 V160 H420" />
+            <path data-from="canvas" data-to="draw" d="M180 160 H420" />
+            <path data-from="encoder" data-to="prompt" d="M180 275.2 H210" />
+            <path data-from="prompt" data-to="draw" d="M390 275.2 H405 V160 H420" />
+            <path data-from="draw" data-to="image" d="M600 160 H630" />
+            <path data-from="vae" data-to="image" d="M720 230.4 V204.8" />
+            <path data-from="image" data-to="save" d="M810 160 H840" />
           </g>
         </svg>
-        <svg className={styles.workflowConnectionsMobile} viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden="true">
+        <svg className={styles.workflowConnectionsMobile} viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
           <defs>
             <marker id="workflow-arrow-mobile-v2" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" refX="8" refY="5" orient="auto">
               <path d="M0,0 L10,5 L0,10 Z" />
             </marker>
           </defs>
           <g>
-            <path d="M471 51 H529" />
-            <path d="M1000 51 H500 V344" />
-            <path d="M471 165 H500 V344" />
-            <path d="M471 280 H529" />
-            <path d="M1000 280 H500 V344" />
-            <path d="M500 445 V459" />
+            <path data-from="model" data-to="attachments" d="M470 65 H530" />
+            <path data-from="attachments" data-to="draw" d="M1000 65 H1020 V500 H500 V522" />
+            <path data-from="canvas" data-to="draw" d="M470 239 H500 V522" />
+            <path data-from="encoder" data-to="prompt" d="M470 413 H530" />
+            <path data-from="prompt" data-to="draw" d="M1000 413 H1020 V500 H500 V522" />
+            <path data-from="draw" data-to="image" d="M500 652 V696" />
+            <path data-from="vae" data-to="image" d="M235 870 V826" />
+            <path data-from="image" data-to="save" d="M765 826 V870" />
             <g className={styles.workflowPorts}>
-              <circle cx="471" cy="51" r="5" />
-              <circle cx="529" cy="51" r="5" />
-              <circle cx="1000" cy="51" r="5" />
-              <circle cx="471" cy="165" r="5" />
-              <circle cx="471" cy="280" r="5" />
-              <circle cx="529" cy="280" r="5" />
-              <circle cx="1000" cy="280" r="5" />
-              <circle cx="500" cy="344" r="5" />
-              <circle cx="500" cy="445" r="5" />
-              <circle cx="500" cy="459" r="5" />
+              <circle cx="470" cy="65" r="5" />
+              <circle cx="530" cy="65" r="5" />
+              <circle cx="1000" cy="65" r="5" />
+              <circle cx="470" cy="239" r="5" />
+              <circle cx="470" cy="413" r="5" />
+              <circle cx="530" cy="413" r="5" />
+              <circle cx="1000" cy="413" r="5" />
+              <circle cx="500" cy="522" r="5" />
+              <circle cx="500" cy="652" r="5" />
+              <circle cx="500" cy="696" r="5" />
+              <circle cx="235" cy="870" r="5" />
+              <circle cx="235" cy="826" r="5" />
+              <circle cx="765" cy="826" r="5" />
+              <circle cx="765" cy="870" r="5" />
             </g>
           </g>
         </svg>
@@ -265,7 +178,7 @@ function WorkflowBoard(): ReactNode {
       <div className={styles.workflowEdgeLabels}>
         <span className={styles.edgeLabelInput}><strong>文本条件</strong><small>提示词经过编码后进入绘制</small></span>
         <span className={styles.edgeLabelLine} aria-hidden="true" />
-        <span className={styles.edgeLabelOutput}><strong>图像结果</strong><small>采样完成后保存输出</small></span>
+        <span className={styles.edgeLabelOutput}><strong>图像结果</strong><small>经 VAE 转换后保存输出</small></span>
       </div>
     </div>
   );

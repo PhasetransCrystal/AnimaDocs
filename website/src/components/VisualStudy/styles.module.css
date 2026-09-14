@@ -9,8 +9,8 @@
 .diagramArt { height: 100%; position: absolute; width: 100%; }
 .diagramArt :is(path, circle, ellipse, line, polyline) { vector-effect: non-scaling-stroke; }
 .field { background: linear-gradient(105deg, var(--anima-paper) 40%, #e7edf4 100%); }
-.field .diagramArt { height: 120%; left: 31%; opacity: 0.65; top: -17%; transform: rotate(-12deg); width: 85%; }
-.field::after { background: linear-gradient(90deg, var(--anima-paper) 13%, transparent 73%); content: ''; inset: 0; position: absolute; }
+.field .diagramArt { height: 75%; left: 24%; opacity: 0.8; top: -9%; transform: rotate(-12deg); width: 80%; }
+.field::after { background: linear-gradient(0deg, var(--anima-paper) 0%, transparent 67%), linear-gradient(90deg, var(--anima-paper) 5%, transparent 65%); content: ''; inset: 0; position: absolute; }
 .specimen { background: #eef2f5; }
 .specimen::before {
   background-image: linear-gradient(#245dcc0d 1px, transparent 1px), linear-gradient(90deg, #245dcc0d 1px, transparent 1px);
@@ -52,11 +52,11 @@
 .calibrationMarks { stroke: #ece9e3; stroke-opacity: 0.85; stroke-width: 0.8; }
 .warmMark { fill: var(--anima-gold); }
 @media screen and (max-width: 996px) {
-  .field .diagramArt { height: 65%; left: 27%; top: -8%; width: 110%; }
-  .field::after { background: linear-gradient(90deg, var(--anima-paper), transparent); }
+  .field .diagramArt { height: 430px; left: 9%; top: -75px; width: 100%; }
+  .field::after { background: linear-gradient(0deg, var(--anima-paper) 25%, transparent 85%); }
 }
 @media screen and (max-width: 640px) {
-  .field .diagramArt { height: 390px; left: 18%; opacity: 0.38; top: -85px; width: 630px; }
+  .field .diagramArt { height: 330px; left: -6%; opacity: 0.65; top: -30px; width: 120%; }
   :global([data-theme='dark']) .field .diagramArt { opacity: 0.46; }
 }
 @media (forced-colors: active) {

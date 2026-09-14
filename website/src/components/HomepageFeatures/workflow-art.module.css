@@ -1,0 +1,128 @@
+.backgroundArt,
+.dayArt,
+.nightArt {
+  border-radius: inherit;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+}
+
+.backgroundArt { z-index: 0; }
+.dayArt { background: var(--anima-art-grain), #f7f9f9; }
+.nightArt { background: var(--anima-art-grain), radial-gradient(ellipse at 76% 0%, #23262c, #181b21 60%, #14171d); display: none; }
+:global([data-theme='dark']) .dayArt { display: none; }
+:global([data-theme='dark']) .nightArt { display: block; }
+
+.polarGrid,
+.orbitStudy,
+.registrationStudy,
+.draftingRules {
+  inset: 0;
+  position: absolute;
+}
+
+.polarGrid { fill: none; stroke: #d44d54; stroke-opacity: 0.12; stroke-width: 0.7; }
+.orbitStudy { fill: none; }
+.orbitBands { stroke: #f3f0e7; --orbit-narrow-opacity: 0.085; --orbit-wide-opacity: 0.055; }
+.orbitBandNarrow { stroke-opacity: var(--orbit-narrow-opacity, 1); stroke-width: clamp(16px, 1.4vw, 30px); }
+.orbitBandWide { stroke-opacity: var(--orbit-wide-opacity, 1); stroke-width: clamp(42px, 4.5vw, 88px); }
+.orbitArcs { stroke: #f3f0e7; stroke-opacity: 0.36; stroke-width: 2.2; }
+.registrationStudy { fill: none; stroke: #f3f0e7; stroke-opacity: 0.3; stroke-width: 1; }
+.registrationMark path { stroke-width: 1.4; }
+
+.decorativeCopy {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 8px;
+  font-weight: 400;
+  gap: 3px;
+  letter-spacing: 0.045em;
+  line-height: 1.4;
+  position: absolute;
+  white-space: nowrap;
+}
+
+.nightLogPrimary,
+.nightLogSecondary { color: #d65b61; font-size: 7.5px; gap: 1px; line-height: 1.2; opacity: 0.38; }
+.nightLogPrimary { left: 44%; top: 65%; }
+.nightLogSecondary { right: 7%; top: 17%; }
+
+.draftingGrid {
+  background-image:
+    linear-gradient(#245dcc0c 1px, transparent 1px),
+    linear-gradient(90deg, #245dcc0c 1px, transparent 1px),
+    linear-gradient(#245dcc06 1px, transparent 1px),
+    linear-gradient(90deg, #245dcc06 1px, transparent 1px);
+  background-size: 128px 128px, 128px 128px, 32px 32px, 32px 32px;
+  inset: 0;
+  position: absolute;
+}
+
+.paperPlane {
+  background: linear-gradient(120deg, #245dcc03, #245dcc13);
+  clip-path: polygon(52% 0, 81% 0, 55% 100%, 26% 100%);
+  inset: 0;
+  position: absolute;
+}
+
+.paperFold {
+  background: #ffffff70;
+  clip-path: polygon(81% 0, 84% 0, 58% 100%, 55% 100%);
+  inset: 0;
+  position: absolute;
+}
+
+.draftingRules { stroke: #245dcc; stroke-opacity: 0.14; stroke-width: 0.8; }
+.constructionStudy { height: auto; opacity: 0.72; position: absolute; right: -5%; top: 50%; transform: translateY(-50%) rotate(-12deg); width: clamp(280px, 32vw, 640px); }
+.constructionLines { stroke: #245dcc; stroke-opacity: 0.22; stroke-width: 0.8; }
+.constructionAccent { stroke: #245dcc; stroke-opacity: 0.35; stroke-width: 2; }
+.constructionWash { fill: #245dcc; fill-opacity: 0.045; }
+.constructionPoints { fill: #245dcc; fill-opacity: 0.35; }
+.constructionStudy path, .constructionStudy circle { vector-effect: non-scaling-stroke; }
+
+.cornerMarks { inset: 20px; position: absolute; }
+.cornerMarks i { border-color: #245dcc50; border-style: solid; height: 10px; position: absolute; width: 10px; }
+.cornerMarks i:nth-child(1) { border-width: 1px 0 0 1px; left: 0; top: 0; }
+.cornerMarks i:nth-child(2) { border-width: 1px 1px 0 0; right: 0; top: 0; }
+.cornerMarks i:nth-child(3) { border-width: 0 0 1px 1px; bottom: 0; left: 0; }
+.cornerMarks i:nth-child(4) { border-width: 0 1px 1px 0; bottom: 0; right: 0; }
+
+.daySwatches { align-items: center; color: #42658c; display: flex; font-family: var(--ifm-font-family-monospace); font-size: 8px; gap: 5px; left: 38%; letter-spacing: 0.09em; opacity: 0.55; position: absolute; top: 24px; }
+.daySwatches i { background: #245dcc; height: 5px; width: 5px; }
+.daySwatches i:nth-child(2) { background: #a77836; }
+.daySwatches i:nth-child(3) { background: #8995a4; }
+.daySwatches span { margin-left: 8px; }
+.dayAnnotation { color: #496485; left: 47%; opacity: 0.5; top: 77%; }
+.dayMeasurement { align-items: center; color: #245dcc; display: flex; font-family: var(--ifm-font-family-monospace); font-size: 8px; gap: 12px; left: 25%; opacity: 0.35; position: absolute; right: 37%; top: 38%; }
+.dayMeasurement i { border-bottom: 1px solid currentColor; border-inline: 1px solid currentColor; flex: 1; height: 5px; }
+
+@media screen and (max-width: 1200px) {
+  .nightLogPrimary { font-size: 7px; }
+  .nightLogSecondary, .dayAnnotation { font-size: 7px; }
+}
+
+@media screen and (max-width: 1400px) {
+  .nightLogSecondary { display: none; }
+}
+
+@media screen and (max-width: 996px) {
+  .nightLogPrimary, .nightLogSecondary, .dayAnnotation, .dayMeasurement { display: none; }
+  .registrationMark:nth-child(2), .registrationMark:nth-child(4) { display: none; }
+  .polarGrid circle:nth-child(even) { display: none; }
+  .polarGrid { stroke-opacity: 0.075; }
+  .orbitStudy circle { cx: 82%; cy: -12%; }
+  .orbitBands { --orbit-narrow-opacity: 0.05; --orbit-wide-opacity: 0.035; }
+  .orbitBandNarrow { stroke-width: 16px; }
+  .orbitBandWide { stroke-width: 32px; }
+  .orbitArcs { stroke-width: 2; stroke-opacity: 0.22; }
+  .registrationStudy { stroke-opacity: 0.22; }
+  .constructionStudy { opacity: 0.45; right: -160px; top: 32%; width: 420px; }
+  .daySwatches { left: 42%; top: 25px; }
+  .daySwatches span { display: none; }
+}
+
+@media (forced-colors: active) {
+  .backgroundArt { display: none; }
+}
