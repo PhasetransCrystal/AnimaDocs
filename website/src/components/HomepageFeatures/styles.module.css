@@ -1,4 +1,4 @@
-.features {
+﻿.features {
   background: var(--anima-paper);
   color: var(--anima-ink);
   overflow: hidden;
@@ -156,8 +156,13 @@
 }
 
 .workflowBoard::before {
+  background-image: repeating-linear-gradient(90deg, var(--anima-line-strong) 0 1px, transparent 1px 12px), repeating-linear-gradient(90deg, var(--anima-line-strong) 0 1px, transparent 1px 12px);
+  background-position: 0 0, 0 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 6px;
   border: 1px solid color-mix(in srgb, var(--anima-ink) 20%, transparent);
   inset: 0.8rem;
+  opacity: 0.85;
 }
 
 .workflowBoard::after {
@@ -181,6 +186,7 @@
 
 .workflowNode {
   align-items: start;
+  border-radius: calc(var(--anima-radius) * 0.6);
   background: color-mix(in srgb, var(--anima-surface) 92%, transparent);
   border: 1px solid var(--anima-line-strong);
   display: flex;
@@ -204,11 +210,16 @@
 }
 
 .workflowNodeIndex {
+  align-items: center;
   color: var(--node-accent);
+  display: inline-flex;
+  gap: 0.3rem;
   font-family: var(--ifm-font-family-monospace);
   font-size: 0.56rem;
   letter-spacing: 0.1em;
 }
+
+.workflowNodeIndex::before { background: currentColor; border-radius: var(--anima-selected-marker-radius); content: ''; height: 5px; width: 5px; }
 
 .workflowNodeMeta {
   align-items: baseline;
@@ -384,9 +395,21 @@
 .legendBlue { background: var(--anima-blue); }
 .legendRed { background: var(--anima-red); }
 
-.learningRoutes { display: grid; gap: 0.75rem; }
+.learningRoutes { display: grid; gap: 0.75rem; position: relative; }
+
+.learningRoutes::before {
+  background: var(--anima-line-strong);
+  bottom: 3.2rem;
+  content: "";
+  left: -1.35rem;
+  opacity: 0.55;
+  position: absolute;
+  top: 1.62rem;
+  width: 1px;
+}
 
 .learningRoute {
+  --stagger: 0rem;
   align-items: center;
   background: var(--anima-surface);
   border: 1px solid var(--anima-line);
@@ -396,26 +419,56 @@
   grid-template-columns: 2.3rem 0.28rem minmax(0, 1fr) auto;
   min-height: 7.4rem;
   padding: 1rem 1.15rem;
+  position: relative;
+  transform: translateX(var(--stagger));
   transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
 }
 
-.learningRoute:not(.learningRouteDisabled):hover { border-color: var(--anima-blue); color: var(--anima-ink); text-decoration: none; transform: translateX(0.35rem); }
+.learningRoute::before {
+  border-bottom: 1px solid var(--anima-line-strong);
+  content: "";
+  opacity: 0.55;
+  position: absolute;
+  right: 100%;
+  top: 1.62rem;
+  width: calc(var(--stagger) + 1.35rem);
+}
+
+.learningRoute::after {
+  background: var(--anima-blue);
+  content: "";
+  height: 7px;
+  left: calc(-1 * var(--stagger) - 1.35rem - 3px);
+  position: absolute;
+  top: calc(1.62rem - 3px);
+  width: 7px;
+}
+
+.learningRouteDisabled::after {
+  background: transparent;
+  border: 1px solid var(--anima-line-strong);
+}
+
+.learningRoute:not(.learningRouteDisabled):hover { border-color: var(--anima-blue); color: var(--anima-ink); text-decoration: none; transform: translateX(calc(var(--stagger) + 0.35rem)); }
 .learningRouteDisabled { cursor: default; opacity: 0.62; }
 .learningRouteDisabled .routeAction { color: var(--anima-ink-soft); }
 .routeIndex { color: var(--anima-blue); font-family: var(--ifm-font-family-monospace); font-size: 0.76rem; font-weight: 700; align-self: start; }
 .routeSignal { background: var(--anima-blue); height: 3.4rem; width: 0.28rem; }
 .routeCopy { display: flex; flex-direction: column; min-width: 0; }
-.routeMeta { color: var(--anima-ink-soft); font-size: 0.57rem; margin-bottom: 0.35rem; }
+.routeMeta { align-items: center; color: var(--anima-ink-soft); display: inline-flex; font-size: 0.57rem; margin-bottom: 0.35rem; }
+.routeMeta::before { border: 1px solid currentColor; content: ''; display: inline-block; height: 7px; margin-right: 0.45rem; vertical-align: -1px; width: 7px; }
+.learningRoute:not(.learningRouteDisabled) .routeMeta::before { background: var(--anima-blue); border-color: var(--anima-blue); }
 .routeCopy strong { font-size: 1rem; line-height: 1.35; }
 .routeCopy > span:last-child { color: var(--anima-ink-soft); font-size: 0.78rem; line-height: 1.5; margin-top: 0.28rem; }
 .routeAction { align-items: center; color: var(--anima-blue); display: inline-flex; font-family: var(--ifm-font-family-monospace); font-size: 0.65rem; gap: 0.6rem; white-space: nowrap; }
 
-.learningRoute:nth-child(2) { transform: translateX(1.4rem); }
-.learningRoute:nth-child(3) { transform: translateX(2.8rem); }
-.learningRoute:not(.learningRouteDisabled):nth-child(2):hover { transform: translateX(1.75rem); }
-.learningRoute:not(.learningRouteDisabled):nth-child(3):hover { transform: translateX(3.15rem); }
+.learningRoute:nth-child(2) { --stagger: 1.4rem; }
+.learningRoute:nth-child(3) { --stagger: 2.8rem; }
+
+
 
 .scopeRail {
+  position: relative;
   border-bottom: 1px solid var(--anima-line-strong);
   border-top: 1px solid var(--anima-line);
   display: grid;
@@ -424,6 +477,11 @@
   margin-top: 3.6rem;
   padding: 1.15rem 0;
 }
+
+.scopeList li > span:first-child { align-items: center; color: var(--anima-art-accent); display: inline-flex; font-family: var(--ifm-font-family-monospace); font-size: 0.62rem; gap: 0.4rem; letter-spacing: 0.08em; }
+.scopeList li > span:first-child::before { background: currentColor; border-radius: var(--anima-selected-marker-radius); content: ''; height: 5px; width: 5px; }
+
+.scopeRail::before { background: repeating-linear-gradient(90deg, var(--anima-line-strong) 0 1px, transparent 1px 12px); content: ''; height: 6px; left: 0; opacity: 0.5; position: absolute; right: 0; top: 0; }
 
 .scopeTitle { color: var(--anima-gold); padding-top: 0.25rem; }
 .scopeList { display: grid; gap: 0.65rem; grid-template-columns: repeat(5, minmax(0, 1fr)); list-style: none; margin: 0; padding: 0; }
@@ -470,11 +528,12 @@
 :global([data-theme='dark']) .sectionKicker,
 :global([data-theme='dark']) .routeIndex,
 :global([data-theme='dark']) .routeAction { color: var(--anima-red); }
+:global([data-theme='dark']) .learningRoute:not(.learningRouteDisabled) .routeSignal { background: var(--anima-red); }
 
 :global([data-theme='light']) .workflowBoard { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%); }
 :global([data-theme='light']) .workflowNode { --node-radius: 0px; border-radius: var(--node-radius); }
 :global([data-theme='light']) .workflowNode::before { border-radius: 0; }
-:global([data-theme='light']) .learningRoute { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%); }
+/* Cut-corner clip removed: it clipped the journey connector pseudo-elements. The square frame keeps the day geometry and keeps connectors paintable. */
 :global([data-theme='light']) .learningRoute:hover { box-shadow: 0.55rem 0.55rem 0 color-mix(in srgb, var(--anima-blue) 10%, transparent); }
 
 @media screen and (max-width: 1100px) {
@@ -504,7 +563,8 @@
   .learningIntro p { margin: 0.9rem 0 1.3rem; }
   .learningLegend { align-items: start; }
   .learningRoute { gap: 0.65rem; grid-template-columns: 1.8rem 0.24rem minmax(0, 1fr); min-height: 7.1rem; padding: 0.9rem 0.8rem; }
-  .learningRoute:nth-child(2), .learningRoute:nth-child(3), .learningRoute:nth-child(2):hover, .learningRoute:nth-child(3):hover { transform: none; }
+  .learningRoute, .learningRoute:nth-child(2), .learningRoute:nth-child(3) { --stagger: 0rem; transform: none; }
+  .learningRoute::before, .learningRoute::after, .learningRoutes::before { display: none; }
   .routeAction { align-self: end; grid-column: 3; justify-self: start; }
   .scopeRail { gap: 1rem; grid-template-columns: 1fr; margin-top: 2.5rem; }
   .scopeList { gap: 0; grid-template-columns: repeat(5, minmax(7rem, 1fr)); overflow-x: auto; padding-bottom: 0.2rem; }
@@ -534,7 +594,7 @@
 .learningIntro { background: linear-gradient(110deg, color-mix(in srgb, var(--anima-gold) 6%, transparent), transparent 70%); }
 .learningRoute { box-shadow: var(--anima-art-inset); border-color: var(--anima-art-rule); }
 .learningRoute:not(.learningRouteDisabled) { background: linear-gradient(110deg, var(--anima-art-surface) 86%, var(--anima-art-wash) 86%); }
-.learningRoute:not(.learningRouteDisabled):hover { border-color: var(--anima-interactive); box-shadow: inset 3px 0 var(--anima-interactive); transform: none; }
+.learningRoute:not(.learningRouteDisabled):hover { border-color: var(--anima-interactive); box-shadow: inset 3px 0 var(--anima-interactive); transform: translateX(calc(var(--stagger) + 0.2rem)); }
 .learningRoute:focus-visible { outline: 2px solid var(--anima-focus); outline-offset: 4px; }
 .learningRouteDisabled { opacity: 1; background: color-mix(in srgb, var(--anima-surface) 50%, var(--anima-paper)); border-color: var(--anima-line); }
 .learningRouteDisabled .routeCopy strong { color: var(--anima-ink-soft); }
@@ -545,6 +605,14 @@
 .scopeRail { border-color: var(--anima-art-rule); }
 .scopeList li { border-color: var(--anima-art-rule); }
 :global([data-theme='dark']) .workflowBoard { box-shadow: inset 0 1px 0 #ffffff12, 0 8px 24px #0000001a; }
+:global([data-theme='dark']) .sectionRail i { border-radius: 50%; }
+:global([data-theme='dark']) .learningLegend i { border-radius: 50%; }
+:global([data-theme='dark']) .learningRoute::before { border-bottom-style: dashed; }
+:global([data-theme='dark']) .learningRoute::after { border-radius: 50%; background: var(--anima-red); }
+:global([data-theme='dark']) .learningRouteDisabled::after { background: transparent; border-color: var(--anima-line-strong); }
+:global([data-theme='dark']) .learningRoutes::before { background: repeating-linear-gradient(180deg, var(--anima-line-strong) 0 4px, transparent 4px 9px); }
+:global([data-theme='dark']) .learningRoute:not(.learningRouteDisabled) .routeMeta::before { background: var(--anima-red); border-color: var(--anima-red); border-radius: 50%; }
+:global([data-theme='dark']) .routeMeta::before { border-radius: 50%; }
 :global([data-theme='dark']) .workflowNode { background: #21242b; box-shadow: inset 0 1px 0 #ffffff0a, 0 3px 8px #00000026; }
 :global([data-theme='dark']) .toneCore { background: #302126; border-color: var(--anima-red); }
 :global([data-theme='dark']) .learningRouteDisabled { opacity: 1; }
