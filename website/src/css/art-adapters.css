@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --anima-art-accent: var(--anima-blue);
   --anima-art-rule: color-mix(in srgb, var(--anima-blue) 22%, var(--anima-line));
   --anima-art-wash: color-mix(in srgb, var(--anima-blue) 4%, var(--anima-surface));
@@ -90,7 +90,10 @@ html, body { background: var(--anima-paper); }
   position: relative;
 }
 .theme-doc-markdown > header:first-child::before {
-  background: repeating-linear-gradient(90deg, var(--anima-art-accent) 0 1px, transparent 1px 12px);
+  background:
+    linear-gradient(color-mix(in srgb, var(--anima-art-accent) 55%, transparent), color-mix(in srgb, var(--anima-art-accent) 55%, transparent)) center 30% / 11px 1px no-repeat,
+    linear-gradient(color-mix(in srgb, var(--anima-art-accent) 55%, transparent), color-mix(in srgb, var(--anima-art-accent) 55%, transparent)) center 30% / 1px 11px no-repeat,
+    repeating-linear-gradient(90deg, var(--anima-art-accent) 0 1px, transparent 1px 12px);
   content: '';
   height: 6px;
   opacity: 0.3;
@@ -102,7 +105,12 @@ html, body { background: var(--anima-paper); }
   z-index: -1;
 }
 .theme-doc-markdown > header:first-child::after {
-  border: 1px solid color-mix(in srgb, var(--anima-art-accent) 18%, transparent);
+  background:
+    linear-gradient(105deg, transparent 61%, color-mix(in srgb, var(--anima-art-accent) 45%, transparent) 61% 63%, transparent 63%),
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--anima-art-accent) 14%, transparent) 0 1px, transparent 1px 14px),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--anima-art-accent) 14%, transparent) 0 1px, transparent 1px 14px),
+    var(--anima-art-wash);
+  border: 1px solid color-mix(in srgb, var(--anima-art-accent) 22%, transparent);
   content: '';
   height: 5rem;
   pointer-events: none;
@@ -117,11 +125,26 @@ html, body { background: var(--anima-paper); }
   background: linear-gradient(110deg, transparent 50%, color-mix(in srgb, var(--anima-red) 5%, transparent));
 }
 [data-theme='dark'] .theme-doc-markdown > header:first-child::after {
+  animation: anima-doc-ring 70s linear infinite;
+  background: conic-gradient(from 20deg, var(--anima-red) 0 240deg, color-mix(in srgb, var(--anima-red) 35%, transparent) 240deg 300deg, transparent 300deg);
+  border: 0;
   border-radius: 50%;
-  box-shadow: 0 0 0 12px #e3454906, 0 0 0 24px #e3454904;
-  transform: rotate(-18deg);
+  box-shadow: none;
+  mask-image: radial-gradient(circle, transparent 0 60%, #000 62% 69%, transparent 71%);
+  right: 3.2rem;
+  width: 5rem;
+  transform: none;
+}
+
+@keyframes anima-doc-ring {
+  to { transform: rotate(360deg); }
 }
 .theme-doc-markdown :is(h2, h3) { border-top-color: var(--anima-art-rule); }
+.theme-doc-markdown h2 {
+  background:
+    linear-gradient(var(--anima-line-strong), var(--anima-line-strong)) right 0.62rem / 5px 5px no-repeat,
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--anima-ink) 32%, transparent) 0 1px, transparent 1px 7px) right 0 / 3.4rem 5px no-repeat;
+}
 .theme-doc-markdown h2::before,
 [data-theme='dark'] .theme-doc-markdown h2::before {
   background: var(--anima-art-accent);
@@ -129,7 +152,7 @@ html, body { background: var(--anima-paper); }
   width: 0.24em;
   box-shadow: 3px 3px 0 color-mix(in srgb, var(--anima-art-accent) 20%, transparent);
 }
-.theme-doc-markdown h3::before { height: 0.45em; width: 0.45em; }
+.theme-doc-markdown h3::before { background: transparent; border: 1.5px solid var(--anima-art-accent); box-shadow: none; height: 0.42em; width: 0.42em; }
 .theme-doc-markdown p, .theme-doc-markdown li { overflow-wrap: anywhere; }
 .theme-doc-markdown a:not(.hash-link):not([class]) {
   color: var(--anima-interactive);
@@ -179,7 +202,28 @@ html, body { background: var(--anima-paper); }
   border: 1px solid color-mix(in srgb, var(--anima-art-accent) 15%, var(--anima-line));
   border-radius: 3px;
 }
-.table-of-contents { border-left-color: var(--anima-art-rule); }
+.table-of-contents { border-left-color: var(--anima-art-rule); position: relative; }
+.table-of-contents::before {
+  background: repeating-linear-gradient(180deg, color-mix(in srgb, var(--anima-art-accent) 45%, transparent) 0 1px, transparent 1px 9px);
+  content: '';
+  left: -1px;
+  opacity: 0.5;
+  position: absolute;
+  top: 0.2rem;
+  bottom: 0.2rem;
+  width: 1px;
+}
+.table-of-contents__link { position: relative; }
+.table-of-contents__link--active::before {
+  background: var(--anima-art-accent);
+  border-radius: var(--anima-selected-marker-radius);
+  content: '';
+  display: inline-block;
+  height: 6px;
+  margin: 0 0.45rem 0 -1px;
+  vertical-align: 1px;
+  width: 6px;
+}
 .table-of-contents__link { border-radius: 2px; transition: color 160ms ease; }
 .table-of-contents__link--active { color: var(--anima-interactive); font-weight: 700; }
 .table-of-contents__link:focus-visible { outline: 2px solid var(--anima-focus); outline-offset: 3px; }
@@ -220,6 +264,8 @@ html, body { background: var(--anima-paper); }
 @media screen and (max-width: 640px) {
   .theme-doc-markdown h1 { font-size: clamp(1.8rem, 6vw, 2.3rem); }
   .theme-doc-markdown > header:first-child { background: none; }
+  .theme-doc-markdown > header:first-child::after { height: 3.2rem; opacity: 0.75; right: 0.4rem; top: 0.35rem; width: 4.8rem; }
+  [data-theme='dark'] .theme-doc-markdown > header:first-child::after { width: 3.2rem; right: 1rem; }
   .theme-doc-markdown table { display: block; overflow-x: auto; }
 }
 @media (prefers-reduced-motion: reduce) {
