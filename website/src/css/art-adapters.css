@@ -104,7 +104,9 @@ html, body { background: var(--anima-paper); }
   width: 22%;
   z-index: -1;
 }
+/* Header figure removed pending a replacement direction; the tick ruler stays. */
 .theme-doc-markdown > header:first-child::after {
+  display: none;
   background:
     linear-gradient(105deg, transparent 61%, color-mix(in srgb, var(--anima-art-accent) 45%, transparent) 61% 63%, transparent 63%),
     repeating-linear-gradient(0deg, color-mix(in srgb, var(--anima-art-accent) 14%, transparent) 0 1px, transparent 1px 14px),
@@ -285,18 +287,18 @@ html, body { background: var(--anima-paper); }
  * concentric observation arcs anchored to the viewport. */
 
 :root {
-  --anima-doc-tile-day: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cpath d='M0 0L72 72M72 0L0 72' stroke='%23245dcc' stroke-opacity='.07'/%3E%3Cg fill='%23245dcc' fill-opacity='.18'%3E%3Crect x='34' y='34' width='4' height='4'/%3E%3Crect x='26' y='26' width='4' height='4'/%3E%3Crect x='42' y='42' width='4' height='4'/%3E%3Crect x='26' y='42' width='4' height='4'/%3E%3Crect x='42' y='26' width='4' height='4'/%3E%3Crect x='-2' y='-2' width='4' height='4'/%3E%3Crect x='6' y='6' width='4' height='4'/%3E%3Crect x='70' y='-2' width='4' height='4'/%3E%3Crect x='62' y='6' width='4' height='4'/%3E%3Crect x='-2' y='70' width='4' height='4'/%3E%3Crect x='6' y='62' width='4' height='4'/%3E%3Crect x='70' y='70' width='4' height='4'/%3E%3Crect x='62' y='62' width='4' height='4'/%3E%3C/g%3E%3C/svg%3E");
+  --anima-doc-tile-day: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='104' height='104' viewBox='0 0 104 104'%3E%3Cpath d='M0 0L104 104M104 0L0 104' stroke='%23245dcc' stroke-opacity='.07'/%3E%3Cg fill='%23245dcc' fill-opacity='.20'%3E%3Crect x='50' y='50' width='4' height='4'/%3E%3Crect x='46' y='46' width='4' height='4'/%3E%3Crect x='54' y='54' width='4' height='4'/%3E%3Crect x='46' y='54' width='4' height='4'/%3E%3Crect x='54' y='46' width='4' height='4'/%3E%3Crect x='-2' y='-2' width='4' height='4'/%3E%3Crect x='2' y='2' width='4' height='4'/%3E%3Crect x='102' y='-2' width='4' height='4'/%3E%3Crect x='98' y='2' width='4' height='4'/%3E%3Crect x='-2' y='102' width='4' height='4'/%3E%3Crect x='2' y='98' width='4' height='4'/%3E%3Crect x='102' y='102' width='4' height='4'/%3E%3Crect x='98' y='98' width='4' height='4'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 main[class*='docMainContainer'] {
   background-image: var(--anima-doc-tile-day);
-  background-size: 72px 72px;
+  background-size: 104px 104px;
 }
 
 [data-theme='dark'] main[class*='docMainContainer'] {
   background-image:
-    repeating-linear-gradient(0deg, rgba(236, 233, 227, 0.05) 0 1px, transparent 1px 32px),
-    repeating-linear-gradient(90deg, rgba(236, 233, 227, 0.05) 0 1px, transparent 1px 32px);
+    repeating-linear-gradient(0deg, rgba(236, 233, 227, 0.05) 0 1px, transparent 1px 48px),
+    repeating-linear-gradient(90deg, rgba(236, 233, 227, 0.05) 0 1px, transparent 1px 48px);
 }
 
 main[class*='docMainContainer']::before,
@@ -336,15 +338,15 @@ main[class*='docMainContainer'] > .container {
 .theme-doc-sidebar-container,
 [data-theme='light'] .theme-doc-sidebar-container {
   background:
-    var(--anima-doc-tile-day) 0 0 / 72px 72px,
+    var(--anima-doc-tile-day) 0 0 / 104px 104px,
     var(--anima-art-grain),
     linear-gradient(180deg, var(--anima-art-wash), var(--anima-paper) 700px);
 }
 
 [data-theme='dark'] .theme-doc-sidebar-container {
   background:
-    repeating-linear-gradient(0deg, rgba(236, 233, 227, 0.045) 0 1px, transparent 1px 32px),
-    repeating-linear-gradient(90deg, rgba(236, 233, 227, 0.045) 0 1px, transparent 1px 32px),
+    repeating-linear-gradient(0deg, rgba(236, 233, 227, 0.045) 0 1px, transparent 1px 48px),
+    repeating-linear-gradient(90deg, rgba(236, 233, 227, 0.045) 0 1px, transparent 1px 48px),
     var(--anima-art-grain),
     linear-gradient(180deg, var(--anima-art-wash), var(--anima-paper) 700px);
 }
