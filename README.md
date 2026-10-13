@@ -32,6 +32,7 @@ website/
 - `react`、`react-dom`：自定义页面和组件的运行时依赖
 - `prism-react-renderer`：代码高亮主题
 - `clsx`：组合 CSS class 名称
+- `remark-math`、`rehype-katex`、`katex`：解析并渲染 Markdown/MDX 中的 LaTeX 数学公式
 
 这些依赖已经写入 `website/package.json`，首次安装时不需要单独下载。若要在其他 Docusaurus 项目中启用 Mermaid，可执行：
 
@@ -99,6 +100,47 @@ npm run build
 ```bash
 npm run serve
 ```
+
+## LaTeX 数学公式
+
+文档（`website/docs/`）和博客（`website/blog/`）的 `.md`、`.mdx` 文件均已启用公式支持，无需在文章里导入组件。公式在构建时由 KaTeX 渲染，样式和字体随站点打包，不依赖外部 CDN。
+
+行内公式使用一对 `$`：
+
+```md
+能量与质量的关系为 $E = mc^2$。
+```
+
+独立公式使用 `math` 代码块：
+
+````md
+```math
+\mathcal{L} = \frac{1}{N}\sum_{i=1}^{N}(y_i - \hat{y}_i)^2
+```
+````
+
+也可以使用各自独占一行的 `$$`：
+
+```md
+$$
+\frac{\partial f}{\partial x} = 2x
+$$
+```
+
+多行公式可使用 `aligned` 环境：
+
+````md
+```math
+\begin{aligned}
+f(x) &= x^2 + 2x + 1 \\
+     &= (x + 1)^2
+\end{aligned}
+```
+````
+
+公式内的反斜杠和花括号直接按 LaTeX 语法书写，在 Markdown/MDX 中不需要额外转义。普通文本中的美元符号可写为 `\$`，例如 `价格为 \$10`；普通代码块和行内代码中的公式语法不会被渲染。修改配置后，已运行的开发服务器需要重启。
+
+这里支持的是 LaTeX 数学公式语法，不是完整 `.tex` 文档编译；可用命令参考 [KaTeX 支持列表](https://katex.org/docs/supported.html)。配置方式参考 [Docusaurus 数学公式文档](https://docusaurus.io/docs/markdown-features/math-equations)。
 
 ## 自定义组件
 

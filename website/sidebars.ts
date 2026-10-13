@@ -8,6 +8,14 @@ const sidebars: SidebarsConfig = {
     {type: 'doc', id: 'intro', label: '序'},
     {type: 'doc', id: 'install', label: '安装'},
     {type: 'doc', id: 'first_workflow', label: '第一个工作流'},
+    {
+      type: 'category',
+      label: '理论篇',
+      collapsed: false,
+      items: [
+        {type: 'doc', id: 'theory/workflow', label: '基本工作流程'},
+      ],
+    },
   ],
 };
 
