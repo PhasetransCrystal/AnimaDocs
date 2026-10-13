@@ -6,252 +6,241 @@ type VisualStudyProps = {
   variant?: 'field' | 'specimen';
 };
 
-/* Deterministic mark data. Every number below is fixed so screenshots and
- * reviews are reproducible; no random source is consulted at render time. */
+/* Hero art adapter.
+ * All geometry is authored in a fixed 1440x900 viewBox and every coordinate
+ * below is a constant, so screenshots and reviews stay reproducible.
+ * Safe areas (standard 1440 viewport): title block x<720 / y>330,
+ * directory panel x 910-1385 / y>360. Focal objects sit above and between
+ * those zones; the panel is allowed to overlap the lower disc edge. */
 
-const TILE_SIZE = 46;
-const TILE_GAP = 1.32;
+const FOCUS = {x: 1150, y: 230};
 
-type TileKind = 'blue' | 'pale' | 'paper' | 'outline' | 'ink' | 'brass';
+/* ---------------------------------------------------------------- Night */
 
-type DayTile = {
-  x: number;
-  y: number;
-  size: number;
-  kind: TileKind;
-  opacity: number;
-};
+const DISC_R = 190;
+const TICK_R = 238;
 
-function buildDayTiles(): DayTile[] {
-  const tiles: DayTile[] = [];
-  const cols = 14;
-  const rows = 7;
-  const centerX = 1000;
-  const centerY = 240;
-  const rotation = (32 * Math.PI) / 180;
-  for (let row = 0; row < rows; row += 1) {
-    for (let col = 0; col < cols; col += 1) {
-      const gridX = (col - (cols - 1) / 2) * TILE_SIZE * TILE_GAP;
-      const gridY = (row - (rows - 1) / 2) * TILE_SIZE * TILE_GAP;
-      const x = centerX + gridX * Math.cos(rotation) - gridY * Math.sin(rotation);
-      const y = centerY + gridX * Math.sin(rotation) + gridY * Math.cos(rotation);
-      const hash = (col * 31 + row * 17 + col * row * 7) % 100;
-      if (hash >= 70 && hash < 86) continue;
-      let kind: TileKind = 'outline';
-      if (hash < 14) kind = 'blue';
-      else if (hash < 30) kind = 'pale';
-      else if (hash < 46) kind = 'paper';
-      else if (hash < 86) kind = 'outline';
-      else if (hash < 94) kind = 'ink';
-      else kind = 'brass';
-      if (y < 110 && kind !== 'outline' && kind !== 'pale') kind = 'outline';
-      const distance = Math.hypot(gridX, gridY);
-      const opacity = Math.max(0.2, 1 - distance / 640);
-      tiles.push({x, y, size: kind === 'brass' ? TILE_SIZE * 0.46 : TILE_SIZE, kind, opacity});
-    }
+function buildTicks(): {d: string; major: boolean}[] {
+  const ticks: {d: string; major: boolean}[] = [];
+  for (let deg = 0; deg < 360; deg += 3) {
+    // Open gap on the lower-left quadrant: the "state" break in the ring.
+    if (deg >= 132 && deg <= 168) continue;
+    const major = deg % 30 === 0;
+    const rad = (deg * Math.PI) / 180;
+    const r0 = TICK_R;
+    const r1 = TICK_R + (major ? 14 : 6);
+    const x0 = FOCUS.x + r0 * Math.cos(rad);
+    const y0 = FOCUS.y + r0 * Math.sin(rad);
+    const x1 = FOCUS.x + r1 * Math.cos(rad);
+    const y1 = FOCUS.y + r1 * Math.sin(rad);
+    ticks.push({d: `M${x0.toFixed(1)} ${y0.toFixed(1)}L${x1.toFixed(1)} ${y1.toFixed(1)}`, major});
   }
-  return tiles;
+  return ticks;
 }
 
-const dayTiles = buildDayTiles();
-
-const dayRouteMain: Array<[number, number]> = [
-  [520, 190],
-  [720, 140],
-  [905, 225],
-  [1105, 150],
-  [1305, 235],
-];
-
-const dayRouteGhost: Array<[number, number]> = [
-  [380, 300],
-  [610, 250],
-  [830, 330],
-  [1050, 260],
-  [1290, 340],
-];
-
-const dayGuideTicks = Array.from({length: 36}, (_value, index) => {
-  const angle = (index * 10 * Math.PI) / 180;
-  const inner = index % 3 === 0 ? 156 : 163;
-  return {
-    x1: 640 + Math.cos(angle) * inner,
-    y1: 150 + Math.sin(angle) * inner,
-    x2: 640 + Math.cos(angle) * 170,
-    y2: 150 + Math.sin(angle) * 170,
-  };
-});
-
-const NIGHT_DISC = {cx: 1000, cy: 235, r: 165};
-
-const nightTicks = Array.from({length: 72}, (_value, index) => {
-  const angle = (index * 5 * Math.PI) / 180;
-  const major = index % 6 === 0;
-  const inner = major ? 190 : 201;
-  return {
-    x1: NIGHT_DISC.cx + Math.cos(angle) * inner,
-    y1: NIGHT_DISC.cy + Math.sin(angle) * inner,
-    x2: NIGHT_DISC.cx + Math.cos(angle) * 213,
-    y2: NIGHT_DISC.cy + Math.sin(angle) * 213,
-    major,
-  };
-});
-
-const nightPixelsOrdered = Array.from({length: 16}, (_value, index) => {
-  const col = index % 4;
-  const row = Math.floor(index / 4);
-  return {x: 64 + col * 15, y: 296 + row * 15, size: 8, opacity: 0.78};
-});
-
-const nightPixelsScatter = Array.from({length: 18}, (_value, index) => ({
-  x: 152 + ((index * 53) % 178),
-  y: 284 + ((index * 37) % 116),
-  size: 3 + (index % 3) * 2,
-  opacity: Math.max(0.18, 0.72 - index * 0.035),
-}));
-
-const nightRulerTicks = Array.from({length: 16}, (_value, index) => ({
-  y: 140 + index * 16,
-  length: index % 5 === 0 ? 12 : 6,
-}));
-
-function toPoints(points: Array<[number, number]>): string {
-  return points.map(([x, y]) => `${x},${y}`).join(' ');
+function buildStruts(): string {
+  // Observatory ring stand-in: radial struts on the upper half of the dome.
+  const parts: string[] = [];
+  for (let deg = 196; deg <= 344; deg += 8) {
+    const rad = (deg * Math.PI) / 180;
+    const x0 = FOCUS.x + 296 * Math.cos(rad);
+    const y0 = FOCUS.y + 296 * Math.sin(rad);
+    const x1 = FOCUS.x + 322 * Math.cos(rad);
+    const y1 = FOCUS.y + 322 * Math.sin(rad);
+    parts.push(`M${x0.toFixed(1)} ${y0.toFixed(1)}L${x1.toFixed(1)} ${y1.toFixed(1)}`);
+  }
+  return parts.join('');
 }
 
-function DayAtlas(): ReactNode {
+const NIGHT_TICKS = buildTicks();
+const NIGHT_STRUTS = buildStruts();
+
+/* Pixel island where the grid "breaks" over the disc edge (night-01). */
+const PIXELS: [number, number, number, 'light' | 'dark'][] = [
+  [968, 296, 8, 'light'], [978, 296, 4, 'light'], [968, 306, 4, 'dark'],
+  [984, 304, 6, 'light'], [992, 314, 4, 'light'], [976, 316, 6, 'dark'],
+  [1002, 322, 4, 'light'], [986, 324, 3, 'light'], [960, 318, 3, 'light'],
+  [1010, 300, 3, 'dark'], [952, 286, 4, 'light'], [998, 334, 6, 'light'],
+];
+
+const PLUS_MARKS: [number, number][] = [
+  [820, 120], [1420, 78], [1365, 470], [900, 430], [1260, 40],
+];
+
+function NightObservatory(): ReactNode {
   return (
-    <g className={styles.dayArt}>
-      <g className={styles.plateFrames}>
-        <rect className={styles.plateFrameWash} x="718" y="84" width="520" height="300" transform="rotate(-7 978 234)" />
-        <rect className={styles.plateFramePaper} x="700" y="70" width="520" height="300" transform="rotate(-7 960 220)" />
-        <rect className={styles.plateFrameLine} x="1140" y="42" width="300" height="200" transform="rotate(4 1290 142)" />
+    <g className={styles.nightArt}>
+      <defs>
+        <radialGradient id="vs-disc" cx="0.42" cy="0.38" r="0.7">
+          <stop offset="0" stopColor="#ff6a5c" />
+          <stop offset="0.55" stopColor="#e34549" />
+          <stop offset="1" stopColor="#a8242c" />
+        </radialGradient>
+        <radialGradient id="vs-halo" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stopColor="#e34549" stopOpacity="0.26" />
+          <stop offset="0.45" stopColor="#e34549" stopOpacity="0.08" />
+          <stop offset="1" stopColor="#e34549" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="vs-grid-fade" cx={FOCUS.x} cy={FOCUS.y} r="640" gradientUnits="userSpaceOnUse">
+          <stop offset="0.28" stopColor="#000" />
+          <stop offset="0.34" stopColor="#fff" />
+          <stop offset="0.62" stopColor="#fff" stopOpacity="0.5" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </radialGradient>
+        <mask id="vs-grid-mask">
+          <rect width="1440" height="900" fill="url(#vs-grid-fade)" />
+        </mask>
+        <pattern id="vs-grid" width="48" height="48" patternUnits="userSpaceOnUse">
+          <path d="M48 0H0V48" className={styles.nightGridLine} />
+        </pattern>
+        <filter id="vs-disc-grain" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" />
+          <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 0" />
+          <feComposite in2="SourceGraphic" operator="in" />
+        </filter>
+      </defs>
+
+      <rect width="1440" height="900" fill="url(#vs-grid)" mask="url(#vs-grid-mask)" />
+
+      {/* Halo and rim-lit observatory ring (placeholder for the optional Krea2 scene). */}
+      <circle cx={FOCUS.x} cy={FOCUS.y} r="420" fill="url(#vs-halo)" />
+      <g className={styles.structure}>
+        <circle cx={FOCUS.x} cy={FOCUS.y} r="296" />
+        <circle cx={FOCUS.x} cy={FOCUS.y} r="322" />
+        <path d={NIGHT_STRUTS} />
+        <path className={styles.structureRim} d="M1404.6 69.2A300 300 0 0 0 1238.3 -56.7" />
       </g>
-      <g className={styles.tileField}>
-        {dayTiles.map((tile, index) => (
-          <rect
-            className={styles[`tile${tile.kind.charAt(0).toUpperCase()}${tile.kind.slice(1)}`]}
-            height={tile.size}
-            key={index}
-            opacity={tile.opacity}
-            transform={`rotate(32 ${tile.x} ${tile.y})`}
-            width={tile.size}
-            x={tile.x - tile.size / 2}
-            y={tile.y - tile.size / 2}
-          />
+
+      <line className={styles.crosshair} x1="640" y1={FOCUS.y} x2="1440" y2={FOCUS.y} />
+      <line className={styles.crosshair} x1={FOCUS.x} y1="0" x2={FOCUS.x} y2="560" />
+
+      <circle cx={FOCUS.x} cy={FOCUS.y} r={DISC_R} fill="url(#vs-disc)" />
+      <circle cx={FOCUS.x} cy={FOCUS.y} r={DISC_R} fill="#000" filter="url(#vs-disc-grain)" opacity="0.5" />
+
+      <g className={styles.tickRing}>
+        {NIGHT_TICKS.map((tick) => (
+          <path key={tick.d} d={tick.d} className={tick.major ? styles.tickMajor : styles.tickMinor} />
         ))}
       </g>
-      <g className={styles.guideStudy}>
-        <circle className={styles.guideCircle} cx="640" cy="150" r="170" />
-        <path className={styles.guideArc} d="M640 -20 A170 170 0 0 1 810 150" />
-        <g className={styles.guideTicks}>
-          {dayGuideTicks.map((tick, index) => <line key={index} {...tick} />)}
-        </g>
+      <circle className={styles.stateDot} cx="961.3" cy="413.1" r="4" />
+
+      <g className={styles.orbits} transform={`rotate(-16 ${FOCUS.x} ${FOCUS.y})`}>
+        <ellipse cx={FOCUS.x} cy={FOCUS.y} rx="430" ry="112" />
+        <ellipse className={styles.orbitSoft} cx={FOCUS.x} cy={FOCUS.y} rx="560" ry="168" />
+        <ellipse className={styles.orbitFaint} cx={FOCUS.x} cy={FOCUS.y} rx="300" ry="64" />
+        <circle className={styles.satellite} cx="746" cy="192" r="5" />
+        <circle className={styles.satelliteRing} cx="746" cy="192" r="13" />
       </g>
-      <polyline className={styles.routeGhost} points={toPoints(dayRouteGhost)} />
-      <polyline className={styles.routeMain} points={toPoints(dayRouteMain)} />
-      <polyline className={styles.routeCrawl} points={toPoints(dayRouteMain)} />
-      <g>
-        {dayRouteMain.map(([x, y]) => (
-          <g key={`${x}-${y}`}>
-            <rect className={styles.nodeSquare} height="12" width="12" x={x - 6} y={y - 6} />
-            <rect className={styles.nodeCore} height="5" width="5" x={x - 2.5} y={y - 2.5} />
-          </g>
+
+      <g className={styles.pixels}>
+        {PIXELS.map(([x, y, s, tone]) => (
+          <rect key={`${x}-${y}`} x={x} y={y} width={s} height={s} className={tone === 'light' ? styles.pixelLight : styles.pixelDark} />
         ))}
       </g>
-      <g className={styles.monoLabel}>
-        <text x="720" y="124" textAnchor="middle">[ 39.90N / 116.40E ]</text>
-        <text x="1105" y="136" textAnchor="middle">[ 31.23N / 121.47E ]</text>
-        <text x="520" y="176" textAnchor="middle">[ 22.54N / 114.05E ]</text>
+
+      <g className={styles.plusMarks}>
+        {PLUS_MARKS.map(([x, y]) => (
+          <path key={`${x}-${y}`} d={`M${x - 5} ${y}H${x + 5}M${x} ${y - 5}V${y + 5}`} />
+        ))}
       </g>
-      <g className={styles.plateNumbers}>
-        <text x="86" y="118">01</text>
-        <line x1="86" x2="126" y1="130" y2="130" />
-        <text x="1356" y="112">02</text>
-        <line x1="1356" x2="1396" y1="124" y2="124" />
-        <text x="1298" y="306">03</text>
-        <line x1="1298" x2="1338" y1="318" y2="318" />
-      </g>
-      <g className={styles.registration}>
-        <line x1="60" x2="60" y1="60" y2="200" />
-        <line x1="72" x2="72" y1="60" y2="160" />
-        <path d="M54 300h12M60 294v12M134 340h12M140 334v12" />
-      </g>
-      <g className={styles.brassMarks}>
-        <rect height="8" width="8" x="131" y="86" />
-        <rect height="6" width="6" x="1300" y="120" />
-        <circle cx="905" cy="262" r="4" />
+
+      <g className={styles.nightLabel}>
+        <text x="724" y="98">FIG.01 — OBSERVATION</text>
+        <text x="724" y="114">GRID SYSTEMS ........ : 02</text>
+        <text x="768" y="318">ORB / 0.42 · 16°</text>
+        <text x="1412" y="96" transform="rotate(90 1412 96)">SIGNAL / ANIMA-01</text>
       </g>
     </g>
   );
 }
 
-function NightObservatory(): ReactNode {
+/* ------------------------------------------------------------------ Day */
+
+type Diamond = [number, number, number, 'blue' | 'pale' | 'outline' | 'ink'];
+
+const ROUTE: [number, number][] = [
+  [740, 318], [860, 262], [975, 288], [1080, 190], [1205, 214], [1330, 120],
+];
+
+const DIAMONDS: Diamond[] = [
+  [860, 262, 30, 'blue'], [975, 288, 22, 'outline'], [1080, 190, 40, 'blue'],
+  [1205, 214, 26, 'pale'], [1330, 120, 34, 'outline'],
+  [1150, 300, 18, 'pale'], [1180, 330, 12, 'blue'], [1236, 296, 20, 'outline'],
+  [1268, 330, 14, 'pale'], [1032, 128, 16, 'pale'], [1120, 112, 12, 'ink'],
+  [930, 210, 14, 'pale'], [1290, 250, 10, 'blue'],
+];
+
+function diamondPath(x: number, y: number, s: number): string {
+  const h = s / 2;
+  return `M${x} ${y - h}L${x + h} ${y}L${x} ${y + h}L${x - h} ${y}Z`;
+}
+
+const DIAMOND_CLASS: Record<Diamond[3], string> = {
+  blue: styles.diamondBlue,
+  pale: styles.diamondPale,
+  outline: styles.diamondOutline,
+  ink: styles.diamondInk,
+};
+
+function DayAtlas(): ReactNode {
+  const solid = ROUTE.slice(2).map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x} ${y}`).join('');
+  const dashed = ROUTE.slice(0, 3).map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x} ${y}`).join('');
   return (
-    <g className={styles.nightArt}>
-      <g className={styles.cardFrames}>
-        <rect className={styles.cardDeep} height="250" rx="26" width="420" x="760" y="70" transform="rotate(-4 970 195)" />
-        <rect className={styles.cardSoft} height="200" rx="22" width="300" x="1105" y="130" transform="rotate(3 1255 230)" />
-        <rect className={styles.cardLine} height="170" rx="18" width="240" x="742" y="96" transform="rotate(-7 862 181)" />
+    <g className={styles.dayArt}>
+      <defs>
+        <pattern id="vs-lattice" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M0 0L40 40M40 0L0 40" className={styles.latticeLine} />
+          <path d="M40 0H0V40" className={styles.latticeFrame} />
+        </pattern>
+      </defs>
+
+      {/* Tilted coordinate plane. */}
+      <g transform={`translate(${FOCUS.x - 40} ${FOCUS.y - 15}) rotate(-11) skewX(-14)`}>
+        <rect className={styles.planePaper} x="-330" y="-150" width="660" height="300" />
+        <rect x="-330" y="-150" width="660" height="300" fill="url(#vs-lattice)" />
+        <path className={styles.planeAxis} d="M-330 0H330M0 -150V150" />
+        <path className={styles.planeTicks} d={Array.from({length: 17}, (_, i) => `M${-320 + i * 40} -4V4`).join('')} />
+        <rect className={styles.planeEdge} x="-330" y="-150" width="660" height="300" />
+        <path className={styles.planeCorner} d="M-330 -130V-150H-310M310 150H330V130" />
       </g>
-      <path
-        className={styles.inkBlob}
-        d="M790 130 C 830 84, 918 60, 992 82 S 1130 132, 1168 112 L 1186 208 C 1150 268, 1032 290, 946 262 S 812 226, 792 182 Z"
-      />
-      <g className={styles.echoDisc}>
-        <circle cx="700" cy="130" r="34" />
-        <circle className={styles.echoDiscRing} cx="700" cy="130" r="45" />
+
+      <path className={styles.routeDashed} d={dashed} />
+      <path className={styles.routeSolid} d={solid} />
+
+      {DIAMONDS.map(([x, y, s, kind]) => (
+        <path key={`${x}-${y}`} d={diamondPath(x, y, s)} className={DIAMOND_CLASS[kind]} />
+      ))}
+
+      {/* Bezier-style handles on two nodes (day-01). */}
+      <g className={styles.handles}>
+        <path d="M1046 214L1114 166" />
+        <rect x="1042" y="210" width="8" height="8" />
+        <rect x="1110" y="162" width="8" height="8" />
+        <path d="M1296 140L1364 100" />
+        <rect x="1292" y="136" width="8" height="8" />
+        <rect x="1360" y="96" width="8" height="8" />
       </g>
-      <circle className={styles.signalDisc} cx={NIGHT_DISC.cx} cy={NIGHT_DISC.cy} r={NIGHT_DISC.r} />
-      <circle className={styles.discEdge} cx={NIGHT_DISC.cx} cy={NIGHT_DISC.cy} r={NIGHT_DISC.r - 14} />
-      <g className={styles.tickRing}>
-        {nightTicks.map((tick, index) => (
-          <line className={tick.major ? styles.tickMajor : styles.tickMinor} key={index} x1={tick.x1} x2={tick.x2} y1={tick.y1} y2={tick.y2} />
+
+      <g className={styles.nodes}>
+        {ROUTE.map(([x, y]) => (
+          <rect key={`${x}-${y}`} x={x - 4} y={y - 4} width="8" height="8" />
         ))}
       </g>
-      <g className={styles.orbitArcs}>
-        <ellipse cx="1000" cy="235" rx="580" ry="120" strokeDasharray="720 280 520 925" transform="rotate(-16 1000 235)" />
-        <ellipse className={styles.orbitArcSoft} cx="1000" cy="235" rx="430" ry="90" strokeDasharray="430 210 400 773" transform="rotate(18 1000 235)" />
+      <rect className={styles.goldMark} x="734" y="312" width="12" height="12" />
+      <circle className={styles.redRing} cx="1080" cy="190" r="34" />
+
+      <g className={styles.registration}>
+        <path d="M820 115H836M828 107V123" />
+        <path d="M1404 300H1420M1412 292V308" />
+        <path d="M1000 400H1016M1008 392V408" />
       </g>
-      <g className={styles.trajectory}>
-        <line x1="60" x2="1380" y1="470" y2="150" />
-        <line x1="240" x2="1240" y1="60" y2="540" />
-        <circle className={styles.nodeDot} cx="720" cy="284" r="4" />
-        <circle className={styles.nodeDot} cx="700" cy="120" r="4" />
-        <path className={styles.plusMark} d="M314 388h12M320 382v12M1074 222h12M1080 216v12M614 240h12M620 234v12" />
+
+      <g className={styles.dayLabel}>
+        <text x="756" y="304">[ INDEX / 01 ]</text>
+        <text x="1222" y="240">[ 38.49°N, 117.62°E ]</text>
+        <text x="1400" y="84" textAnchor="end">[ ROUTE A-03 ]</text>
+        <text x="724" y="98">(1) PLANE · (2) ROUTE · (3) TILE</text>
       </g>
-      <g className={styles.stateRing}>
-        <circle cx="520" cy="160" r="42" />
-        <circle cx="520" cy="160" r="31" />
-        <path className={styles.stateRingGap} d="M520 118 A42 42 0 1 1 484 135" />
-        <circle className={styles.stateRingDot} cx="484" cy="135" r="3.5" />
-      </g>
-      <g className={styles.nightLabel}>
-        <text x="90" y="150">FIELD LOG ...... 04</text>
-        <text x="90" y="166">ORBIT SYNC ... 76.2</text>
-        <text x="90" y="182">DISC DRIFT .... 0.8</text>
-        <text x="90" y="198">STATE ........ LIVE</text>
-      </g>
-      <g className={styles.seal}>
-        <rect height="36" rx="9" width="36" x="782" y="300" transform="rotate(-6 800 318)" />
-        <path d="M800 306 L812 318 800 330 788 318 Z M794 312 L806 324 M806 312 L794 324" transform="rotate(-6 800 318)" />
-      </g>
-      <g className={styles.pixelIslands}>
-        {nightPixelsOrdered.map((pixel, index) => (
-          <rect height={pixel.size} key={`o-${index}`} opacity={pixel.opacity} width={pixel.size} x={pixel.x} y={pixel.y} />
-        ))}
-        {nightPixelsScatter.map((pixel, index) => (
-          <rect height={pixel.size} key={`s-${index}`} opacity={pixel.opacity} width={pixel.size} x={pixel.x} y={pixel.y} />
-        ))}
-      </g>
-      <g className={styles.rulerTicks}>
-        {nightRulerTicks.map((tick, index) => (
-          <line key={index} x1="44" x2={44 + tick.length} y1={tick.y} y2={tick.y} />
-        ))}
-      </g>
-      <circle className={styles.oliveDot} cx="648" cy="86" r="5" />
-      <circle className={styles.oliveDot} cx="240" cy="140" r="4" />
-      <circle className={styles.blueDot} cx="1330" cy="336" r="5" />
     </g>
   );
 }
@@ -259,7 +248,12 @@ function NightObservatory(): ReactNode {
 export default function VisualStudy({variant = 'field'}: VisualStudyProps): ReactNode {
   return (
     <div className={`${styles.backgroundArt} ${styles[variant]}`} aria-hidden="true">
-      <svg className={styles.diagramArt} viewBox="0 0 1440 900" preserveAspectRatio="xMidYMin slice" fill="none" focusable="false">
+      <svg
+        className={styles.diagramArt}
+        viewBox="0 0 1440 900"
+        preserveAspectRatio="xMidYMin slice"
+        fill="none"
+        focusable="false">
         <DayAtlas />
         <NightObservatory />
       </svg>
