@@ -13,7 +13,7 @@ const sidebars: SidebarsConfig = {
       label: '理论篇',
       collapsed: false,
       items: [
-        {type: 'doc', id: 'theory/workflow', label: '基本工作流程'},
+        {type: 'doc', id: 'theory/generation_basics', label: '生图基本原理'},
       ],
     },
   ],
