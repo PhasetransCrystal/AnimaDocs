@@ -92,3 +92,67 @@ vae加载器节点同理。完成后，这个工作流应该是长这个样子�
 请注意：下面以及后文使用到的工作流都是用于表达该生图方案的基本逻辑框架，不代表同样效果的唯一实现方案。
 
 开始本部分前，强烈推荐先[了解ai生图基本原理](theory/generation_basics)，这有助于您理解为什么要这样连线。
+
+首先我们找到需要用到的模型加载类节点。请注意，节点内需要选择你之前下载并放在对应位置的模型名字：
+
+<div style={{ textAlign: 'center' }}>
+    <img
+        src="/img/docs/first_workflow/cui_2.png"
+        alt="CUI-2"
+    />
+</div>
+
+在这些节点的基础上，我们来配置提示词编码，采样节点以及输出节点：
+
+<div style={{ textAlign: 'center' }}>
+    <img
+        src="/img/docs/first_workflow/cui_3.png"
+        alt="CUI-3"
+    />
+</div>
+
+*注意这些连线！相同颜色的线条是连在一起的，latent和vae从节点下面穿过去了，视觉上不连续但实际可以表示数据传递
+
+`K采样器`节点是整个生图的核心，请按照图中的数据进行配置。以Anima-Base为例：
+- 种子/seed：最右侧有个蓝色小按钮，点击可以切换模式，通常使用随机化（默认的模式）。一般认为种子数值是在不修改其它条件的情况下影响随机化出图结果的核心量。
+- 步数/steps：官方推荐值30-50，但个人感觉20足够。高步数会让产出一张图的时间变得更长，因为要进行更多次采样循环。
+- cfg：官方推荐4.0-5.0，个人使用的是6.0。一定范围内调整对出图结果影响不大，但不要调的太小/太大
+- 采样器名称/sampler_name：仅推荐使用`er_sde`。其实存在为anima专门设计的更好的采样器节点，但属于第三方节点，这里暂时不用。
+- 调度器/schedular：使用默认的`simple`即可。
+- 降噪/denoise：文生图一般选1，图生图视情况而定。文生图此值拉低可以增加画面多样性，但同时也会导致更高的错误出图概率。
+
+对于大部分蒸馏模型(例如Anima-Turbo)，cfg会被推荐恒为1，步数固定8。具体情况请以使用的模型的官方推荐数值为准。
+
+在`Clip文本编码`节点分别输入正负提示词。提示词全部使用英文，可以danboorutag与自然语言混合使用。
+
+通常情况下，负面提示词使用一套通用内容即可。负面提示词可以被理解为你不希望画面中有的内容。在特殊需求下可以调整增减：
+
+```text
+worst quality, low quality, normal quality, lowres, blurry, pixelated, jpeg artifacts, chromatic aberration, score_1, score_2, score_3, score_4, bad anatomy, deformed, distorted, disfigured, extra limbs, extra arms, extra fingers, extra toes, missing fingers, missing toes, fused fingers, fused toes, mutated hands, bad hands, bad feet, poorly drawn hands, poorly drawn face, multiple views, comic, monochrome, grayscale, flat color, text, watermark, signature, artist name, cropped,
+```
+
+正面提示词则根据自己的需求完成即可。例如，这里的测试我找了一组德克萨斯的提示词：
+
+```text
+newest, masterpiece, best quality, very aesthetic, absurdres,
+
+1girl, solo, texas the omertosa (arknights), arknights, wolf girl, wolf ears, animal ear fluff, wolf tail, hair between eyes, yellow eyes, orange eyes, brown eyes, black hair, long hair, very long hair, medium breasts, white shirt, black vest, blue gloves, fingerless gloves, collared shirt, black pantyhose, blue shorts, pantyhose under shorts, black jacket, long sleeves, blue necktie, holding sword, dual wielding, two swords, standing, closed mouth, smile, looking at viewer, full body, white background, simple background, view from front with side angle
+
+Texas the Omertosa stands in a full-body pose against a blank white background, body turned at a slight side angle while her face looks at the viewer. She holds two swords in her hands. She wears a white collared shirt under a black vest and black jacket with long sleeves, a blue necktie, blue fingerless gloves, blue shorts, and black pantyhose under the shorts. Her expression is a closed-mouth smile.
+```
+
+完成后，点击右上角运行按钮，等待计算完成，您就可以获得第一张图像了，比如这样：
+
+<div style={{ textAlign: 'center' }}>
+    <img
+        src="/img/docs/first_workflow/first_output.png"
+        alt="第一张图。简单小德。"
+        style={{ width: '70%', height: 'auto' }}
+    />
+</div>
+
+当然，由于没有配置画风方面的内容，大概结果只会是“能看出是这个人，但是算不上好看”的阶段。
+不用担心，下一章我们会提到如何配置画风等要素，这会让出图风格看起来更像某位画师。我们还可以使用别的方法来改变画风。
+
+你可以在`ComfyUI/output`路径下找到你的原图。
+如果一切顺利，恭喜你，你已经基本掌握了如何跑图（是真的。后面大多数内容都可以被视为提高出图效率与质量的小技巧。）
