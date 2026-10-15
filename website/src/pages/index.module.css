@@ -340,7 +340,6 @@
 }
 
 :global([data-theme='light']) .signalPanel { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%); }
-:global([data-theme='light']) .panelStatus { clip-path: polygon(0 0, 100% 0, 100% 78%, 12% 100%, 0 78%); }
 :global([data-theme='light']) .heroBanner { --hero-accent: var(--anima-blue); }
 
 @media screen and (min-width: 1600px) {

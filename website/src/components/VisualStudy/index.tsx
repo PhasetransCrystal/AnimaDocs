@@ -234,12 +234,37 @@ function toPoints(points: Array<[number, number]>): string {
   return points.map(([x, y]) => `${x},${y}`).join(' ');
 }
 
-/* Day-04 study: deterministic data plate values (stable for screenshots). */
-const dayChartBars = [34, 52, 41, 66, 58, 74, 49, 63, 80, 57];
-const dayChartLine: Array<[number, number]> = dayChartBars.map((value, index) => [
-  176 + index * 16,
-  300 - value * 0.55,
-]);
+/* Day-04 study: irregular pale blue wash blocks stacked under the lattice.
+ * Seeded LCG so the layout is identical on every render and screenshot. */
+type WashBlock = {x: number; y: number; width: number; height: number; tone: number; opacity: number};
+
+function buildWashBlocks(): WashBlock[] {
+  let seed = 20260816;
+  const random = () => {
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    return seed / 4294967296;
+  };
+  const blocks: WashBlock[] = [];
+  for (let index = 0; index < 34; index += 1) {
+    // Snap to the 48px lattice so block edges land on grid lines.
+    const col = Math.floor(random() * 22) + 8;
+    const row = Math.floor(random() * 11);
+    const width = (Math.floor(random() * 5) + 2) * 48;
+    const height = (Math.floor(random() * 4) + 1) * 48;
+    blocks.push({
+      x: col * 48,
+      y: row * 48,
+      width,
+      height,
+      tone: Math.floor(random() * 3),
+      opacity: 0.18 + random() * 0.32,
+    });
+  }
+  return blocks;
+}
+
+const washBlocks = buildWashBlocks();
+const washToneClass = ['washA', 'washB', 'washC'] as const;
 
 function DayAtlas(): ReactNode {
   return (
@@ -270,6 +295,19 @@ function DayAtlas(): ReactNode {
           <rect fill="url(#vsDayLatticeFade)" height="560" width="1440" />
         </mask>
       </defs>
+      <g className={styles.washField} mask="url(#vsDayLatticeMask)">
+        {washBlocks.map((block, index) => (
+          <rect
+            className={styles[washToneClass[block.tone]]}
+            height={block.height}
+            key={index}
+            opacity={block.opacity}
+            width={block.width}
+            x={block.x}
+            y={block.y}
+          />
+        ))}
+      </g>
       <rect fill="url(#vsDayLattice)" height="560" mask="url(#vsDayLatticeMask)" width="1440" />
       <g className={styles.plateFrames}>
         <rect className={styles.plateFrameWash} x="718" y="84" width="520" height="300" transform="rotate(-7 978 234)" />
@@ -321,25 +359,6 @@ function DayAtlas(): ReactNode {
         <rect height="16" width="44" x="1328" y="243" />
         <text x="1350" y="254" textAnchor="middle">A-05</text>
         <path d="M905 231V242H928M1305 241V251H1328" />
-      </g>
-      {/* Data plate: bars + sparkline, purely decorative. */}
-      <g className={styles.dataPlate}>
-        <rect className={styles.dataPlateFrame} height="118" width="196" x="160" y="200" />
-        <rect className={styles.dataPlateHead} height="18" width="196" x="160" y="200" />
-        <text className={styles.dataPlateTitle} x="168" y="213">[ SAMPLING / STEP ]</text>
-        <text className={styles.dataPlateValue} x="348" y="213" textAnchor="end">63%</text>
-        {dayChartBars.map((value, index) => (
-          <rect
-            className={index === 8 ? styles.dataBarActive : styles.dataBar}
-            height={value * 0.55}
-            key={index}
-            width="9"
-            x={172 + index * 16}
-            y={308 - value * 0.55}
-          />
-        ))}
-        <polyline className={styles.dataLine} points={toPoints(dayChartLine)} />
-        <line className={styles.dataBase} x1="168" x2="348" y1="308" y2="308" />
       </g>
       <g className={styles.plateNumbers}>
         <text x="86" y="118">01</text>

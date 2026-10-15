@@ -130,19 +130,11 @@
   letter-spacing: 0.08em;
 }
 
-.dataPlateFrame { fill: #ffffff; fill-opacity: 0.86; stroke: var(--anima-line-strong); stroke-opacity: 0.6; }
-.dataPlateHead { fill: var(--anima-blue); }
-.dataPlateTitle,
-.dataPlateValue {
-  fill: #ffffff;
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-}
-.dataBar { fill: #b9cbe8; }
-.dataBarActive { fill: var(--anima-blue); }
-.dataLine { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.7; stroke-width: 1; }
-.dataBase { stroke: var(--anima-line-strong); }
+/* Pale stacked wash blocks under the lattice; overlaps build the layering. */
+.washField { mix-blend-mode: multiply; }
+.washA { fill: #dce6f5; }
+.washB { fill: #c9d8ef; }
+.washC { fill: #e8eef7; }
 
 @keyframes spin360 { to { transform: rotate(360deg); } }
 @keyframes routeCrawl { to { stroke-dashoffset: -160; } }
