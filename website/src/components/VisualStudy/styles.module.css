@@ -140,11 +140,18 @@
  * level share one fill so the stepped edge reads as a single band. */
 /* The coastline in index.tsx already bounds the land; no extra fade mask. */
 .landShadow rect { fill: var(--anima-ink); fill-opacity: 0.05; }
-.land0 rect { fill: #e6edf7; }
-.land1 rect { fill: #d6e2f3; }
-.land2 rect { fill: #c3d4ee; }
-.land3 rect { fill: #a9c1e8; }
-.land4 rect { fill: #8eaee2; }
+.land0 rect { fill: #e2eaf6; }
+.land1 rect { fill: #d6e1f3; }
+.land2 rect { fill: #cfdcf1; }
+.land3 rect { fill: #bfd0ec; }
+.land4 rect { fill: #aec3e7; }
+.land5 rect { fill: #9cb6e2; }
+.land6 rect { fill: #8aa8dc; }
+
+/* Lattice redrawn on top of the land in the land's own rotated frame, in
+ * white so it stays legible over the blue terraces. */
+.landLatticeLine { fill: none; stroke: #ffffff; stroke-opacity: 0.7; }
+.landLatticeCross { fill: none; stroke: #1d4aa6; stroke-opacity: 0.45; }
 
 @keyframes spin360 { to { transform: rotate(360deg); } }
 @keyframes routeCrawl { to { stroke-dashoffset: -160; } }

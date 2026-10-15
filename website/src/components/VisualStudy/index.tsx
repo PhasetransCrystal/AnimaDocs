@@ -271,9 +271,9 @@ const washBlocks = buildWashBlocks().filter((block) => block.x < 760);
  * rows; higher levels are smaller and deeper blue (a progressive gradient). */
 // The land fills the upper-right wedge: right of a coastline running from
 // the top edge (~x 884) diagonally down to the bottom of the directory panel.
-const LAND_STEP = 24;
-const LAND_LEVELS = 5;
-const LAND_BAND = 92; // depth (in viewBox units) per terrace level
+const LAND_STEP = 48; // matches the 48px lattice, so cells read as grid tiles
+const LAND_LEVELS = 7;
+const LAND_BAND = 64; // depth (in viewBox units) per terrace level
 const LAND_ROTATE = -7; // parallel to the tilted plate
 const LAND_PIVOT = {x: 960, y: 220};
 const landCoast: Array<[number, number]> = [
@@ -311,7 +311,13 @@ function landDepth(px: number, py: number): number {
 
 /** Smooth deterministic undulation so terrace edges wander like contours. */
 function landNoise(u: number, v: number): number {
-  return 34 * Math.sin(u * 0.019 + 1.3) * Math.cos(v * 0.023 + 0.4) + 16 * Math.sin((u + v) * 0.051 + 2.1);
+  return 46 * Math.sin(u * 0.013 + 1.3) * Math.cos(v * 0.016 + 0.4) + 22 * Math.sin((u + v) * 0.031 + 2.1);
+}
+
+/** Zones where one intermediate level is missing, so the colour jumps
+ * directly from level n-1 to n+1 (e.g. blue 1 -> blue 3). */
+function landSkip(u: number, v: number): boolean {
+  return Math.sin(u * 0.009 + 0.7) * Math.cos(v * 0.012 + 1.9) > 0.42;
 }
 
 function buildLandTerraces(): LandRow[][] {
@@ -321,19 +327,21 @@ function buildLandTerraces(): LandRow[][] {
   const sin = Math.sin(angle);
   // Walk a grid in the rotated frame, map each cell centre back to viewBox
   // space, classify it, then merge same-level cells into horizontal runs.
-  for (let v = -120; v < 720; v += LAND_STEP) {
+  // Start on a multiple of 48 so cells align with the land lattice pattern.
+  for (let v = -144; v < 720; v += LAND_STEP) {
     let runLevel = -1;
     let runStart = 0;
     const flush = (end: number) => {
       if (runLevel >= 0) levels[runLevel].push({x: runStart, y: v, width: end - runStart});
     };
-    for (let u = 760; u <= 1600; u += LAND_STEP) {
+    for (let u = 768; u <= 1600; u += LAND_STEP) {
       const cu = u + LAND_STEP / 2 - LAND_PIVOT.x;
       const cv = v + LAND_STEP / 2 - LAND_PIVOT.y;
       const px = LAND_PIVOT.x + cu * cos - cv * sin;
       const py = LAND_PIVOT.y + cu * sin + cv * cos;
       const depth = landDepth(px, py) + landNoise(u, v);
-      const level = depth < 0 ? -1 : Math.min(LAND_LEVELS - 1, Math.floor(depth / LAND_BAND));
+      let level = depth < 0 ? -1 : Math.min(LAND_LEVELS - 1, Math.floor(depth / LAND_BAND));
+      if (level >= 1 && level < LAND_LEVELS - 1 && landSkip(u, v)) level += 1;
       if (level !== runLevel) {
         flush(u);
         runLevel = level;
@@ -373,6 +381,16 @@ function DayAtlas(): ReactNode {
           <stop offset="0.25" stopColor="#fff" stopOpacity="0" />
           <stop offset="0.6" stopColor="#fff" stopOpacity="1" />
         </linearGradient>
+        <pattern id="vsDayLandLattice" height="48" patternUnits="userSpaceOnUse" width="48">
+          <path className={styles.landLatticeLine} d="M0 0H48M0 0V48" />
+          <path className={styles.landLatticeCross} d="M-3 -3L3 3M3 -3L-3 3" />
+        </pattern>
+        {/* Clip the white lattice to the land so it only appears over blue. */}
+        <clipPath id="vsDayLandClip">
+          {landTerraces.flat().map((row, index) => (
+            <rect height={LAND_STEP} key={index} width={row.width} x={row.x} y={row.y} />
+          ))}
+        </clipPath>
         <mask id="vsDayLatticeMask">
           <rect fill="url(#vsDayLatticeFade)" height="560" width="1440" />
         </mask>
@@ -404,6 +422,14 @@ function DayAtlas(): ReactNode {
             ))}
           </g>
         ))}
+        <rect
+          clipPath="url(#vsDayLandClip)"
+          fill="url(#vsDayLandLattice)"
+          height="912"
+          width="912"
+          x="768"
+          y="-144"
+        />
       </g>
       <rect fill="url(#vsDayLattice)" height="560" mask="url(#vsDayLatticeMask)" width="1440" />
       <g className={styles.plateFrames}>
