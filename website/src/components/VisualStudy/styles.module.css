@@ -199,6 +199,75 @@
 
 .nightLabel text { fill: #ece9e3; fill-opacity: 0.55; }
 
+/* Motion --------------------------------------------------------------------
+ * Slow, low-amplitude loops only. The disc itself never moves so it stays the
+ * stable focus; everything that moves is secondary and peripheral. */
+
+/* Day: route nodes blink in sequence along the route. */
+.nodeBlink { animation: nodeBlink 7.2s ease-in-out infinite; }
+
+/* Night: terrace islands breathe by a few pixels. */
+.terraceDrift {
+  animation: terraceDrift 38s ease-in-out infinite alternate;
+  transform-box: view-box;
+}
+
+/* Eccentric twin swings slightly, so the overlap lens changes shape. */
+.lensDrift {
+  animation: lensDrift 24s ease-in-out infinite alternate;
+  transform-box: view-box;
+}
+
+/* Tick ring rotates around the disc centre (FOCUS 1010,236). */
+.tickSpin {
+  animation: spin360 240s linear infinite;
+  transform-box: view-box;
+  transform-origin: 1010px 236px;
+}
+
+.orbitComet {
+  animation: orbitComet 22s linear infinite;
+  fill: none;
+  stroke: #ece9e3;
+  stroke-dasharray: 34 966;
+  stroke-linecap: round;
+  stroke-opacity: 0.85;
+  stroke-width: 1.4;
+}
+.orbitCometSlow { animation-duration: 34s; animation-direction: reverse; stroke-opacity: 0.5; }
+
+.pulse {
+  animation: pulse 4.8s ease-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.flicker { animation: flicker 5s steps(1, end) infinite; }
+
+@keyframes nodeBlink {
+  0%, 70%, 100% { opacity: 1; }
+  78% { opacity: 0.15; }
+  86% { opacity: 1; }
+}
+@keyframes terraceDrift {
+  from { transform: translate(0, 0); }
+  to { transform: translate(-14px, 10px); }
+}
+@keyframes lensDrift {
+  from { transform: translate(0, 0); }
+  to { transform: translate(-36px, 18px); }
+}
+@keyframes orbitComet { to { stroke-dashoffset: -1000; } }
+@keyframes pulse {
+  0% { opacity: 0.6; transform: scale(1); }
+  80%, 100% { opacity: 0; transform: scale(2.2); }
+}
+@keyframes flicker {
+  0%, 88%, 100% { opacity: 1; }
+  90% { opacity: 0.1; }
+  94% { opacity: 0.8; }
+}
+
 /* Theme switching ---------------------------------------------------------- */
 
 :global([data-theme='dark']) .dayArt { display: none; }
@@ -236,9 +305,18 @@
 
 @media (prefers-reduced-motion: reduce) {
   .guideCircle,
-  .routeCrawl {
+  .routeCrawl,
+  .nodeBlink,
+  .terraceDrift,
+  .lensDrift,
+  .tickSpin,
+  .pulse,
+  .flicker {
     animation: none;
   }
+
+  /* A frozen comet would read as a stray dash, so hide it. */
+  .orbitComet { display: none; }
 }
 
 @media (forced-colors: active) {

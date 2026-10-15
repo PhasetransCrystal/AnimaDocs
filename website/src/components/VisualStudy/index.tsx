@@ -186,9 +186,11 @@ function NightObservatory(): ReactNode {
           thin contour arcs keep the curved edge as the readable mark. */}
       <g mask="url(#vs-terrace-mask)">
         <g filter="url(#vs-terrace-blur)">
-          {NIGHT_TERRACES.map((t) => (
-            <path key={`tf-${t.level}`} d={t.d} className={styles[`terrace${t.level}`]} />
-          ))}
+          <g className={styles.terraceDrift}>
+            {NIGHT_TERRACES.map((t) => (
+              <path key={`tf-${t.level}`} d={t.d} className={styles[`terrace${t.level}`]} />
+            ))}
+          </g>
         </g>
       </g>
 
@@ -199,27 +201,44 @@ function NightObservatory(): ReactNode {
 
       <circle cx={FOCUS.x} cy={FOCUS.y} r={DISC_R} fill="url(#vs-disc)" />
       {/* Overlap lens with the eccentric twin, then the twin's outline. */}
-      <circle className={styles.discLens} cx={FOCUS.x + TWIN.dx} cy={FOCUS.y + TWIN.dy} r={DISC_R} clipPath="url(#vs-disc-clip)" />
+      {/* The clip stays on the wrapper so only the twin drifts, not the clip. */}
+      <g clipPath="url(#vs-disc-clip)">
+        <circle className={`${styles.discLens} ${styles.lensDrift}`} cx={FOCUS.x + TWIN.dx} cy={FOCUS.y + TWIN.dy} r={DISC_R} />
+      </g>
       <circle cx={FOCUS.x} cy={FOCUS.y} r={DISC_R} fill="#000" filter="url(#vs-disc-grain)" opacity="0.42" />
 
-      <g className={styles.tickRing}>
-        {NIGHT_TICKS.map((tick) => (
-          <path key={tick.d} d={tick.d} className={tick.major ? styles.tickMajor : styles.tickMinor} />
-        ))}
+      {/* Tick ring and state dot rotate together so the gap keeps its dot. */}
+      <g className={styles.tickSpin}>
+        <g className={styles.tickRing}>
+          {NIGHT_TICKS.map((tick) => (
+            <path key={tick.d} d={tick.d} className={tick.major ? styles.tickMajor : styles.tickMinor} />
+          ))}
+        </g>
+        <circle className={styles.stateDot} cx={STATE_DOT[0].toFixed(1)} cy={STATE_DOT[1].toFixed(1)} r="4" />
       </g>
-      <circle className={styles.stateDot} cx={STATE_DOT[0].toFixed(1)} cy={STATE_DOT[1].toFixed(1)} r="4" />
 
       <g className={styles.orbits} transform={`rotate(-16 ${FOCUS.x} ${FOCUS.y})`}>
         <ellipse cx={FOCUS.x} cy={FOCUS.y} rx="430" ry="112" />
         <ellipse className={styles.orbitSoft} cx={FOCUS.x} cy={FOCUS.y} rx="560" ry="168" />
         <ellipse className={styles.orbitFaint} cx={FOCUS.x} cy={FOCUS.y} rx="300" ry="64" />
+        {/* Short bright segments travelling along two orbits. */}
+        <ellipse className={styles.orbitComet} cx={FOCUS.x} cy={FOCUS.y} rx="430" ry="112" pathLength={1000} />
+        <ellipse className={`${styles.orbitComet} ${styles.orbitCometSlow}`} cx={FOCUS.x} cy={FOCUS.y} rx="560" ry="168" pathLength={1000} />
         <circle className={styles.satellite} cx={FOCUS.x - 404} cy={FOCUS.y - 38} r="5" />
-        <circle className={styles.satelliteRing} cx={FOCUS.x - 404} cy={FOCUS.y - 38} r="13" />
+        <circle className={`${styles.satelliteRing} ${styles.pulse}`} cx={FOCUS.x - 404} cy={FOCUS.y - 38} r="13" />
       </g>
 
       <g className={styles.pixels}>
-        {PIXELS.map(([x, y, s, tone]) => (
-          <rect key={`${x}-${y}`} x={FOCUS.x + x} y={FOCUS.y + y} width={s} height={s} className={tone === 'light' ? styles.pixelLight : styles.pixelDark} />
+        {PIXELS.map(([x, y, s, tone], index) => (
+          <rect
+            key={`${x}-${y}`}
+            x={FOCUS.x + x}
+            y={FOCUS.y + y}
+            width={s}
+            height={s}
+            className={`${tone === 'light' ? styles.pixelLight : styles.pixelDark} ${index % 3 === 0 ? styles.flicker : ''}`}
+            style={{animationDelay: `${(index * 0.7) % 5}s`}}
+          />
         ))}
       </g>
 
@@ -547,10 +566,17 @@ function DayAtlas(): ReactNode {
       <polyline className={styles.routeMain} points={toPoints(dayRouteMain)} />
       <polyline className={styles.routeCrawl} points={toPoints(dayRouteMain)} />
       <g>
-        {dayRouteMain.map(([x, y]) => (
+        {dayRouteMain.map(([x, y], index) => (
           <g key={`${x}-${y}`}>
             <rect className={styles.nodeSquare} height="12" width="12" x={x - 6} y={y - 6} />
-            <rect className={styles.nodeCore} height="5" width="5" x={x - 2.5} y={y - 2.5} />
+            <rect
+              className={`${styles.nodeCore} ${styles.nodeBlink}`}
+              height="5"
+              width="5"
+              x={x - 2.5}
+              y={y - 2.5}
+              style={{animationDelay: `${index * 1.2}s`}}
+            />
           </g>
         ))}
       </g>
