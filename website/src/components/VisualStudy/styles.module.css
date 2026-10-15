@@ -28,19 +28,15 @@
 
 /* Frame ------------------------------------------------------------------- */
 
+/* Day frame restored from 3e7732b. */
 .field {
-  background:
-    linear-gradient(var(--anima-line) 1px, transparent 1px) 0 0 / 96px 96px,
-    linear-gradient(90deg, var(--anima-line) 1px, transparent 1px) 0 0 / 96px 96px,
-    var(--anima-paper);
-  background-blend-mode: normal;
+  background: linear-gradient(105deg, var(--anima-paper) 40%, #e7edf4 100%);
 }
 
-/* Keep the title column calm: fade art toward the left and bottom edges. */
 .field::after {
   background:
-    linear-gradient(0deg, var(--anima-paper) 4%, transparent 46%),
-    linear-gradient(90deg, var(--anima-paper) 24%, color-mix(in srgb, var(--anima-paper) 60%, transparent) 46%, transparent 64%);
+    linear-gradient(0deg, var(--anima-paper) 2%, transparent 52%),
+    linear-gradient(90deg, var(--anima-paper) 0%, transparent 40%);
   content: '';
   inset: 0;
   position: absolute;
@@ -50,39 +46,73 @@
 
 .nightArt { display: none; }
 
-/* Day: index atlas -------------------------------------------------------- */
+/* Day: tiled atlas plate (restored from 3e7732b) ---------------------------- */
 
-.planePaper { fill: #ffffff; fill-opacity: 0.72; }
-.latticeLine { fill: none; stroke: var(--anima-line); stroke-opacity: 0.7; stroke-width: 0.6; }
-.latticeFrame { fill: none; stroke: var(--anima-line); stroke-width: 0.8; }
-.planeAxis { stroke: var(--anima-blue); stroke-opacity: 0.45; stroke-width: 1; }
-.planeTicks { stroke: var(--anima-blue); stroke-opacity: 0.6; }
-.planeEdge { fill: none; stroke: var(--anima-line-strong); stroke-opacity: 0.7; }
-.planeCorner { fill: none; stroke: var(--anima-ink); stroke-width: 1.6; }
+.plateFramePaper { fill: #ffffff; fill-opacity: 0.78; stroke: var(--anima-line); }
+.plateFrameWash { fill: var(--anima-ink); fill-opacity: 0.06; }
+.plateFrameLine { fill: none; stroke: var(--anima-line-strong); stroke-opacity: 0.55; }
 
-.routeSolid { fill: none; stroke: var(--anima-blue); stroke-width: 1.6; }
-.routeDashed { fill: none; stroke: var(--anima-blue); stroke-dasharray: 5 6; stroke-opacity: 0.6; stroke-width: 1.2; }
+.tileField {
+  mask-image: linear-gradient(180deg, #000 55%, transparent 88%);
+}
 
-.diamondBlue { fill: var(--anima-blue); }
-.diamondPale { fill: #c9d7ef; }
-.diamondOutline { fill: #ffffff; stroke: var(--anima-blue); stroke-width: 1.2; }
-.diamondInk { fill: var(--anima-ink); }
+.tileBlue { fill: var(--anima-blue); fill-opacity: 0.82; }
+.tilePale { fill: #cfdcf0; }
+.tilePaper { fill: #ffffff; fill-opacity: 0.85; stroke: var(--anima-line); }
+.tileOutline { fill: none; stroke: var(--anima-line-strong); stroke-opacity: 0.6; }
+.tileInk { fill: var(--anima-ink); fill-opacity: 0.85; }
+.tileBrass { fill: var(--anima-gold); }
 
-.handles path { stroke: var(--anima-blue); stroke-opacity: 0.55; stroke-width: 0.8; }
-.handles rect { fill: #ffffff; stroke: var(--anima-blue); stroke-width: 1; }
-.nodes rect { fill: #ffffff; stroke: var(--anima-ink); stroke-width: 1.2; }
-.goldMark { fill: var(--anima-gold); }
-.redRing { fill: none; stroke: var(--anima-red); stroke-dasharray: 3 5; stroke-width: 1.1; }
-.registration path { stroke: var(--anima-line-strong); stroke-width: 1; }
+.guideCircle {
+  animation: spin360 160s linear infinite;
+  stroke: var(--anima-line-strong);
+  stroke-dasharray: 3 9;
+  stroke-opacity: 0.45;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.guideArc { stroke: var(--anima-blue); stroke-opacity: 0.8; stroke-width: 1.2; }
+.guideTicks line { stroke: var(--anima-line-strong); stroke-opacity: 0.5; }
 
-.dayLabel text,
+.routeMain { stroke: var(--anima-blue); stroke-opacity: 0.9; stroke-width: 1.75; }
+.routeGhost { stroke: var(--anima-line-strong); stroke-dasharray: 4 6; stroke-opacity: 0.55; }
+.routeCrawl {
+  animation: routeCrawl 36s linear infinite;
+  stroke: #ffffff;
+  stroke-dasharray: 2 14;
+  stroke-opacity: 0.85;
+  stroke-width: 1.5;
+}
+
+.nodeSquare { fill: var(--anima-blue); }
+.nodeCore { fill: #ffffff; }
+
+.monoLabel text {
+  fill: var(--anima-ink-soft);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+.plateNumbers text {
+  fill: var(--anima-ink);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 22px;
+  font-weight: 700;
+}
+.plateNumbers line { stroke: var(--anima-ink); stroke-width: 2; }
+
+.registration :is(line, path) { stroke: var(--anima-line-strong); stroke-opacity: 0.45; }
+.brassMarks :is(rect, circle) { fill: var(--anima-gold); }
+
+@keyframes spin360 { to { transform: rotate(360deg); } }
+@keyframes routeCrawl { to { stroke-dashoffset: -160; } }
+
 .nightLabel text {
   font-family: var(--ifm-font-family-monospace);
   font-size: 10px;
   letter-spacing: 0.1em;
 }
-
-.dayLabel text { fill: var(--anima-ink-soft); }
 
 /* Night: observatory ------------------------------------------------------ */
 
@@ -129,25 +159,28 @@
 /* Mobile: the slice crop would only show the centre strip, so scale the
  * plate down and anchor the focal object to the top right instead. */
 @media screen and (max-width: 640px) {
-  .diagramArt {
+  :global([data-theme='dark']) .diagramArt {
     aspect-ratio: 1440 / 900;
     height: auto;
     inset: 0 auto auto -78%;
     width: 205%;
   }
 
-  .field::after {
-    background: linear-gradient(0deg, var(--anima-paper) 30%, transparent 62%);
-  }
-
   :global([data-theme='dark']) .field::after {
     background: linear-gradient(0deg, #0d1014 30%, transparent 62%);
   }
 
-  .dayLabel, .nightLabel { display: none; }
+  .nightLabel { display: none; }
 }
 
 /* Fallbacks ---------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .guideCircle,
+  .routeCrawl {
+    animation: none;
+  }
+}
 
 @media (forced-colors: active) {
   .backgroundArt { display: none; }

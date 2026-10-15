@@ -1,4 +1,4 @@
-﻿import type {ReactNode} from 'react';
+import type {ReactNode} from 'react';
 
 import styles from './styles.module.css';
 
@@ -155,91 +155,147 @@ function NightObservatory(): ReactNode {
 }
 
 /* ------------------------------------------------------------------ Day */
+/* Restored from 3e7732b (pre-redesign tiled atlas). */
 
-type Diamond = [number, number, number, 'blue' | 'pale' | 'outline' | 'ink'];
+const TILE_SIZE = 46;
+const TILE_GAP = 1.32;
 
-const ROUTE: [number, number][] = [
-  [740, 318], [860, 262], [975, 288], [1080, 190], [1205, 214], [1330, 120],
-];
+type TileKind = 'blue' | 'pale' | 'paper' | 'outline' | 'ink' | 'brass';
 
-const DIAMONDS: Diamond[] = [
-  [860, 262, 30, 'blue'], [975, 288, 22, 'outline'], [1080, 190, 40, 'blue'],
-  [1205, 214, 26, 'pale'], [1330, 120, 34, 'outline'],
-  [1150, 300, 18, 'pale'], [1180, 330, 12, 'blue'], [1236, 296, 20, 'outline'],
-  [1268, 330, 14, 'pale'], [1032, 128, 16, 'pale'], [1120, 112, 12, 'ink'],
-  [930, 210, 14, 'pale'], [1290, 250, 10, 'blue'],
-];
-
-function diamondPath(x: number, y: number, s: number): string {
-  const h = s / 2;
-  return `M${x} ${y - h}L${x + h} ${y}L${x} ${y + h}L${x - h} ${y}Z`;
-}
-
-const DIAMOND_CLASS: Record<Diamond[3], string> = {
-  blue: styles.diamondBlue,
-  pale: styles.diamondPale,
-  outline: styles.diamondOutline,
-  ink: styles.diamondInk,
+type DayTile = {
+  x: number;
+  y: number;
+  size: number;
+  kind: TileKind;
+  opacity: number;
 };
 
+function buildDayTiles(): DayTile[] {
+  const tiles: DayTile[] = [];
+  const cols = 14;
+  const rows = 7;
+  const centerX = 1000;
+  const centerY = 240;
+  const rotation = (32 * Math.PI) / 180;
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      const gridX = (col - (cols - 1) / 2) * TILE_SIZE * TILE_GAP;
+      const gridY = (row - (rows - 1) / 2) * TILE_SIZE * TILE_GAP;
+      const x = centerX + gridX * Math.cos(rotation) - gridY * Math.sin(rotation);
+      const y = centerY + gridX * Math.sin(rotation) + gridY * Math.cos(rotation);
+      const hash = (col * 31 + row * 17 + col * row * 7) % 100;
+      if (hash >= 70 && hash < 86) continue;
+      let kind: TileKind = 'outline';
+      if (hash < 14) kind = 'blue';
+      else if (hash < 30) kind = 'pale';
+      else if (hash < 46) kind = 'paper';
+      else if (hash < 86) kind = 'outline';
+      else if (hash < 94) kind = 'ink';
+      else kind = 'brass';
+      if (y < 110 && kind !== 'outline' && kind !== 'pale') kind = 'outline';
+      const distance = Math.hypot(gridX, gridY);
+      const opacity = Math.max(0.2, 1 - distance / 640);
+      tiles.push({x, y, size: kind === 'brass' ? TILE_SIZE * 0.46 : TILE_SIZE, kind, opacity});
+    }
+  }
+  return tiles;
+}
+
+const dayTiles = buildDayTiles();
+
+const dayRouteMain: Array<[number, number]> = [
+  [520, 190],
+  [720, 140],
+  [905, 225],
+  [1105, 150],
+  [1305, 235],
+];
+
+const dayRouteGhost: Array<[number, number]> = [
+  [380, 300],
+  [610, 250],
+  [830, 330],
+  [1050, 260],
+  [1290, 340],
+];
+
+const dayGuideTicks = Array.from({length: 36}, (_value, index) => {
+  const angle = (index * 10 * Math.PI) / 180;
+  const inner = index % 3 === 0 ? 156 : 163;
+  return {
+    x1: 640 + Math.cos(angle) * inner,
+    y1: 150 + Math.sin(angle) * inner,
+    x2: 640 + Math.cos(angle) * 170,
+    y2: 150 + Math.sin(angle) * 170,
+  };
+});
+
+function toPoints(points: Array<[number, number]>): string {
+  return points.map(([x, y]) => `${x},${y}`).join(' ');
+}
+
 function DayAtlas(): ReactNode {
-  const solid = ROUTE.slice(2).map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x} ${y}`).join('');
-  const dashed = ROUTE.slice(0, 3).map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x} ${y}`).join('');
   return (
     <g className={styles.dayArt}>
-      <defs>
-        <pattern id="vs-lattice" width="40" height="40" patternUnits="userSpaceOnUse">
-          <path d="M0 0L40 40M40 0L0 40" className={styles.latticeLine} />
-          <path d="M40 0H0V40" className={styles.latticeFrame} />
-        </pattern>
-      </defs>
-
-      {/* Tilted coordinate plane. */}
-      <g transform={`translate(${FOCUS.x - 40} ${FOCUS.y - 15}) rotate(-11) skewX(-14)`}>
-        <rect className={styles.planePaper} x="-330" y="-150" width="660" height="300" />
-        <rect x="-330" y="-150" width="660" height="300" fill="url(#vs-lattice)" />
-        <path className={styles.planeAxis} d="M-330 0H330M0 -150V150" />
-        <path className={styles.planeTicks} d={Array.from({length: 17}, (_, i) => `M${-320 + i * 40} -4V4`).join('')} />
-        <rect className={styles.planeEdge} x="-330" y="-150" width="660" height="300" />
-        <path className={styles.planeCorner} d="M-330 -130V-150H-310M310 150H330V130" />
+      <g className={styles.plateFrames}>
+        <rect className={styles.plateFrameWash} x="718" y="84" width="520" height="300" transform="rotate(-7 978 234)" />
+        <rect className={styles.plateFramePaper} x="700" y="70" width="520" height="300" transform="rotate(-7 960 220)" />
+        <rect className={styles.plateFrameLine} x="1140" y="42" width="300" height="200" transform="rotate(4 1290 142)" />
       </g>
-
-      <path className={styles.routeDashed} d={dashed} />
-      <path className={styles.routeSolid} d={solid} />
-
-      {DIAMONDS.map(([x, y, s, kind]) => (
-        <path key={`${x}-${y}`} d={diamondPath(x, y, s)} className={DIAMOND_CLASS[kind]} />
-      ))}
-
-      {/* Bezier-style handles on two nodes (day-01). */}
-      <g className={styles.handles}>
-        <path d="M1046 214L1114 166" />
-        <rect x="1042" y="210" width="8" height="8" />
-        <rect x="1110" y="162" width="8" height="8" />
-        <path d="M1296 140L1364 100" />
-        <rect x="1292" y="136" width="8" height="8" />
-        <rect x="1360" y="96" width="8" height="8" />
-      </g>
-
-      <g className={styles.nodes}>
-        {ROUTE.map(([x, y]) => (
-          <rect key={`${x}-${y}`} x={x - 4} y={y - 4} width="8" height="8" />
+      <g className={styles.tileField}>
+        {dayTiles.map((tile, index) => (
+          <rect
+            className={styles[`tile${tile.kind.charAt(0).toUpperCase()}${tile.kind.slice(1)}`]}
+            height={tile.size}
+            key={index}
+            opacity={tile.opacity}
+            transform={`rotate(32 ${tile.x} ${tile.y})`}
+            width={tile.size}
+            x={tile.x - tile.size / 2}
+            y={tile.y - tile.size / 2}
+          />
         ))}
       </g>
-      <rect className={styles.goldMark} x="734" y="312" width="12" height="12" />
-      <circle className={styles.redRing} cx="1080" cy="190" r="34" />
-
-      <g className={styles.registration}>
-        <path d="M820 115H836M828 107V123" />
-        <path d="M1404 300H1420M1412 292V308" />
-        <path d="M1000 400H1016M1008 392V408" />
+      <g className={styles.guideStudy}>
+        <circle className={styles.guideCircle} cx="640" cy="150" r="170" />
+        <path className={styles.guideArc} d="M640 -20 A170 170 0 0 1 810 150" />
+        <g className={styles.guideTicks}>
+          {dayGuideTicks.map((tick, index) => <line key={index} {...tick} />)}
+        </g>
       </g>
-
-      <g className={styles.dayLabel}>
-        <text x="756" y="304">[ INDEX / 01 ]</text>
-        <text x="1222" y="240">[ 38.49°N, 117.62°E ]</text>
-        <text x="1400" y="84" textAnchor="end">[ ROUTE A-03 ]</text>
-        <text x="724" y="98">(1) PLANE · (2) ROUTE · (3) TILE</text>
+      <polyline className={styles.routeGhost} points={toPoints(dayRouteGhost)} />
+      <polyline className={styles.routeMain} points={toPoints(dayRouteMain)} />
+      <polyline className={styles.routeCrawl} points={toPoints(dayRouteMain)} />
+      <g>
+        {dayRouteMain.map(([x, y]) => (
+          <g key={`${x}-${y}`}>
+            <rect className={styles.nodeSquare} height="12" width="12" x={x - 6} y={y - 6} />
+            <rect className={styles.nodeCore} height="5" width="5" x={x - 2.5} y={y - 2.5} />
+          </g>
+        ))}
+      </g>
+      <g className={styles.monoLabel}>
+        <text x="720" y="124" textAnchor="middle">[ 39.90N / 116.40E ]</text>
+        <text x="1105" y="136" textAnchor="middle">[ 31.23N / 121.47E ]</text>
+        <text x="520" y="176" textAnchor="middle">[ 22.54N / 114.05E ]</text>
+      </g>
+      <g className={styles.plateNumbers}>
+        <text x="86" y="118">01</text>
+        <line x1="86" x2="126" y1="130" y2="130" />
+        <text x="1356" y="112">02</text>
+        <line x1="1356" x2="1396" y1="124" y2="124" />
+        <text x="1298" y="306">03</text>
+        <line x1="1298" x2="1338" y1="318" y2="318" />
+      </g>
+      <g className={styles.registration}>
+        <line x1="60" x2="60" y1="60" y2="200" />
+        <line x1="72" x2="72" y1="60" y2="160" />
+        <path d="M54 300h12M60 294v12M134 340h12M140 334v12" />
+      </g>
+      <g className={styles.brassMarks}>
+        <rect height="8" width="8" x="131" y="86" />
+        <rect height="6" width="6" x="1300" y="120" />
+        <circle cx="905" cy="262" r="4" />
       </g>
     </g>
   );

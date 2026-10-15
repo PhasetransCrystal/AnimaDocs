@@ -442,9 +442,9 @@
 
 /* Hero art round 1: panel frames per mode (art adapter only) ------------- */
 
-.heroArt::after { display: none; }
+:global([data-theme='dark']) .heroArt::after { display: none; }
 
-.signalPanel::before {
+:global([data-theme='dark']) .signalPanel::before {
   /* Corner registration marks; decorative, sits above panel content edges. */
   background:
     linear-gradient(var(--hero-accent), var(--hero-accent)) 0 0 / 14px 1.5px,
@@ -458,25 +458,6 @@
   position: absolute;
   z-index: 1;
 }
-
-:global([data-theme='light']) .signalPanel {
-  background: #ffffffeb;
-  border: 1px solid var(--anima-line-strong);
-  border-left: 4px solid var(--anima-blue);
-  border-radius: 0;
-  box-shadow: 8px 8px 0 color-mix(in srgb, var(--anima-blue) 9%, transparent);
-}
-:global([data-theme='light']) .indexList li { grid-template-columns: 2.6rem 1fr auto; }
-:global([data-theme='light']) .indexList li > span:first-child {
-  -webkit-text-stroke: 1px var(--anima-blue);
-  color: transparent;
-  font-family: var(--ifm-heading-font-family);
-  font-size: 1.5rem;
-  font-weight: 800;
-  line-height: 1;
-  opacity: 1;
-}
-:global([data-theme='light']) .indexList .indexItemActive > span:first-child { color: var(--anima-blue); }
 
 :global([data-theme='dark']) .signalPanel {
   backdrop-filter: blur(8px);
