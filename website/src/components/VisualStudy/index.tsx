@@ -233,7 +233,6 @@ function NightObservatory(): ReactNode {
         <text x="560" y="98">FIG.01 — OBSERVATION</text>
         <text x="560" y="114">GRID SYSTEMS ........ : 02</text>
         <text x="628" y="324">ORB / 0.42 · 16°</text>
-        <text x="1250" y="318">CONTOUR / 08 LV</text>
         <text x="1412" y="96" transform="rotate(90 1412 96)">SIGNAL / ANIMA-01</text>
       </g>
     </g>

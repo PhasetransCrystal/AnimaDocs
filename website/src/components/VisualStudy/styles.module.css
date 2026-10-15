@@ -178,7 +178,7 @@
 .terrace6 { fill: #3a1c1f; }
 .terrace7 { fill: #441e21; }
 /* Eccentric twin disc: only the overlap lens is drawn, in a deeper red. */
-.discLens { fill: #8e1f26; fill-opacity: 0.72; }
+.discLens { fill: #a8272e; fill-opacity: 0.5; }
 
 .crosshair { stroke: #ece9e3; stroke-dasharray: 2 6; stroke-opacity: 0.22; }
 
