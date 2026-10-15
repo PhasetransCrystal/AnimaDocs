@@ -263,7 +263,48 @@ function buildWashBlocks(): WashBlock[] {
   return blocks;
 }
 
-const washBlocks = buildWashBlocks();
+/* Left half keeps the faint scattered wash; the right half becomes terraces. */
+const washBlocks = buildWashBlocks().filter((block) => block.x < 760);
+
+/* Right half: stepped terraces drawn in the plate's -7deg frame, like
+ * contour bands on a map. Each level is a stepped ellipse built from 24px
+ * rows; higher levels are smaller and deeper blue (a progressive gradient). */
+// Sits right of / below the plate so the terraces are not hidden by it.
+const LAND_CENTER = {x: 1300, y: 360};
+const LAND_STEP = 24;
+const landLevels = [
+  {rx: 330, ry: 230},
+  {rx: 262, ry: 180},
+  {rx: 200, ry: 136},
+  {rx: 140, ry: 94},
+  {rx: 82, ry: 54},
+];
+
+type LandRow = {x: number; y: number; width: number};
+
+function buildLandLevel(level: number): LandRow[] {
+  let seed = 7331 + level * 97;
+  const random = () => {
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    return seed / 4294967296;
+  };
+  const {rx, ry} = landLevels[level];
+  // Shift inner levels slightly so the "peak" sits off-centre.
+  const cx = LAND_CENTER.x + level * 14;
+  const cy = LAND_CENTER.y - level * 8;
+  const rows: LandRow[] = [];
+  for (let y = cy - ry; y < cy + ry; y += LAND_STEP) {
+    const dy = (y + LAND_STEP / 2 - cy) / ry;
+    const half = rx * Math.sqrt(Math.max(0, 1 - dy * dy));
+    // Snap both edges to the step grid with seeded jitter -> stepped coastline.
+    const left = Math.round((cx - half + (random() - 0.5) * 40) / LAND_STEP) * LAND_STEP;
+    const right = Math.round((cx + half + (random() - 0.5) * 40) / LAND_STEP) * LAND_STEP;
+    if (right - left >= LAND_STEP) rows.push({x: left, y, width: right - left});
+  }
+  return rows;
+}
+
+const landTerraces = landLevels.map((_level, index) => buildLandLevel(index));
 const washToneClass = ['washA', 'washB', 'washC'] as const;
 
 function DayAtlas(): ReactNode {
@@ -306,6 +347,21 @@ function DayAtlas(): ReactNode {
             x={block.x}
             y={block.y}
           />
+        ))}
+      </g>
+      <g className={styles.landField} transform="rotate(-7 960 220)">
+        {/* Cast shadow of the base terrace, offset like the plate wash. */}
+        <g className={styles.landShadow} transform="translate(14 16)">
+          {landTerraces[0].map((row, index) => (
+            <rect height={LAND_STEP} key={index} width={row.width} x={row.x} y={row.y} />
+          ))}
+        </g>
+        {landTerraces.map((rows, level) => (
+          <g className={styles[`land${level}`]} key={level}>
+            {rows.map((row, index) => (
+              <rect height={LAND_STEP} key={index} width={row.width} x={row.x} y={row.y} />
+            ))}
+          </g>
         ))}
       </g>
       <rect fill="url(#vsDayLattice)" height="560" mask="url(#vsDayLatticeMask)" width="1440" />
