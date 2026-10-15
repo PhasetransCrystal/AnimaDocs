@@ -48,21 +48,57 @@ function buildTicks(): {d: string; major: boolean}[] {
 const TERRACE_ORIGIN = {x: 1580, y: -150};
 const TERRACE_LEVELS = 8;
 
-type Terrace = {cx: number; cy: number; r: number; level: number};
+type Terrace = {d: string; level: number};
+
+/* Irregular contour: a base circle whose radius is modulated by a few
+ * low-frequency sine terms. Phases depend on the level so neighbouring
+ * lines drift apart and pinch together like a topographic map, while the
+ * fixed constants keep the result deterministic. Points are joined with a
+ * Catmull-Rom spline converted to cubic Beziers for a smooth edge. */
+function contourPath(cx: number, cy: number, r: number, level: number): string {
+  const steps = 48;
+  const pts: [number, number][] = [];
+  for (let s = 0; s < steps; s += 1) {
+    const t = (s / steps) * Math.PI * 2;
+    const k =
+      1 +
+      0.045 * Math.sin(2 * t + level * 0.9) +
+      0.03 * Math.sin(3 * t + 1.7 + level * 1.4) +
+      0.018 * Math.sin(5 * t + 0.4 + level * 2.3);
+    pts.push([cx + r * k * Math.cos(t), cy + r * k * Math.sin(t)]);
+  }
+  const f = (n: number) => n.toFixed(1);
+  let d = `M${f(pts[0][0])} ${f(pts[0][1])}`;
+  for (let i = 0; i < steps; i += 1) {
+    const p0 = pts[(i - 1 + steps) % steps];
+    const p1 = pts[i];
+    const p2 = pts[(i + 1) % steps];
+    const p3 = pts[(i + 2) % steps];
+    const c1x = p1[0] + (p2[0] - p0[0]) / 6;
+    const c1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const c2x = p2[0] - (p3[0] - p1[0]) / 6;
+    const c2y = p2[1] - (p3[1] - p1[1]) / 6;
+    d += `C${f(c1x)} ${f(c1y)} ${f(c2x)} ${f(c2y)} ${f(p2[0])} ${f(p2[1])}`;
+  }
+  return `${d}Z`;
+}
 
 function buildTerraces(): Terrace[] {
   const levels: Terrace[] = [];
   for (let i = 0; i < TERRACE_LEVELS; i += 1) {
-    levels.push({
-      cx: TERRACE_ORIGIN.x - i * 16,
-      cy: TERRACE_ORIGIN.y + i * 9,
-      // Spacing tightens toward the core, like contours on a slope.
-      r: 860 - i * 74 - i * i * 3,
-      level: i,
-    });
+    // Uneven drift and spacing so the shelves are not concentric.
+    const cx = TERRACE_ORIGIN.x - i * 16 - (i % 3) * 10;
+    const cy = TERRACE_ORIGIN.y + i * 9 + (i % 2) * 12;
+    const r = 860 - i * 74 - i * i * 3 + (i % 2 ? 14 : -6);
+    levels.push({d: contourPath(cx, cy, r, i), level: i});
   }
   return levels;
 }
+
+/* Eccentric twin of the disc: same radius, offset toward the terraces.
+ * The lens where both overlap is filled with a deeper red; the part of the
+ * twin outside the disc is only a thin outline. */
+const TWIN = {dx: 74, dy: -58};
 
 const NIGHT_TICKS = buildTicks();
 const NIGHT_TERRACES = buildTerraces();
@@ -103,6 +139,9 @@ function NightObservatory(): ReactNode {
           <stop offset="0.5" stopColor="#fff" />
           <stop offset="0.86" stopColor="#fff" stopOpacity="0" />
         </linearGradient>
+        <clipPath id="vs-disc-clip">
+          <circle cx={FOCUS.x} cy={FOCUS.y} r={DISC_R} />
+        </clipPath>
         <mask id="vs-terrace-mask">
           <rect width="1440" height="900" fill="url(#vs-terrace-fade)" />
         </mask>
@@ -137,12 +176,12 @@ function NightObservatory(): ReactNode {
       <g mask="url(#vs-terrace-mask)">
         <g filter="url(#vs-terrace-blur)">
           {NIGHT_TERRACES.map((t) => (
-            <circle key={`tf-${t.level}`} cx={t.cx} cy={t.cy} r={t.r} className={styles[`terrace${t.level}`]} />
+            <path key={`tf-${t.level}`} d={t.d} className={styles[`terrace${t.level}`]} />
           ))}
         </g>
         <g className={styles.terraceContours}>
           {NIGHT_TERRACES.map((t) => (
-            <circle key={`tc-${t.level}`} cx={t.cx} cy={t.cy} r={t.r} />
+            <path key={`tc-${t.level}`} d={t.d} />
           ))}
         </g>
       </g>
@@ -153,7 +192,12 @@ function NightObservatory(): ReactNode {
       <line className={styles.crosshair} x1={FOCUS.x} y1="0" x2={FOCUS.x} y2="560" />
 
       <circle cx={FOCUS.x} cy={FOCUS.y} r={DISC_R} fill="url(#vs-disc)" />
+      {/* Overlap lens with the eccentric twin, then the twin's outline. */}
+      <circle className={styles.discLens} cx={FOCUS.x + TWIN.dx} cy={FOCUS.y + TWIN.dy} r={DISC_R} clipPath="url(#vs-disc-clip)" />
       <circle cx={FOCUS.x} cy={FOCUS.y} r={DISC_R} fill="#000" filter="url(#vs-disc-grain)" opacity="0.42" />
+      <circle className={styles.discTwin} cx={FOCUS.x + TWIN.dx} cy={FOCUS.y + TWIN.dy} r={DISC_R} />
+      <circle className={styles.discTwinCenter} cx={FOCUS.x + TWIN.dx} cy={FOCUS.y + TWIN.dy} r="3" />
+      <line className={styles.discTwinAxis} x1={FOCUS.x} y1={FOCUS.y} x2={FOCUS.x + TWIN.dx} y2={FOCUS.y + TWIN.dy} />
 
       <g className={styles.tickRing}>
         {NIGHT_TICKS.map((tick) => (

@@ -167,16 +167,25 @@
 .nightGridLine { fill: none; stroke: #ece9e3; stroke-opacity: 0.07; stroke-width: 1; }
 
 /* Upper-right terraces: graphite (outer) to dark ember (inner). */
-.terrace0 { fill: #16161b; }
-.terrace1 { fill: #20171b; }
-.terrace2 { fill: #2c191c; }
-.terrace3 { fill: #3a1b1e; }
-.terrace4 { fill: #4b1d20; }
-.terrace5 { fill: #5e2023; }
-.terrace6 { fill: #742428; }
-.terrace7 { fill: #8c292d; }
-.terraceContours circle { fill: none; stroke: #ff8a6e; stroke-opacity: 0.32; stroke-width: 1; }
-.terraceContours circle:nth-child(odd) { stroke: #ece9e3; stroke-opacity: 0.16; }
+/* Lowered contrast: the inner level stops at a muted ember so the disc
+ * stays the single visual focus. */
+.terrace0 { fill: #131418; }
+.terrace1 { fill: #171619; }
+.terrace2 { fill: #1c171a; }
+.terrace3 { fill: #22181b; }
+.terrace4 { fill: #29191c; }
+.terrace5 { fill: #311b1e; }
+.terrace6 { fill: #3a1c1f; }
+.terrace7 { fill: #441e21; }
+.terraceContours path { fill: none; stroke: #ff8a6e; stroke-opacity: 0.22; stroke-width: 1; }
+.terraceContours path:nth-child(odd) { stroke: #ece9e3; stroke-opacity: 0.11; }
+.terraceContours path:nth-child(3n) { stroke-dasharray: 2 5; }
+
+/* Eccentric twin disc: overlap lens is a deeper red, outline is thin. */
+.discLens { fill: #8e1f26; fill-opacity: 0.72; }
+.discTwin { fill: none; stroke: #ece9e3; stroke-opacity: 0.42; stroke-width: 0.9; }
+.discTwinCenter { fill: #ece9e3; fill-opacity: 0.7; }
+.discTwinAxis { stroke: #ece9e3; stroke-opacity: 0.45; stroke-dasharray: 2 3; }
 
 .crosshair { stroke: #ece9e3; stroke-dasharray: 2 6; stroke-opacity: 0.22; }
 
