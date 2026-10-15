@@ -138,9 +138,7 @@
 
 /* Right-side terraces: base to peak, light to deeper blue. Rows inside a
  * level share one fill so the stepped edge reads as a single band. */
-.landField {
-  mask-image: linear-gradient(90deg, transparent 50%, #000 64%);
-}
+/* The coastline in index.tsx already bounds the land; no extra fade mask. */
 .landShadow rect { fill: var(--anima-ink); fill-opacity: 0.05; }
 .land0 rect { fill: #e6edf7; }
 .land1 rect { fill: #d6e2f3; }

@@ -269,42 +269,83 @@ const washBlocks = buildWashBlocks().filter((block) => block.x < 760);
 /* Right half: stepped terraces drawn in the plate's -7deg frame, like
  * contour bands on a map. Each level is a stepped ellipse built from 24px
  * rows; higher levels are smaller and deeper blue (a progressive gradient). */
-// Sits right of / below the plate so the terraces are not hidden by it.
-const LAND_CENTER = {x: 1300, y: 360};
+// The land fills the upper-right wedge: right of a coastline running from
+// the top edge (~x 884) diagonally down to the bottom of the directory panel.
 const LAND_STEP = 24;
-const landLevels = [
-  {rx: 330, ry: 230},
-  {rx: 262, ry: 180},
-  {rx: 200, ry: 136},
-  {rx: 140, ry: 94},
-  {rx: 82, ry: 54},
+const LAND_LEVELS = 5;
+const LAND_BAND = 92; // depth (in viewBox units) per terrace level
+const LAND_ROTATE = -7; // parallel to the tilted plate
+const LAND_PIVOT = {x: 960, y: 220};
+const landCoast: Array<[number, number]> = [
+  [884, -40],
+  [899, 172],
+  [978, 252],
+  [1051, 339],
+  [1123, 426],
+  [1232, 499],
+  [1304, 571],
+  [1480, 600],
 ];
 
 type LandRow = {x: number; y: number; width: number};
 
-function buildLandLevel(level: number): LandRow[] {
-  let seed = 7331 + level * 97;
-  const random = () => {
-    seed = (seed * 1664525 + 1013904223) % 4294967296;
-    return seed / 4294967296;
-  };
-  const {rx, ry} = landLevels[level];
-  // Shift inner levels slightly so the "peak" sits off-centre.
-  const cx = LAND_CENTER.x + level * 14;
-  const cy = LAND_CENTER.y - level * 8;
-  const rows: LandRow[] = [];
-  for (let y = cy - ry; y < cy + ry; y += LAND_STEP) {
-    const dy = (y + LAND_STEP / 2 - cy) / ry;
-    const half = rx * Math.sqrt(Math.max(0, 1 - dy * dy));
-    // Snap both edges to the step grid with seeded jitter -> stepped coastline.
-    const left = Math.round((cx - half + (random() - 0.5) * 40) / LAND_STEP) * LAND_STEP;
-    const right = Math.round((cx + half + (random() - 0.5) * 40) / LAND_STEP) * LAND_STEP;
-    if (right - left >= LAND_STEP) rows.push({x: left, y, width: right - left});
+/** Signed depth inland: >0 right/above the coast, growing toward the corner. */
+function landDepth(px: number, py: number): number {
+  let best = Infinity;
+  let sign = -1;
+  for (let index = 0; index < landCoast.length - 1; index += 1) {
+    const [ax, ay] = landCoast[index];
+    const [bx, by] = landCoast[index + 1];
+    const dx = bx - ax;
+    const dy = by - ay;
+    const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)));
+    const distance = Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
+    if (distance < best) {
+      best = distance;
+      // Cross product > 0 means the point is on the inland (upper-right) side.
+      sign = dx * (py - ay) - dy * (px - ax) < 0 ? 1 : -1;
+    }
   }
-  return rows;
+  return best * sign;
 }
 
-const landTerraces = landLevels.map((_level, index) => buildLandLevel(index));
+/** Smooth deterministic undulation so terrace edges wander like contours. */
+function landNoise(u: number, v: number): number {
+  return 34 * Math.sin(u * 0.019 + 1.3) * Math.cos(v * 0.023 + 0.4) + 16 * Math.sin((u + v) * 0.051 + 2.1);
+}
+
+function buildLandTerraces(): LandRow[][] {
+  const levels: LandRow[][] = Array.from({length: LAND_LEVELS}, () => []);
+  const angle = (LAND_ROTATE * Math.PI) / 180;
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  // Walk a grid in the rotated frame, map each cell centre back to viewBox
+  // space, classify it, then merge same-level cells into horizontal runs.
+  for (let v = -120; v < 720; v += LAND_STEP) {
+    let runLevel = -1;
+    let runStart = 0;
+    const flush = (end: number) => {
+      if (runLevel >= 0) levels[runLevel].push({x: runStart, y: v, width: end - runStart});
+    };
+    for (let u = 760; u <= 1600; u += LAND_STEP) {
+      const cu = u + LAND_STEP / 2 - LAND_PIVOT.x;
+      const cv = v + LAND_STEP / 2 - LAND_PIVOT.y;
+      const px = LAND_PIVOT.x + cu * cos - cv * sin;
+      const py = LAND_PIVOT.y + cu * sin + cv * cos;
+      const depth = landDepth(px, py) + landNoise(u, v);
+      const level = depth < 0 ? -1 : Math.min(LAND_LEVELS - 1, Math.floor(depth / LAND_BAND));
+      if (level !== runLevel) {
+        flush(u);
+        runLevel = level;
+        runStart = u;
+      }
+    }
+    flush(1600 + LAND_STEP);
+  }
+  return levels;
+}
+
+const landTerraces = buildLandTerraces();
 const washToneClass = ['washA', 'washB', 'washC'] as const;
 
 function DayAtlas(): ReactNode {
@@ -352,7 +393,7 @@ function DayAtlas(): ReactNode {
       <g className={styles.landField} transform="rotate(-7 960 220)">
         {/* Cast shadow of the base terrace, offset like the plate wash. */}
         <g className={styles.landShadow} transform="translate(14 16)">
-          {landTerraces[0].map((row, index) => (
+          {landTerraces.flat().map((row, index) => (
             <rect height={LAND_STEP} key={index} width={row.width} x={row.x} y={row.y} />
           ))}
         </g>
