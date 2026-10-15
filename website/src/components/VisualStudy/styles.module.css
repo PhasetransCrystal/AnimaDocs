@@ -177,15 +177,8 @@
 .terrace5 { fill: #311b1e; }
 .terrace6 { fill: #3a1c1f; }
 .terrace7 { fill: #441e21; }
-.terraceContours path { fill: none; stroke: #ff8a6e; stroke-opacity: 0.34; stroke-width: 1; }
-.terraceContours path:nth-child(odd) { stroke: #ece9e3; stroke-opacity: 0.2; }
-.terraceContours path:nth-child(3n) { stroke-dasharray: 2 5; }
-
-/* Eccentric twin disc: overlap lens is a deeper red, outline is thin. */
+/* Eccentric twin disc: only the overlap lens is drawn, in a deeper red. */
 .discLens { fill: #8e1f26; fill-opacity: 0.72; }
-.discTwin { fill: none; stroke: #ece9e3; stroke-opacity: 0.72; stroke-width: 1.1; }
-.discTwinCenter { fill: #ece9e3; fill-opacity: 0.7; }
-.discTwinAxis { stroke: #ece9e3; stroke-opacity: 0.45; stroke-dasharray: 2 3; }
 
 .crosshair { stroke: #ece9e3; stroke-dasharray: 2 6; stroke-opacity: 0.22; }
 

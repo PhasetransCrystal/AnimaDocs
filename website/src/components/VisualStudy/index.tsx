@@ -190,11 +190,6 @@ function NightObservatory(): ReactNode {
             <path key={`tf-${t.level}`} d={t.d} className={styles[`terrace${t.level}`]} />
           ))}
         </g>
-        <g className={styles.terraceContours}>
-          {NIGHT_TERRACES.map((t) => (
-            <path key={`tc-${t.level}`} d={t.d} />
-          ))}
-        </g>
       </g>
 
       <circle cx={FOCUS.x} cy={FOCUS.y} r="420" fill="url(#vs-halo)" />
@@ -206,9 +201,6 @@ function NightObservatory(): ReactNode {
       {/* Overlap lens with the eccentric twin, then the twin's outline. */}
       <circle className={styles.discLens} cx={FOCUS.x + TWIN.dx} cy={FOCUS.y + TWIN.dy} r={DISC_R} clipPath="url(#vs-disc-clip)" />
       <circle cx={FOCUS.x} cy={FOCUS.y} r={DISC_R} fill="#000" filter="url(#vs-disc-grain)" opacity="0.42" />
-      <circle className={styles.discTwin} cx={FOCUS.x + TWIN.dx} cy={FOCUS.y + TWIN.dy} r={DISC_R} />
-      <circle className={styles.discTwinCenter} cx={FOCUS.x + TWIN.dx} cy={FOCUS.y + TWIN.dy} r="3" />
-      <line className={styles.discTwinAxis} x1={FOCUS.x} y1={FOCUS.y} x2={FOCUS.x + TWIN.dx} y2={FOCUS.y + TWIN.dy} />
 
       <g className={styles.tickRing}>
         {NIGHT_TICKS.map((tick) => (
