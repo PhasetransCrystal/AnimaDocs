@@ -62,9 +62,9 @@ function contourPath(cx: number, cy: number, r: number, level: number): string {
     const t = (s / steps) * Math.PI * 2;
     const k =
       1 +
-      0.045 * Math.sin(2 * t + level * 0.9) +
-      0.03 * Math.sin(3 * t + 1.7 + level * 1.4) +
-      0.018 * Math.sin(5 * t + 0.4 + level * 2.3);
+      0.07 * Math.sin(2 * t + level * 0.9) +
+      0.045 * Math.sin(3 * t + 1.7 + level * 1.4) +
+      0.025 * Math.sin(5 * t + 0.4 + level * 2.3);
     pts.push([cx + r * k * Math.cos(t), cy + r * k * Math.sin(t)]);
   }
   const f = (n: number) => n.toFixed(1);
@@ -83,22 +83,33 @@ function contourPath(cx: number, cy: number, r: number, level: number): string {
   return `${d}Z`;
 }
 
+/* Island peaks: closed contour loops sit inside the frame so the levels
+ * read as islands rather than one huge arc. The main peak sits in the
+ * upper-right corner; a smaller secondary peak rises beside it. */
+const ISLAND_PEAKS = [
+  {x: 1335, y: 96, r0: 330, step: 36, levels: TERRACE_LEVELS, from: 0},
+  {x: 1408, y: 300, r0: 92, step: 26, levels: 3, from: 3},
+];
+
 function buildTerraces(): Terrace[] {
   const levels: Terrace[] = [];
-  for (let i = 0; i < TERRACE_LEVELS; i += 1) {
-    // Uneven drift and spacing so the shelves are not concentric.
-    const cx = TERRACE_ORIGIN.x - i * 16 - (i % 3) * 10;
-    const cy = TERRACE_ORIGIN.y + i * 9 + (i % 2) * 12;
-    const r = 860 - i * 74 - i * i * 3 + (i % 2 ? 14 : -6);
-    levels.push({d: contourPath(cx, cy, r, i), level: i});
+  for (const peak of ISLAND_PEAKS) {
+    for (let i = 0; i < peak.levels; i += 1) {
+      const level = peak.from + i;
+      // Uneven drift and spacing so the loops are not concentric.
+      const cx = peak.x - i * 7 + (i % 3) * 6;
+      const cy = peak.y + i * 5 - (i % 2) * 6;
+      const r = peak.r0 - i * peak.step + (i % 2 ? 6 : -3);
+      levels.push({d: contourPath(cx, cy, r, level + peak.from * 3), level});
+    }
   }
   return levels;
 }
 
-/* Eccentric twin of the disc: same radius, offset toward the terraces.
- * The lens where both overlap is filled with a deeper red; the part of the
- * twin outside the disc is only a thin outline. */
-const TWIN = {dx: 74, dy: -58};
+/* Eccentric twin of the disc: same radius, offset to the lower right.
+ * The centre distance (~211) keeps the overlap lens narrow; the lens is a
+ * deeper red and the rest of the twin is an outline only. */
+const TWIN = {dx: 180, dy: 110};
 
 const NIGHT_TICKS = buildTicks();
 const NIGHT_TERRACES = buildTerraces();
