@@ -166,8 +166,17 @@
 
 .nightGridLine { fill: none; stroke: #ece9e3; stroke-opacity: 0.07; stroke-width: 1; }
 
-.structure :is(circle, path) { fill: none; stroke: #ece9e3; stroke-opacity: 0.12; stroke-width: 1; }
-.structure .structureRim { stroke: #ff8a6e; stroke-opacity: 0.55; stroke-width: 2; }
+/* Upper-right terraces: graphite (outer) to dark ember (inner). */
+.terrace0 { fill: #16161b; }
+.terrace1 { fill: #20171b; }
+.terrace2 { fill: #2c191c; }
+.terrace3 { fill: #3a1b1e; }
+.terrace4 { fill: #4b1d20; }
+.terrace5 { fill: #5e2023; }
+.terrace6 { fill: #742428; }
+.terrace7 { fill: #8c292d; }
+.terraceContours circle { fill: none; stroke: #ff8a6e; stroke-opacity: 0.32; stroke-width: 1; }
+.terraceContours circle:nth-child(odd) { stroke: #ece9e3; stroke-opacity: 0.16; }
 
 .crosshair { stroke: #ece9e3; stroke-dasharray: 2 6; stroke-opacity: 0.22; }
 

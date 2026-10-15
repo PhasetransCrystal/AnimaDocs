@@ -13,7 +13,8 @@ type VisualStudyProps = {
  * directory panel x 910-1385 / y>360. Focal objects sit above and between
  * those zones; the panel is allowed to overlap the lower disc edge. */
 
-const FOCUS = {x: 1150, y: 230};
+/* Night disc sits left of the frame edge, matching the day atlas centre. */
+const FOCUS = {x: 1010, y: 236};
 
 /* ---------------------------------------------------------------- Night */
 
@@ -38,53 +39,82 @@ function buildTicks(): {d: string; major: boolean}[] {
   return ticks;
 }
 
-function buildStruts(): string {
-  // Observatory ring stand-in: radial struts on the upper half of the dome.
-  const parts: string[] = [];
-  for (let deg = 196; deg <= 344; deg += 8) {
-    const rad = (deg * Math.PI) / 180;
-    const x0 = FOCUS.x + 296 * Math.cos(rad);
-    const y0 = FOCUS.y + 296 * Math.sin(rad);
-    const x1 = FOCUS.x + 322 * Math.cos(rad);
-    const y1 = FOCUS.y + 322 * Math.sin(rad);
-    parts.push(`M${x0.toFixed(1)} ${y0.toFixed(1)}L${x1.toFixed(1)} ${y1.toFixed(1)}`);
+/* Upper-right terraces: the night counterpart of the day "land" wedge.
+ * Instead of stepped blocks, each level is a large arc whose centre drifts
+ * slightly toward the frame, so the bands read as smooth contour shelves.
+ * Levels run from graphite (outer) to dark ember (inner); a soft blur on
+ * the fills blends neighbouring levels into a continuous gradient while a
+ * thin contour stroke keeps the arc edge as the primary mark. */
+const TERRACE_ORIGIN = {x: 1580, y: -150};
+const TERRACE_LEVELS = 8;
+
+type Terrace = {cx: number; cy: number; r: number; level: number};
+
+function buildTerraces(): Terrace[] {
+  const levels: Terrace[] = [];
+  for (let i = 0; i < TERRACE_LEVELS; i += 1) {
+    levels.push({
+      cx: TERRACE_ORIGIN.x - i * 16,
+      cy: TERRACE_ORIGIN.y + i * 9,
+      // Spacing tightens toward the core, like contours on a slope.
+      r: 860 - i * 74 - i * i * 3,
+      level: i,
+    });
   }
-  return parts.join('');
+  return levels;
 }
 
 const NIGHT_TICKS = buildTicks();
-const NIGHT_STRUTS = buildStruts();
+const NIGHT_TERRACES = buildTerraces();
 
-/* Pixel island where the grid "breaks" over the disc edge (night-01). */
+/* Pixel island where the grid "breaks" over the lower-left disc edge
+ * (night-01). Offsets are relative to FOCUS. */
 const PIXELS: [number, number, number, 'light' | 'dark'][] = [
-  [968, 296, 8, 'light'], [978, 296, 4, 'light'], [968, 306, 4, 'dark'],
-  [984, 304, 6, 'light'], [992, 314, 4, 'light'], [976, 316, 6, 'dark'],
-  [1002, 322, 4, 'light'], [986, 324, 3, 'light'], [960, 318, 3, 'light'],
-  [1010, 300, 3, 'dark'], [952, 286, 4, 'light'], [998, 334, 6, 'light'],
+  [-182, 66, 8, 'light'], [-172, 66, 4, 'light'], [-182, 76, 4, 'dark'],
+  [-166, 74, 6, 'light'], [-158, 84, 4, 'light'], [-174, 86, 6, 'dark'],
+  [-148, 92, 4, 'light'], [-164, 94, 3, 'light'], [-190, 88, 3, 'light'],
+  [-140, 70, 3, 'dark'], [-198, 56, 4, 'light'], [-152, 104, 6, 'light'],
 ];
 
 const PLUS_MARKS: [number, number][] = [
-  [820, 120], [1420, 78], [1365, 470], [900, 430], [1260, 40],
+  [660, 150], [1420, 78], [1365, 470], [760, 430], [1180, 40],
 ];
+
+function polar(r: number, deg: number): [number, number] {
+  const rad = (deg * Math.PI) / 180;
+  return [FOCUS.x + r * Math.cos(rad), FOCUS.y + r * Math.sin(rad)];
+}
+
+const STATE_DOT = polar(263, 136);
 
 function NightObservatory(): ReactNode {
   return (
     <g className={styles.nightArt}>
       <defs>
-        <radialGradient id="vs-disc" cx="0.42" cy="0.38" r="0.7">
-          <stop offset="0" stopColor="#ff6a5c" />
-          <stop offset="0.55" stopColor="#e34549" />
-          <stop offset="1" stopColor="#a8242c" />
-        </radialGradient>
+        {/* Near-flat disc: a shallow tonal shift only, no specular highlight. */}
+        <linearGradient id="vs-disc" x1="0.2" y1="0.1" x2="0.8" y2="0.95">
+          <stop offset="0" stopColor="#e94a4c" />
+          <stop offset="1" stopColor="#c8363d" />
+        </linearGradient>
+        <filter id="vs-terrace-blur" x="0" y="0" width="1440" height="900" filterUnits="userSpaceOnUse">
+          <feGaussianBlur stdDeviation="10" />
+        </filter>
+        <linearGradient id="vs-terrace-fade" x1="0" y1="0" x2="0" y2="900" gradientUnits="userSpaceOnUse">
+          <stop offset="0.5" stopColor="#fff" />
+          <stop offset="0.86" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+        <mask id="vs-terrace-mask">
+          <rect width="1440" height="900" fill="url(#vs-terrace-fade)" />
+        </mask>
         <radialGradient id="vs-halo" cx="0.5" cy="0.5" r="0.5">
           <stop offset="0" stopColor="#e34549" stopOpacity="0.26" />
           <stop offset="0.45" stopColor="#e34549" stopOpacity="0.08" />
           <stop offset="1" stopColor="#e34549" stopOpacity="0" />
         </radialGradient>
-        <radialGradient id="vs-grid-fade" cx={FOCUS.x} cy={FOCUS.y} r="640" gradientUnits="userSpaceOnUse">
-          <stop offset="0.28" stopColor="#000" />
-          <stop offset="0.34" stopColor="#fff" />
-          <stop offset="0.62" stopColor="#fff" stopOpacity="0.5" />
+        <radialGradient id="vs-grid-fade" cx={FOCUS.x} cy={FOCUS.y} r="900" gradientUnits="userSpaceOnUse">
+          <stop offset="0.2" stopColor="#000" />
+          <stop offset="0.25" stopColor="#fff" />
+          <stop offset="0.6" stopColor="#fff" stopOpacity="0.55" />
           <stop offset="1" stopColor="#fff" stopOpacity="0" />
         </radialGradient>
         <mask id="vs-grid-mask">
@@ -102,39 +132,47 @@ function NightObservatory(): ReactNode {
 
       <rect width="1440" height="900" fill="url(#vs-grid)" mask="url(#vs-grid-mask)" />
 
-      {/* Halo and rim-lit observatory ring (placeholder for the optional Krea2 scene). */}
-      <circle cx={FOCUS.x} cy={FOCUS.y} r="420" fill="url(#vs-halo)" />
-      <g className={styles.structure}>
-        <circle cx={FOCUS.x} cy={FOCUS.y} r="296" />
-        <circle cx={FOCUS.x} cy={FOCUS.y} r="322" />
-        <path d={NIGHT_STRUTS} />
-        <path className={styles.structureRim} d="M1404.6 69.2A300 300 0 0 0 1238.3 -56.7" />
+      {/* Upper-right terraces: blurred fills give a continuous gradient,
+          thin contour arcs keep the curved edge as the readable mark. */}
+      <g mask="url(#vs-terrace-mask)">
+        <g filter="url(#vs-terrace-blur)">
+          {NIGHT_TERRACES.map((t) => (
+            <circle key={`tf-${t.level}`} cx={t.cx} cy={t.cy} r={t.r} className={styles[`terrace${t.level}`]} />
+          ))}
+        </g>
+        <g className={styles.terraceContours}>
+          {NIGHT_TERRACES.map((t) => (
+            <circle key={`tc-${t.level}`} cx={t.cx} cy={t.cy} r={t.r} />
+          ))}
+        </g>
       </g>
 
-      <line className={styles.crosshair} x1="640" y1={FOCUS.y} x2="1440" y2={FOCUS.y} />
+      <circle cx={FOCUS.x} cy={FOCUS.y} r="420" fill="url(#vs-halo)" />
+
+      <line className={styles.crosshair} x1="520" y1={FOCUS.y} x2="1440" y2={FOCUS.y} />
       <line className={styles.crosshair} x1={FOCUS.x} y1="0" x2={FOCUS.x} y2="560" />
 
       <circle cx={FOCUS.x} cy={FOCUS.y} r={DISC_R} fill="url(#vs-disc)" />
-      <circle cx={FOCUS.x} cy={FOCUS.y} r={DISC_R} fill="#000" filter="url(#vs-disc-grain)" opacity="0.5" />
+      <circle cx={FOCUS.x} cy={FOCUS.y} r={DISC_R} fill="#000" filter="url(#vs-disc-grain)" opacity="0.42" />
 
       <g className={styles.tickRing}>
         {NIGHT_TICKS.map((tick) => (
           <path key={tick.d} d={tick.d} className={tick.major ? styles.tickMajor : styles.tickMinor} />
         ))}
       </g>
-      <circle className={styles.stateDot} cx="961.3" cy="413.1" r="4" />
+      <circle className={styles.stateDot} cx={STATE_DOT[0].toFixed(1)} cy={STATE_DOT[1].toFixed(1)} r="4" />
 
       <g className={styles.orbits} transform={`rotate(-16 ${FOCUS.x} ${FOCUS.y})`}>
         <ellipse cx={FOCUS.x} cy={FOCUS.y} rx="430" ry="112" />
         <ellipse className={styles.orbitSoft} cx={FOCUS.x} cy={FOCUS.y} rx="560" ry="168" />
         <ellipse className={styles.orbitFaint} cx={FOCUS.x} cy={FOCUS.y} rx="300" ry="64" />
-        <circle className={styles.satellite} cx="746" cy="192" r="5" />
-        <circle className={styles.satelliteRing} cx="746" cy="192" r="13" />
+        <circle className={styles.satellite} cx={FOCUS.x - 404} cy={FOCUS.y - 38} r="5" />
+        <circle className={styles.satelliteRing} cx={FOCUS.x - 404} cy={FOCUS.y - 38} r="13" />
       </g>
 
       <g className={styles.pixels}>
         {PIXELS.map(([x, y, s, tone]) => (
-          <rect key={`${x}-${y}`} x={x} y={y} width={s} height={s} className={tone === 'light' ? styles.pixelLight : styles.pixelDark} />
+          <rect key={`${x}-${y}`} x={FOCUS.x + x} y={FOCUS.y + y} width={s} height={s} className={tone === 'light' ? styles.pixelLight : styles.pixelDark} />
         ))}
       </g>
 
@@ -145,9 +183,10 @@ function NightObservatory(): ReactNode {
       </g>
 
       <g className={styles.nightLabel}>
-        <text x="724" y="98">FIG.01 — OBSERVATION</text>
-        <text x="724" y="114">GRID SYSTEMS ........ : 02</text>
-        <text x="768" y="318">ORB / 0.42 · 16°</text>
+        <text x="560" y="98">FIG.01 — OBSERVATION</text>
+        <text x="560" y="114">GRID SYSTEMS ........ : 02</text>
+        <text x="628" y="324">ORB / 0.42 · 16°</text>
+        <text x="1250" y="318">CONTOUR / 08 LV</text>
         <text x="1412" y="96" transform="rotate(90 1412 96)">SIGNAL / ANIMA-01</text>
       </g>
     </g>
