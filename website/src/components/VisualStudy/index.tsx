@@ -234,9 +234,43 @@ function toPoints(points: Array<[number, number]>): string {
   return points.map(([x, y]) => `${x},${y}`).join(' ');
 }
 
+/* Day-04 study: deterministic data plate values (stable for screenshots). */
+const dayChartBars = [34, 52, 41, 66, 58, 74, 49, 63, 80, 57];
+const dayChartLine: Array<[number, number]> = dayChartBars.map((value, index) => [
+  176 + index * 16,
+  300 - value * 0.55,
+]);
+
 function DayAtlas(): ReactNode {
   return (
     <g className={styles.dayArt}>
+      <defs>
+        <linearGradient id="vsDayBlue" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stopColor="#3474e8" />
+          <stop offset="1" stopColor="#1d4aa6" />
+        </linearGradient>
+        <linearGradient id="vsDayPale" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stopColor="#e4ecf8" />
+          <stop offset="1" stopColor="#b9cbe8" />
+        </linearGradient>
+        <linearGradient id="vsDayGray" x1="0" x2="1" y1="1" y2="0">
+          <stop offset="0" stopColor="#ffffff" />
+          <stop offset="1" stopColor="#d5dce3" />
+        </linearGradient>
+        {/* Regular lattice with an X mark at every crossing (day-04 grid). */}
+        <pattern id="vsDayLattice" height="48" patternUnits="userSpaceOnUse" width="48">
+          <path className={styles.latticeLine} d="M0 0H48M0 0V48" />
+          <path className={styles.latticeCross} d="M-3 -3L3 3M3 -3L-3 3" />
+        </pattern>
+        <linearGradient id="vsDayLatticeFade" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0.25" stopColor="#fff" stopOpacity="0" />
+          <stop offset="0.6" stopColor="#fff" stopOpacity="1" />
+        </linearGradient>
+        <mask id="vsDayLatticeMask">
+          <rect fill="url(#vsDayLatticeFade)" height="560" width="1440" />
+        </mask>
+      </defs>
+      <rect fill="url(#vsDayLattice)" height="560" mask="url(#vsDayLatticeMask)" width="1440" />
       <g className={styles.plateFrames}>
         <rect className={styles.plateFrameWash} x="718" y="84" width="520" height="300" transform="rotate(-7 978 234)" />
         <rect className={styles.plateFramePaper} x="700" y="70" width="520" height="300" transform="rotate(-7 960 220)" />
@@ -274,10 +308,38 @@ function DayAtlas(): ReactNode {
           </g>
         ))}
       </g>
+      <polyline className={styles.routeSurvey} points="905,225 960,300 1110,318 1250,290" />
       <g className={styles.monoLabel}>
-        <text x="720" y="124" textAnchor="middle">[ 39.90N / 116.40E ]</text>
-        <text x="1105" y="136" textAnchor="middle">[ 31.23N / 121.47E ]</text>
-        <text x="520" y="176" textAnchor="middle">[ 22.54N / 114.05E ]</text>
+        <text x="720" y="124" textAnchor="middle">[ 39.90°N, 116.40°E ]</text>
+        <text x="1105" y="136" textAnchor="middle">[ 31.23°N, 121.47°E ]</text>
+        <text x="520" y="176" textAnchor="middle">[ 22.54°N, 114.05°E ]</text>
+      </g>
+      {/* Small blue label plates pinned to route nodes. */}
+      <g className={styles.tagPlates}>
+        <rect height="16" width="44" x="928" y="234" />
+        <text x="950" y="245" textAnchor="middle">A-03</text>
+        <rect height="16" width="44" x="1328" y="243" />
+        <text x="1350" y="254" textAnchor="middle">A-05</text>
+        <path d="M905 231V242H928M1305 241V251H1328" />
+      </g>
+      {/* Data plate: bars + sparkline, purely decorative. */}
+      <g className={styles.dataPlate}>
+        <rect className={styles.dataPlateFrame} height="118" width="196" x="160" y="200" />
+        <rect className={styles.dataPlateHead} height="18" width="196" x="160" y="200" />
+        <text className={styles.dataPlateTitle} x="168" y="213">[ SAMPLING / STEP ]</text>
+        <text className={styles.dataPlateValue} x="348" y="213" textAnchor="end">63%</text>
+        {dayChartBars.map((value, index) => (
+          <rect
+            className={index === 8 ? styles.dataBarActive : styles.dataBar}
+            height={value * 0.55}
+            key={index}
+            width="9"
+            x={172 + index * 16}
+            y={308 - value * 0.55}
+          />
+        ))}
+        <polyline className={styles.dataLine} points={toPoints(dayChartLine)} />
+        <line className={styles.dataBase} x1="168" x2="348" y1="308" y2="308" />
       </g>
       <g className={styles.plateNumbers}>
         <text x="86" y="118">01</text>
