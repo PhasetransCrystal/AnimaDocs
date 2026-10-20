@@ -143,7 +143,8 @@ function NightObservatory(): ReactNode {
           <stop offset="0" stopColor="#e94a4c" />
           <stop offset="1" stopColor="#c8363d" />
         </linearGradient>
-        <filter id="vs-terrace-blur" x="0" y="0" width="1440" height="900" filterUnits="userSpaceOnUse">
+        {/* Regions start above y=0 so narrow layouts can reveal the plate's upper bleed. */}
+        <filter id="vs-terrace-blur" x="0" y="-240" width="1440" height="1140" filterUnits="userSpaceOnUse">
           <feGaussianBlur stdDeviation="10" />
         </filter>
         <linearGradient id="vs-terrace-fade" x1="0" y1="0" x2="0" y2="900" gradientUnits="userSpaceOnUse">
@@ -154,7 +155,7 @@ function NightObservatory(): ReactNode {
           <circle cx={FOCUS.x} cy={FOCUS.y} r={DISC_R} />
         </clipPath>
         <mask id="vs-terrace-mask">
-          <rect width="1440" height="900" fill="url(#vs-terrace-fade)" />
+          <rect y="-240" width="1440" height="1140" fill="url(#vs-terrace-fade)" />
         </mask>
         <radialGradient id="vs-halo" cx="0.5" cy="0.5" r="0.5">
           <stop offset="0" stopColor="#e34549" stopOpacity="0.26" />
@@ -168,7 +169,7 @@ function NightObservatory(): ReactNode {
           <stop offset="1" stopColor="#fff" stopOpacity="0" />
         </radialGradient>
         <mask id="vs-grid-mask">
-          <rect width="1440" height="900" fill="url(#vs-grid-fade)" />
+          <rect y="-240" width="1440" height="1140" fill="url(#vs-grid-fade)" />
         </mask>
         <pattern id="vs-grid" width="48" height="48" patternUnits="userSpaceOnUse">
           <path d="M48 0H0V48" className={styles.nightGridLine} />
@@ -180,7 +181,7 @@ function NightObservatory(): ReactNode {
         </filter>
       </defs>
 
-      <rect width="1440" height="900" fill="url(#vs-grid)" mask="url(#vs-grid-mask)" />
+      <rect y="-240" width="1440" height="1140" fill="url(#vs-grid)" mask="url(#vs-grid-mask)" />
 
       {/* Upper-right terraces: blurred fills give a continuous gradient,
           thin contour arcs keep the curved edge as the readable mark. */}
@@ -197,7 +198,7 @@ function NightObservatory(): ReactNode {
       <circle cx={FOCUS.x} cy={FOCUS.y} r="420" fill="url(#vs-halo)" />
 
       <line className={styles.crosshair} x1="520" y1={FOCUS.y} x2="1440" y2={FOCUS.y} />
-      <line className={styles.crosshair} x1={FOCUS.x} y1="0" x2={FOCUS.x} y2="560" />
+      <line className={styles.crosshair} x1={FOCUS.x} y1="-240" x2={FOCUS.x} y2="560" />
 
       <circle cx={FOCUS.x} cy={FOCUS.y} r={DISC_R} fill="url(#vs-disc)" />
       {/* Overlap lens with the eccentric twin, then the twin's outline. */}

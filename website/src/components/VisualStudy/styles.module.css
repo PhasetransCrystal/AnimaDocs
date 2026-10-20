@@ -292,19 +292,10 @@
     height: auto;
     /* Drop the plate below the topline so the tick ring clears it. */
     inset: 112px auto auto -78%;
-    /* Feather the plate's top edge into the field so the offset leaves no seam. */
-    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 88px);
-    mask-image: linear-gradient(180deg, transparent 0, #000 88px);
+    /* Render the drawing's upper bleed (grid + terraces extend to y=-240)
+     * instead of fading it; .backgroundArt still clips at the hero frame. */
+    overflow: visible;
     width: 205%;
-  }
-
-  /* Continue the observation grid above the plate (48px × 0.8 scale ≈ 38.5px). */
-  :global([data-theme='dark']) .field {
-    background:
-      radial-gradient(circle at 74% 34%, rgba(200, 54, 61, 0.1), transparent 46%),
-      linear-gradient(90deg, rgba(236, 233, 227, 0.035) 1px, transparent 1px) 0 0 / 38.5px 38.5px,
-      linear-gradient(0deg, rgba(236, 233, 227, 0.035) 1px, transparent 1px) 0 0 / 38.5px 38.5px,
-      #0d1014;
   }
 
   :global([data-theme='dark']) .field::after {
