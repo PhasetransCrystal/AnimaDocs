@@ -56,9 +56,10 @@
   mask-image: linear-gradient(180deg, #000 55%, transparent 88%);
 }
 
-.tileBlue { fill: var(--anima-blue); fill-opacity: 0.82; }
-.tilePale { fill: #cfdcf0; }
-.tilePaper { fill: #ffffff; fill-opacity: 0.85; stroke: var(--anima-line); }
+/* Gradient diamonds (defs vsDayBlue / vsDayPale / vsDayGray). */
+.tileBlue { fill: url(#vsDayBlue); fill-opacity: 0.9; }
+.tilePale { fill: url(#vsDayPale); }
+.tilePaper { fill: url(#vsDayGray); stroke: var(--anima-line); }
 .tileOutline { fill: none; stroke: var(--anima-line-strong); stroke-opacity: 0.6; }
 .tileInk { fill: var(--anima-ink); fill-opacity: 0.85; }
 .tileBrass { fill: var(--anima-gold); }
@@ -105,11 +106,7 @@
 .registration :is(line, path) { stroke: var(--anima-line-strong); stroke-opacity: 0.45; }
 .brassMarks :is(rect, circle) { fill: var(--anima-gold); }
 
-/* Day-04 adjustments: gradient diamonds, X-crossing lattice, survey route,
- * blue tag plates and a small data plate. All decorative. */
-.tileBlue { fill: url(#vsDayBlue); fill-opacity: 0.9; }
-.tilePale { fill: url(#vsDayPale); }
-.tilePaper { fill: url(#vsDayGray); fill-opacity: 1; }
+/* Day-04 adjustments: X-crossing lattice, survey route, blue tag plates. */
 
 .latticeLine { fill: none; stroke: var(--anima-line); stroke-opacity: 0.55; }
 .latticeCross { fill: none; stroke: var(--anima-line-strong); stroke-opacity: 0.5; }

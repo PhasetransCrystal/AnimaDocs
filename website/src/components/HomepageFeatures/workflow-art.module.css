@@ -74,12 +74,12 @@
   position: absolute;
 }
 
-.draftingRules { stroke: #245dcc; stroke-opacity: 0.14; stroke-width: 0.8; }
+.draftingRules { stroke: var(--anima-blue); stroke-opacity: 0.14; stroke-width: 0.8; }
 .constructionStudy { height: auto; opacity: 0.72; position: absolute; right: -5%; top: 50%; transform: translateY(-50%) rotate(-12deg); width: clamp(280px, 32vw, 640px); }
-.constructionLines { stroke: #245dcc; stroke-opacity: 0.22; stroke-width: 0.8; }
-.constructionAccent { stroke: #245dcc; stroke-opacity: 0.35; stroke-width: 2; }
-.constructionWash { fill: #245dcc; fill-opacity: 0.045; }
-.constructionPoints { fill: #245dcc; fill-opacity: 0.35; }
+.constructionLines { stroke: var(--anima-blue); stroke-opacity: 0.22; stroke-width: 0.8; }
+.constructionAccent { stroke: var(--anima-blue); stroke-opacity: 0.35; stroke-width: 2; }
+.constructionWash { fill: var(--anima-blue); fill-opacity: 0.045; }
+.constructionPoints { fill: var(--anima-blue); fill-opacity: 0.35; }
 .constructionStudy path, .constructionStudy circle { vector-effect: non-scaling-stroke; }
 
 .cornerMarks { inset: 20px; position: absolute; }
@@ -90,12 +90,12 @@
 .cornerMarks i:nth-child(4) { border-width: 0 1px 1px 0; bottom: 0; right: 0; }
 
 .daySwatches { align-items: center; color: #42658c; display: flex; font-family: var(--ifm-font-family-monospace); font-size: 8px; gap: 5px; left: 38%; letter-spacing: 0.09em; opacity: 0.55; position: absolute; top: 24px; }
-.daySwatches i { background: #245dcc; height: 5px; width: 5px; }
-.daySwatches i:nth-child(2) { background: #a77836; }
+.daySwatches i { background: var(--anima-blue); height: 5px; width: 5px; }
+.daySwatches i:nth-child(2) { background: var(--anima-gold); }
 .daySwatches i:nth-child(3) { background: #8995a4; }
 .daySwatches span { margin-left: 8px; }
 .dayAnnotation { color: #496485; left: 47%; opacity: 0.5; top: 77%; }
-.dayMeasurement { align-items: center; color: #245dcc; display: flex; font-family: var(--ifm-font-family-monospace); font-size: 8px; gap: 12px; left: 25%; opacity: 0.35; position: absolute; right: 37%; top: 38%; }
+.dayMeasurement { align-items: center; color: var(--anima-blue); display: flex; font-family: var(--ifm-font-family-monospace); font-size: 8px; gap: 12px; left: 25%; opacity: 0.35; position: absolute; right: 37%; top: 38%; }
 .dayMeasurement i { border-bottom: 1px solid currentColor; border-inline: 1px solid currentColor; flex: 1; height: 5px; }
 
 @media screen and (max-width: 1200px) {

@@ -775,15 +775,6 @@ a:focus-visible {
   background: var(--anima-red);
 }
 
-[data-theme='dark'] .navbar__link--active::after {
-  background: var(--anima-red);
-}
-
-[data-theme='dark'] .menu__link:hover,
-[data-theme='dark'] .menu__link:focus-visible {
-  color: var(--anima-interactive);
-}
-
 [data-theme='dark'] .theme-doc-sidebar-container::before {
   background-image:
     radial-gradient(circle, color-mix(in srgb, var(--anima-red) 42%, transparent) 0 1px, transparent 1.4px),
