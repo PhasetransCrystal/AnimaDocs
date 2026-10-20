@@ -290,12 +290,13 @@
   :global([data-theme='dark']) .diagramArt {
     aspect-ratio: 1440 / 900;
     height: auto;
-    inset: 0 auto auto -78%;
+    /* Drop the plate below the topline so the tick ring clears it. */
+    inset: 112px auto auto -78%;
     width: 205%;
   }
 
   :global([data-theme='dark']) .field::after {
-    background: linear-gradient(0deg, #0d1014 30%, transparent 62%);
+    background: linear-gradient(0deg, #0d1014 22%, transparent 46%);
   }
 
   .nightLabel { display: none; }

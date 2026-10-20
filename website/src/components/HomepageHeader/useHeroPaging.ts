@@ -26,12 +26,19 @@ export default function useHeroPaging() {
     let direction = 0;
     let wheelAmount = 0;
     let lastWheel = 0;
+    let scrollIdleTimer = 0;
 
     const paint = () => {
       frame = 0;
       const progress = Math.max(0, Math.min(1, (window.scrollY - sectionTop) / sceneHeight));
       section.style.setProperty('--hero-progress', String(progress));
       section.style.setProperty('--art-travel', `${-progress * 120}px`);
+      // Once the scene has fully left the viewport, stop its loops entirely.
+      const offscreen = progress >= 1;
+      if ((section.dataset.artOffscreen === 'true') !== offscreen) {
+        if (offscreen) section.dataset.artOffscreen = 'true';
+        else delete section.dataset.artOffscreen;
+      }
     };
 
     const measure = () => {
@@ -63,8 +70,18 @@ export default function useHeroPaging() {
       });
     };
 
+    // Flag active scrolling so CSS can pause the art loops and keep the layer cached.
+    const markScrolling = () => {
+      if (section.dataset.scrolling !== 'true') section.dataset.scrolling = 'true';
+      window.clearTimeout(scrollIdleTimer);
+      scrollIdleTimer = window.setTimeout(() => {
+        delete section.dataset.scrolling;
+      }, 220);
+    };
+
     const onScroll = () => {
       if (!frame) frame = window.requestAnimationFrame(paint);
+      markScrolling();
       window.clearTimeout(settleTimer);
       if (!supportsScrollEnd && !animating && !pointerDown) settleTimer = window.setTimeout(settle, 160);
     };
@@ -198,6 +215,7 @@ export default function useHeroPaging() {
       window.cancelAnimationFrame(measureFrame);
       window.clearTimeout(animationTimer);
       window.clearTimeout(settleTimer);
+      window.clearTimeout(scrollIdleTimer);
       themeObserver.disconnect();
       window.removeEventListener('resize', cancelMotion);
       window.removeEventListener('scroll', onScroll);
