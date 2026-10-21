@@ -592,7 +592,18 @@
 .workflowEdgeCopy { opacity: 0.6; }
 .learningIntro { background: linear-gradient(110deg, color-mix(in srgb, var(--anima-gold) 6%, transparent), transparent 70%); }
 .learningRoute { box-shadow: var(--anima-art-inset); border-color: var(--anima-art-rule); }
-.learningRoute:not(.learningRouteDisabled) { background: linear-gradient(110deg, var(--anima-art-surface) 86%, var(--anima-art-wash) 86%); }
+/* Gradient stops are registered colour properties so the wedge can ease on theme switch
+   (a plain background-image gradient cannot interpolate and snaps). */
+@property --route-surface { syntax: '<color>'; inherits: false; initial-value: transparent; }
+@property --route-wash { syntax: '<color>'; inherits: false; initial-value: transparent; }
+.learningRoute:not(.learningRouteDisabled) {
+  --route-surface: var(--anima-art-surface);
+  --route-wash: var(--anima-art-wash);
+  background: linear-gradient(110deg, var(--route-surface) 86%, var(--route-wash) 86%);
+}
+:global(html.theme-transitioning) .learningRoute:not(.learningRouteDisabled) {
+  transition-property: color, background-color, border-color, box-shadow, --route-surface, --route-wash !important;
+}
 .learningRoute:not(.learningRouteDisabled):hover { border-color: var(--anima-interactive); box-shadow: inset 3px 0 var(--anima-interactive); transform: translateX(calc(var(--stagger) + 0.2rem)); }
 .learningRoute:focus-visible { outline: 2px solid var(--anima-focus); outline-offset: 4px; }
 .learningRouteDisabled { opacity: 1; background: color-mix(in srgb, var(--anima-surface) 50%, var(--anima-paper)); border-color: var(--anima-line); }

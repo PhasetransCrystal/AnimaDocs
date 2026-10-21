@@ -401,6 +401,13 @@ html.theme-transitioning[data-theme='dark'] [data-theme-art] [data-art-mode='nig
   z-index: 1;
 }
 @keyframes animaArtFadeIn { from { opacity: 0; } to { opacity: 1; } }
+/* Freeze the plates' inner loops for the window. Running SVG loops (night plate
+ * especially) keep invalidating style, and Chrome then cancels and restarts every
+ * page colour transition from its midpoint, so text never finishes easing
+ * and snaps when the class is removed. The loops restart once the window ends. */
+html.theme-transitioning [data-theme-art] [data-art-mode] *,
+html.theme-transitioning [data-theme-art] [data-art-mode] *::before,
+html.theme-transitioning [data-theme-art] [data-art-mode] *::after { animation: none !important; }
 
 @media screen and (max-width: 996px) {
   main[class*='docMainContainer']::before,
