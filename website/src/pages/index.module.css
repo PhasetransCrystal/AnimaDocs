@@ -313,7 +313,7 @@
 }
 
 :global([data-theme='dark']) .heroArtRule { background: var(--anima-red); }
-:global([data-theme='dark']) .panelStatus { background: var(--anima-red); color: var(--anima-paper); }
+:global([data-theme='dark']) .panelStatus { background: var(--anima-red); color: #171a20; }
 :global([data-theme='dark']) .panelHeader { border-color: #44484f; }
 :global([data-theme='dark']) .heroTopline { border-color: var(--anima-line); }
 :global([data-theme='dark']) .heroSubtitle { color: #b7b5af; }

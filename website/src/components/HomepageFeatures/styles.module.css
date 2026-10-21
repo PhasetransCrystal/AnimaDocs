@@ -518,7 +518,7 @@
 :global([data-theme='dark']) .workflowNode::before { border-radius: var(--node-radius) var(--node-radius) 0 0; }
 :global([data-theme='dark']) .edgeCopyInput,
 :global([data-theme='dark']) .edgeCopyOutput { color: #f1eee7; opacity: 0.08; }
-:global([data-theme='dark']) .learningRoute { background: color-mix(in srgb, #171a20 57%, var(--anima-paper)); border-color: var(--anima-line); border-radius: 14px; }
+:global([data-theme='dark']) .learningRoute { background: #171a20; border-color: var(--anima-line); border-radius: 14px; }
 :global([data-theme='dark']) .learningRoute:hover { box-shadow: 0 12px 28px color-mix(in srgb, #000000 28%, transparent); }
 :global([data-theme='dark']) .learningRoute:not(.learningRouteDisabled):hover { border-color: var(--anima-interactive); }
 :global([data-theme='dark']) .learningIntro { border-left-color: var(--anima-red); }
