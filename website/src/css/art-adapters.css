@@ -433,7 +433,11 @@ html.theme-vt *::after { transition: none !important; }
 ::view-transition-old(root) { animation-name: none; }
 /* The UA default blends the pair with plus-lighter (it expects old to fade out
  * as new fades in). With old held opaque that adds the two frames together:
- * blown-out whites and blue+red turning pink. Plain source-over instead. */
+ * blown-out whites and blue+red turning pink. Chrome applies plus-lighter via a
+ * UA animation, which beats a plain mix-blend-mode declaration, so the new
+ * frame gets its own opacity-only keyframes and source-over blending. */
+@keyframes animaThemeFadeIn { from { opacity: 0; } to { opacity: 1; } }
+::view-transition-new(root) { animation-name: animaThemeFadeIn; }
 ::view-transition-old(root),
 ::view-transition-new(root) { mix-blend-mode: normal; }
 @media (prefers-reduced-motion: reduce) {
