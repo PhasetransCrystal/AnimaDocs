@@ -79,6 +79,8 @@ const config: Config = {
 
   themes: ['@docusaurus/theme-mermaid'],
 
+  clientModules: ['./src/clientModules/themeTransition.ts'],
+
   themeConfig: {
     // Replace with your project's social card
     image: 'img/anima-social-card.svg',

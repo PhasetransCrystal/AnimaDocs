@@ -363,6 +363,45 @@ main[class*='docMainContainer'] > .container {
   width: 5px;
 }
 
+/* Day/night switch transition --------------------------------------------
+ * html.theme-transitioning is set by src/clientModules/themeTransition.ts for
+ * --anima-theme-switch-duration after data-theme flips (never under
+ * prefers-reduced-motion). clip-path (--anima-cut) cannot interpolate
+ * polygon <-> none and snaps; radii and colours ease. */
+:root { --anima-theme-switch-duration: 520ms; }
+
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition-duration: var(--anima-theme-switch-duration) !important;
+  transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, box-shadow, border-radius !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Art is crossfaded as whole plates instead of easing thousands of SVG fills. */
+html.theme-transitioning [data-theme-art] *,
+html.theme-transitioning [data-theme-art] *::before,
+html.theme-transitioning [data-theme-art] *::after { transition: none !important; }
+
+/* Both plates render only inside the window: the outgoing one holds still
+ * underneath, the incoming one fades in on top, then the outgoing returns to
+ * display:none when the class is removed. */
+[data-theme-art] { isolation: isolate; }
+html.theme-transitioning [data-theme-art] [data-art-mode] { display: block !important; }
+/* Grain / vignette layers stay above both plates while they swap order. */
+html.theme-transitioning [data-theme-art] > :not([data-art-mode]),
+html.theme-transitioning [data-theme-art]::before,
+html.theme-transitioning [data-theme-art]::after { z-index: 2; }
+html.theme-transitioning[data-theme='light'] [data-theme-art] [data-art-mode='night'],
+html.theme-transitioning[data-theme='dark'] [data-theme-art] [data-art-mode='day'] { z-index: 0; }
+html.theme-transitioning[data-theme='light'] [data-theme-art] [data-art-mode='day'],
+html.theme-transitioning[data-theme='dark'] [data-theme-art] [data-art-mode='night'] {
+  animation: animaArtFadeIn var(--anima-theme-switch-duration) cubic-bezier(0.4, 0, 0.2, 1) both !important;
+  z-index: 1;
+}
+@keyframes animaArtFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
 @media screen and (max-width: 996px) {
   main[class*='docMainContainer']::before,
   main[class*='docMainContainer']::after { display: none; }

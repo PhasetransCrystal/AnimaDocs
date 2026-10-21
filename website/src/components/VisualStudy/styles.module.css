@@ -44,7 +44,10 @@
 
 .specimen { background: var(--anima-paper); }
 
-.nightArt { display: none; }
+/* Mode plates: the inactive plate is display:none at rest so it costs no
+ * layout/paint/animation. art-adapters.css dual-renders both only while
+ * html.theme-transitioning is set. */
+.nightPlate { display: none; }
 
 /* Day: tiled atlas plate (restored from 3e7732b) ---------------------------- */
 
@@ -267,8 +270,8 @@
 
 /* Theme switching ---------------------------------------------------------- */
 
-:global([data-theme='dark']) .dayArt { display: none; }
-:global([data-theme='dark']) .nightArt { display: inline; }
+:global([data-theme='dark']) .dayPlate { display: none; }
+:global([data-theme='dark']) .nightPlate { display: block; }
 :global([data-theme='dark']) .field {
   background:
     radial-gradient(circle at 80% 26%, rgba(227, 69, 73, 0.1), transparent 38%),
@@ -284,7 +287,9 @@
 /* Mobile: the slice crop would only show the centre strip, so scale the
  * plate down and anchor the focal object to the top right instead. */
 @media screen and (max-width: 640px) {
-  :global([data-theme='dark']) .diagramArt {
+  /* Not theme-scoped: the night plate keeps this geometry while it fades out
+   * during a dark -> light switch. */
+  .nightPlate {
     aspect-ratio: 1440 / 900;
     height: auto;
     /* Drop the plate below the topline so the tick ring clears it. */

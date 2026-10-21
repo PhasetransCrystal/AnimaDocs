@@ -619,14 +619,25 @@ function DayAtlas(): ReactNode {
 
 export default function VisualStudy({variant = 'field'}: VisualStudyProps): ReactNode {
   return (
-    <div className={`${styles.backgroundArt} ${styles[variant]}`} aria-hidden="true">
+    <div className={`${styles.backgroundArt} ${styles[variant]}`} aria-hidden="true" data-theme-art="">
+      {/* One SVG per mode so each keeps its own mobile geometry while both
+          are briefly visible during the day/night crossfade. */}
       <svg
-        className={styles.diagramArt}
+        className={`${styles.diagramArt} ${styles.dayPlate}`}
+        data-art-mode="day"
         viewBox="0 0 1440 900"
         preserveAspectRatio="xMidYMin slice"
         fill="none"
         focusable="false">
         <DayAtlas />
+      </svg>
+      <svg
+        className={`${styles.diagramArt} ${styles.nightPlate}`}
+        data-art-mode="night"
+        viewBox="0 0 1440 900"
+        preserveAspectRatio="xMidYMin slice"
+        fill="none"
+        focusable="false">
         <NightObservatory />
       </svg>
       <div className={styles.noiseLayer} />

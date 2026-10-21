@@ -19,7 +19,7 @@ function NightStudy(): ReactNode {
   const marksMaskId = `${maskId}-marks-mask`;
 
   return (
-    <div className={styles.nightArt} data-workflow-art="night">
+    <div className={styles.nightArt} data-workflow-art="night" data-art-mode="night">
       <svg className={styles.polarGrid} width="100%" height="100%" focusable="false">
         {polarRadii.map((radius) => <circle key={radius} cx="-8%" cy="78%" r={`${radius}%`} />)}
         <svg data-polar-origin="true" x="-8%" y="78%" width="1" height="1" overflow="visible" focusable="false">
@@ -90,7 +90,7 @@ function NightStudy(): ReactNode {
 
 function DayStudy(): ReactNode {
   return (
-    <div className={styles.dayArt} data-workflow-art="day">
+    <div className={styles.dayArt} data-workflow-art="day" data-art-mode="day">
       <div className={styles.draftingGrid} />
       <div className={styles.paperPlane} />
       <div className={styles.paperFold} />
@@ -129,7 +129,7 @@ function DayStudy(): ReactNode {
 
 export default function WorkflowArt(): ReactNode {
   return (
-    <div className={styles.backgroundArt} aria-hidden="true">
+    <div className={styles.backgroundArt} aria-hidden="true" data-theme-art="">
       <DayStudy />
       <NightStudy />
     </div>
