@@ -431,6 +431,11 @@ html.theme-vt *::after { transition: none !important; }
 /* Keep the old frame opaque underneath so mid-fade never shows a see-through
  * mix of both pages over the backdrop. */
 ::view-transition-old(root) { animation-name: none; }
+/* The UA default blends the pair with plus-lighter (it expects old to fade out
+ * as new fades in). With old held opaque that adds the two frames together:
+ * blown-out whites and blue+red turning pink. Plain source-over instead. */
+::view-transition-old(root),
+::view-transition-new(root) { mix-blend-mode: normal; }
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),
