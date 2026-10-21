@@ -51,24 +51,24 @@
 
 .draftingGrid {
   background-image:
-    linear-gradient(#245dcc0c 1px, transparent 1px),
-    linear-gradient(90deg, #245dcc0c 1px, transparent 1px),
-    linear-gradient(#245dcc06 1px, transparent 1px),
-    linear-gradient(90deg, #245dcc06 1px, transparent 1px);
+    linear-gradient(color-mix(in srgb, var(--anima-blue) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--anima-blue) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--anima-blue) 2%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--anima-blue) 2%, transparent) 1px, transparent 1px);
   background-size: 128px 128px, 128px 128px, 32px 32px, 32px 32px;
   inset: 0;
   position: absolute;
 }
 
 .paperPlane {
-  background: linear-gradient(120deg, #245dcc03, #245dcc13);
+  background: linear-gradient(120deg, color-mix(in srgb, var(--anima-blue) 1%, transparent), color-mix(in srgb, var(--anima-blue) 7%, transparent));
   clip-path: polygon(52% 0, 81% 0, 55% 100%, 26% 100%);
   inset: 0;
   position: absolute;
 }
 
 .paperFold {
-  background: #ffffff70;
+  background: color-mix(in srgb, var(--anima-surface) 44%, transparent);
   clip-path: polygon(81% 0, 84% 0, 58% 100%, 55% 100%);
   inset: 0;
   position: absolute;
@@ -83,7 +83,7 @@
 .constructionStudy path, .constructionStudy circle { vector-effect: non-scaling-stroke; }
 
 .cornerMarks { inset: 20px; position: absolute; }
-.cornerMarks i { border-color: #245dcc50; border-style: solid; height: 10px; position: absolute; width: 10px; }
+.cornerMarks i { border-color: color-mix(in srgb, var(--anima-blue) 31%, transparent); border-style: solid; height: 10px; position: absolute; width: 10px; }
 .cornerMarks i:nth-child(1) { border-width: 1px 0 0 1px; left: 0; top: 0; }
 .cornerMarks i:nth-child(2) { border-width: 1px 1px 0 0; right: 0; top: 0; }
 .cornerMarks i:nth-child(3) { border-width: 0 0 1px 1px; bottom: 0; left: 0; }

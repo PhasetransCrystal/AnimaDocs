@@ -51,7 +51,7 @@
 
 /* Day: tiled atlas plate (restored from 3e7732b) ---------------------------- */
 
-.plateFramePaper { fill: #ffffff; fill-opacity: 0.78; stroke: var(--anima-line); }
+.plateFramePaper { fill: var(--anima-surface); fill-opacity: 0.78; stroke: var(--anima-line); }
 .plateFrameWash { fill: var(--anima-ink); fill-opacity: 0.06; }
 .plateFrameLine { fill: none; stroke: var(--anima-line-strong); stroke-opacity: 0.55; }
 
@@ -82,14 +82,14 @@
 .routeGhost { stroke: var(--anima-line-strong); stroke-dasharray: 4 6; stroke-opacity: 0.55; }
 .routeCrawl {
   animation: routeCrawl 36s linear infinite;
-  stroke: #ffffff;
+  stroke: var(--anima-surface);
   stroke-dasharray: 2 14;
   stroke-opacity: 0.85;
   stroke-width: 1.5;
 }
 
 .nodeSquare { fill: var(--anima-blue); }
-.nodeCore { fill: #ffffff; }
+.nodeCore { fill: var(--anima-surface); }
 
 .monoLabel text {
   fill: var(--anima-ink-soft);
@@ -124,7 +124,7 @@
 .tagPlates rect { fill: var(--anima-blue); }
 .tagPlates path { fill: none; stroke: var(--anima-blue); stroke-opacity: 0.7; }
 .tagPlates text {
-  fill: #ffffff;
+  fill: var(--anima-surface);
   font-family: var(--ifm-font-family-monospace);
   font-size: 9px;
   letter-spacing: 0.08em;
@@ -150,8 +150,8 @@
 
 /* Lattice redrawn on top of the land in the land's own rotated frame, in
  * white so it stays legible over the blue terraces. */
-.landLatticeLine { fill: none; stroke: #ffffff; stroke-opacity: 0.7; }
-.landLatticeCross { fill: none; stroke: #1d4aa6; stroke-opacity: 0.45; }
+.landLatticeLine { fill: none; stroke: var(--anima-surface); stroke-opacity: 0.7; }
+.landLatticeCross { fill: none; stroke: var(--anima-blue); stroke-opacity: 0.45; }
 
 @keyframes spin360 { to { transform: rotate(360deg); } }
 @keyframes routeCrawl { to { stroke-dashoffset: -160; } }
@@ -164,7 +164,7 @@
 
 /* Night: observatory ------------------------------------------------------ */
 
-.nightGridLine { fill: none; stroke: #ece9e3; stroke-opacity: 0.07; stroke-width: 1; }
+.nightGridLine { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.07; stroke-width: 1; }
 
 /* Upper-right terraces: graphite (outer) to dark ember (inner). */
 /* Lowered contrast: the inner level stops at a muted ember so the disc
@@ -180,24 +180,24 @@
 /* Eccentric twin disc: only the overlap lens is drawn, in a deeper red. */
 .discLens { fill: #a8272e; fill-opacity: 0.5; }
 
-.crosshair { stroke: #ece9e3; stroke-dasharray: 2 6; stroke-opacity: 0.22; }
+.crosshair { stroke: var(--anima-ink); stroke-dasharray: 2 6; stroke-opacity: 0.22; }
 
-.tickMinor { stroke: #ece9e3; stroke-opacity: 0.38; }
-.tickMajor { stroke: #ece9e3; stroke-opacity: 0.8; stroke-width: 1.2; }
+.tickMinor { stroke: var(--anima-ink); stroke-opacity: 0.38; }
+.tickMajor { stroke: var(--anima-ink); stroke-opacity: 0.8; stroke-width: 1.2; }
 .stateDot { fill: var(--anima-red-bright); }
 
-.orbits ellipse { fill: none; stroke: #ece9e3; stroke-opacity: 0.5; stroke-width: 0.9; }
+.orbits ellipse { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.5; stroke-width: 0.9; }
 .orbits .orbitSoft { stroke-opacity: 0.22; }
 .orbits .orbitFaint { stroke-dasharray: 3 7; stroke-opacity: 0.35; }
-.satellite { fill: #ece9e3; }
-.satelliteRing { fill: none; stroke: #ece9e3; stroke-opacity: 0.45; }
+.satellite { fill: var(--anima-ink); }
+.satelliteRing { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.45; }
 
-.pixelLight { fill: #ece9e3; fill-opacity: 0.85; }
-.pixelDark { fill: #0d1014; }
+.pixelLight { fill: var(--anima-ink); fill-opacity: 0.85; }
+.pixelDark { fill: var(--anima-art-night); }
 
-.plusMarks path { stroke: #ece9e3; stroke-opacity: 0.55; stroke-width: 1; }
+.plusMarks path { stroke: var(--anima-ink); stroke-opacity: 0.55; stroke-width: 1; }
 
-.nightLabel text { fill: #ece9e3; fill-opacity: 0.55; }
+.nightLabel text { fill: var(--anima-ink); fill-opacity: 0.55; }
 
 /* Motion --------------------------------------------------------------------
  * Slow, low-amplitude loops only. The disc itself never moves so it stays the
@@ -228,7 +228,7 @@
 .orbitComet {
   animation: orbitComet 22s linear infinite;
   fill: none;
-  stroke: #ece9e3;
+  stroke: var(--anima-ink);
   stroke-dasharray: 34 966;
   stroke-linecap: round;
   stroke-opacity: 0.85;
@@ -274,13 +274,13 @@
 :global([data-theme='dark']) .nightPlate { display: block; }
 :global([data-theme='dark']) .field {
   background:
-    radial-gradient(circle at 80% 26%, rgba(227, 69, 73, 0.1), transparent 38%),
-    #0d1014;
+    radial-gradient(circle at 80% 26%, color-mix(in srgb, var(--anima-red) 10%, transparent), transparent 38%),
+    var(--anima-art-night);
 }
 :global([data-theme='dark']) .field::after {
   background:
-    linear-gradient(0deg, #0d1014 3%, transparent 40%),
-    linear-gradient(90deg, #0d1014 20%, rgba(13, 16, 20, 0.55) 44%, transparent 60%);
+    linear-gradient(0deg, var(--anima-art-night) 3%, transparent 40%),
+    linear-gradient(90deg, var(--anima-art-night) 20%, color-mix(in srgb, var(--anima-art-night) 55%, transparent) 44%, transparent 60%);
 }
 :global([data-theme='dark']) .noiseLayer { opacity: 0.16; }
 
@@ -301,7 +301,7 @@
   }
 
   :global([data-theme='dark']) .field::after {
-    background: linear-gradient(0deg, #0d1014 22%, transparent 46%);
+    background: linear-gradient(0deg, var(--anima-art-night) 22%, transparent 46%);
   }
 
   .nightLabel { display: none; }

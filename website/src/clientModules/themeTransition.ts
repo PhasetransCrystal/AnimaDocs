@@ -18,13 +18,17 @@ const DURATION_MS = 520;
 const CLASS_NAME = 'theme-transitioning';
 
 /**
- * Reserved hook: whole-page View Transitions crossfade.
- * Off by default (it snapshots the page, which is heavy with the hero SVG and
- * blurs the art during the fade). Kept until the element-level transition is
- * signed off; delete this block and `installViewTransition` afterwards.
+ * Primary path: whole-page View Transitions crossfade. The browser snapshots
+ * the old frame once and fades it over the new one on the compositor, so no
+ * per-element colour transitions run (the class path below eases ~740 nodes,
+ * and inherited colours restart every frame). Browsers without
+ * startViewTransition fall back to the class path.
  */
-const ENABLE_VIEW_TRANSITION = false;
+const ENABLE_VIEW_TRANSITION = true;
+/** Set on <html> while a view transition runs; CSS pauses art loops with it. */
+const VT_CLASS_NAME = 'theme-vt';
 const TOGGLE_SELECTOR = '[class*="colorModeToggle"] button';
+let viewTransitionActive = false;
 
 function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -38,7 +42,7 @@ function installClassTransition(): void {
     const changed = records.some(
       (r) => r.oldValue !== root.getAttribute('data-theme'),
     );
-    if (!changed || prefersReducedMotion()) return;
+    if (!changed || viewTransitionActive || prefersReducedMotion()) return;
 
     // Restart the window if the user toggles again mid-transition.
     window.clearTimeout(timer);
@@ -54,25 +58,37 @@ function installClassTransition(): void {
 }
 
 function installViewTransition(): void {
-  type VTDocument = Document & {startViewTransition?: (cb: () => void) => unknown};
+  type ViewTransition = {finished: Promise<void>};
+  type VTDocument = Document & {
+    startViewTransition?: (cb: () => void) => ViewTransition;
+  };
   const doc = document as VTDocument;
   if (typeof doc.startViewTransition !== 'function') return;
 
+  const root = document.documentElement;
   let bypass = false;
   document.addEventListener(
     'click',
     (event) => {
-      if (bypass || prefersReducedMotion()) return;
+      if (bypass || viewTransitionActive || prefersReducedMotion()) return;
       const button = (event.target as Element | null)?.closest?.(TOGGLE_SELECTOR);
       if (!(button instanceof HTMLElement)) return;
       // Swallow the original click, then replay it inside the transition so
       // Docusaurus flips data-theme while the old frame is captured.
       event.stopImmediatePropagation();
       event.preventDefault();
-      doc.startViewTransition!(() => {
+      viewTransitionActive = true;
+      // Freeze art loops before the old snapshot so the live new frame does
+      // not repaint the SVG plates on every animation frame.
+      root.classList.add(VT_CLASS_NAME);
+      const transition = doc.startViewTransition!(() => {
         bypass = true;
         button.click();
         bypass = false;
+      });
+      transition.finished.finally(() => {
+        viewTransitionActive = false;
+        root.classList.remove(VT_CLASS_NAME);
       });
     },
     true,

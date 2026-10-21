@@ -5,6 +5,8 @@
   --anima-art-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch' seed='17'/%3E%3C/filter%3E%3Cpath fill='%23000' filter='url(%23grain)' opacity='.035' d='M0 0h160v160H0z'/%3E%3C/svg%3E");
   --anima-art-surface: var(--anima-surface);
   --anima-art-inset: inset 0 1px 0 #ffffff80;
+  /* Night observatory ground; deeper than --anima-paper on purpose. */
+  --anima-art-night: #0d1014;
 }
 
 [data-theme='dark'] {
@@ -408,6 +410,32 @@ html.theme-transitioning[data-theme='dark'] [data-theme-art] [data-art-mode='nig
 html.theme-transitioning [data-theme-art] [data-art-mode] *,
 html.theme-transitioning [data-theme-art] [data-art-mode] *::before,
 html.theme-transitioning [data-theme-art] [data-art-mode] *::after { animation: none !important; }
+
+/* View Transitions path (primary; themeTransition.ts). The root snapshot pair
+ * is crossfaded on the compositor, so nothing on the page transitions itself.
+ * html.theme-vt covers the whole transition: the art loops hold still so the
+ * new frame is painted once instead of every animation frame. */
+html.theme-vt [data-theme-art] *,
+html.theme-vt [data-theme-art] *::before,
+html.theme-vt [data-theme-art] *::after { animation-play-state: paused !important; }
+/* Components' own hover/colour transitions would otherwise re-ease underneath
+ * the crossfade and keep the live frame repainting. */
+html.theme-vt *,
+html.theme-vt *::before,
+html.theme-vt *::after { transition: none !important; }
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--anima-theme-switch-duration);
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* Keep the old frame opaque underneath so mid-fade never shows a see-through
+ * mix of both pages over the backdrop. */
+::view-transition-old(root) { animation-name: none; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) { animation: none !important; }
+}
 
 @media screen and (max-width: 996px) {
   main[class*='docMainContainer']::before,
