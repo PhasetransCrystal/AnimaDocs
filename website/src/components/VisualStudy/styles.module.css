@@ -1,4 +1,4 @@
-﻿/* Hero art adapter. Semantic content never lives here; every layer below is
+/* Hero art adapter. Semantic content never lives here; every layer below is
  * aria-hidden decoration and can be replaced per mode. */
 
 .backgroundArt {
@@ -116,13 +116,16 @@
 .actorLayer [data-actor] { opacity: 0; transform-box: view-box; transform-origin: 0 0; }
 .actorLayer [data-actor='rig'] { opacity: 1; }
 .actorRing { fill: none; stroke: #245dcc; stroke-opacity: 0.55; stroke-width: 1.2; }
-/* Connectors draw via dashoffset (pathLength 1). Ghosts = faint second layer. */
+/* Connectors draw via dashoffset (pathLength 1). */
 .actorLayer polyline { fill: none; stroke-dasharray: 1 1; stroke-linejoin: miter; }
 .actorBlue { stroke: #3474e8; stroke-width: 1.2; }
-.actorGhostBlue { stroke: #3474e8; stroke-opacity: 0.3; stroke-width: 0.8; }
 .actorSquare { fill: #f1f3f2; stroke: #245dcc; stroke-width: 1.4; }
 .actorRed { stroke: #ff5d5d; stroke-width: 1.4; }
-.actorGhostRed { stroke: #ff5d5d; stroke-opacity: 0.32; stroke-width: 0.8; }
+/* Faint lines: independent thin set, low contrast on both grounds. */
+.actorFaint { stroke-width: 0.8; }
+.actorFaint[data-tone='grey'] { stroke: #85868a; stroke-opacity: 0.45; }
+.actorFaint[data-tone='blue'] { stroke: #3474e8; stroke-opacity: 0.35; }
+.actorFaint[data-tone='red'] { stroke: #ff5d5d; stroke-opacity: 0.32; }
 .actorRedEnd { fill: #ff5d5d; }
 .actorLeader { stroke-width: 2.2; }
 .actorLeader[data-tone='red'] { stroke: #ece9e3; }
@@ -148,6 +151,9 @@
 }
 .axis .axisName { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; }
 .axis [data-axis-arm] { stroke-dasharray: 1 1; }
+/* Only the set of the running direction is shown (controller fades it in). */
+.axis [data-axis-set] { opacity: 0; }
+.axis .axisCross { stroke-width: 1.2; }
 .axisLayer[data-hero-axis='day'] .axis { stroke: #111820; stroke-opacity: 0.55; }
 .axisLayer[data-hero-axis='day'] .axis text { fill: #111820; fill-opacity: 0.7; }
 .axisLayer[data-hero-axis='night'] .axis { stroke: #ece9e3; stroke-opacity: 0.6; }
@@ -164,6 +170,9 @@
 .plateFramePaper { fill: var(--anima-surface); fill-opacity: 0.78; stroke: var(--anima-line); }
 .plateFrameWash { fill: var(--anima-ink); fill-opacity: 0.06; }
 .plateFrameLine { fill: none; stroke: var(--anima-line-strong); stroke-opacity: 0.55; }
+/* Terrain contours in the open field under the paper plate. */
+.contours path { fill: none; stroke: var(--anima-line-strong); stroke-opacity: 0.16; stroke-width: 0.8; }
+.contours path[data-major] { stroke-opacity: 0.26; }
 
 .tileField {
   mask-image: linear-gradient(180deg, #000 55%, transparent 88%);

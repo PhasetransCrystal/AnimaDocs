@@ -421,6 +421,37 @@ const PAD_ARC_PATH = (() => {
 })();
 const PAD_CROSS_PATH = 'M-10 0H-4M4 0H10M0 -10V-4M0 4V10';
 
+/* Faint terrain contours in the open field under the paper plate, around
+ * the pad. Deterministic: fixed harmonics per level, smoothed with
+ * midpoint quadratics. One static path, no animation. */
+const DAY_CONTOURS = (() => {
+  const cx = 770;
+  const cy = 520;
+  const tilt = (-7 * Math.PI) / 180;
+  const levels: string[] = [];
+  for (let level = 0; level < 6; level += 1) {
+    const base = 34 + level * 30;
+    const pts: Array<[number, number]> = [];
+    for (let i = 0; i < 64; i += 1) {
+      const a = (i / 64) * Math.PI * 2;
+      const r = base * (1
+        + 0.16 * Math.sin(2 * a + 0.7 + level * 0.22)
+        + 0.09 * Math.sin(3 * a + 2.1 - level * 0.35)
+        + 0.04 * Math.sin(5 * a + level));
+      const x = Math.cos(a) * r * 1.35;
+      const y = Math.sin(a) * r * 0.82;
+      pts.push([cx + x * Math.cos(tilt) - y * Math.sin(tilt), cy + x * Math.sin(tilt) + y * Math.cos(tilt)]);
+    }
+    const mid = (p: [number, number], q: [number, number]) => `${((p[0] + q[0]) / 2).toFixed(1)} ${((p[1] + q[1]) / 2).toFixed(1)}`;
+    let d = `M${mid(pts[pts.length - 1], pts[0])}`;
+    pts.forEach((p, i) => {
+      d += `Q${p[0].toFixed(1)} ${p[1].toFixed(1)} ${mid(p, pts[(i + 1) % pts.length])}`;
+    });
+    levels.push(`${d}Z`);
+  }
+  return levels;
+})();
+
 function toPoints(points: Array<[number, number]>): string {
   return points.map(([x, y]) => `${x},${y}`).join(' ');
 }
@@ -631,6 +662,11 @@ function DayAtlas(): ReactNode {
         />
       </g>
       <rect fill="url(#vsDayLattice)" height="560" mask="url(#vsDayLatticeMask)" width="1440" />
+      <g className={styles.contours}>
+        {DAY_CONTOURS.map((d, level) => (
+          <path d={d} key={level} data-major={level % 3 === 2 ? '' : undefined} />
+        ))}
+      </g>
       <g className={styles.plateFrames}>
         <rect className={styles.plateFrameWash} x="718" y="84" width="520" height="300" transform="rotate(-7 978 234)" />
         <rect className={styles.plateFramePaper} x="700" y="70" width="520" height="300" transform="rotate(-7 960 220)" />
@@ -726,7 +762,7 @@ function DayLines(): ReactNode {
         <path d="M54 300h12M60 294v12M134 340h12M140 334v12" />
       </g>
       <g className={styles.brassMarks}>
-        <rect height="8" width="8" x="131" y="86" />
+        {/* The 8px mark at (131, 86) belonged to plate "01"; removed with it. */}
         <rect height="6" width="6" x="1300" y="120" />
         <circle cx="905" cy="262" r="4" />
       </g>
@@ -753,73 +789,126 @@ export const HERO_ANCHORS = {
   pad: PAD,
 } as const;
 
-/* Actor connectors in pad-local coordinates (origin = white star). Each has
- * an elbow and a faint parallel copy offset by `ghost`. Blue runs from a
- * survey square to the pad ring; red runs from the star out to a mark. */
-type Connector = {points: Array<[number, number]>; ghost: [number, number]};
+/* Actor connectors in pad-local coordinates (origin = white star). Most run
+ * straight; a few take one elbow. Blue runs from a survey square in to the
+ * pad ring; red runs from the star out to a mark. */
+type Pt = [number, number];
+type Connector = {points: Pt[]; end?: number};
+/** Point at radius r along the direction of p (from the origin). */
+const onRing = ([x, y]: Pt, r: number): Pt => {
+  const k = r / Math.hypot(x, y);
+  return [Number((x * k).toFixed(2)), Number((y * k).toFixed(2))];
+};
+const inward = (...path: Pt[]): Pt[] => [...path, onRing(path[path.length - 1], PAD.r + 2)];
+const outward = (...path: Pt[]): Pt[] => [onRing(path[0], 8), ...path];
 const BLUE_LINKS: Connector[] = [
-  {points: [[-264, -140], [-140, -140], [-31, -31]], ghost: [0, -7]},
-  {points: [[252, -112], [112, -112], [31, -31]], ghost: [0, -7]},
-  {points: [[-120, 196], [-120, 120], [-31, 31]], ghost: [-7, 0]},
+  {points: inward([-470, -200])},
+  {points: inward([380, -170], [200, -170])},
+  {points: inward([560, 120])},
+  {points: inward([40, 300], [40, 150])},
 ];
 const RED_LINKS: Connector[] = [
-  {points: [[6, -6], [58, -58], [214, -58]], ghost: [0, 7]},
-  {points: [[6, 6], [40, 40], [40, 152]], ghost: [7, 0]},
-  {points: [[-6, -6], [-64, -64], [-64, -188]], ghost: [-7, 0]},
+  {points: outward([-330, -250]), end: 3.5},
+  {points: outward([110, -110], [110, -230]), end: 2.5},
+  {points: outward([620, 20]), end: 4.5},
+  {points: outward([120, 120], [330, 120]), end: 3},
 ];
-/* Leader lines with a caption, one per direction. */
+/* Faint lines have their own directions and lengths; they are not copies
+ * of the bold connectors. One does not pass through the star at all. */
+const FAINT_LINES: Array<{points: Pt[]; tone: 'grey' | 'blue' | 'red'}> = [
+  {points: outward([-600, 120]), tone: 'blue'},
+  {points: outward([-180, -320]), tone: 'grey'},
+  {points: outward([820, -150]), tone: 'blue'},
+  {points: [[-300, 60], [380, -330]], tone: 'grey'},
+  {points: outward([250, 500]), tone: 'red'},
+  {points: outward([520, 330]), tone: 'grey'},
+];
+/* Leader lines with a caption, one per direction, hung off an elbow end. */
 const LEADERS = {
-  red: {points: [[-64, -188], [-94, -218], [-236, -218]] as Array<[number, number]>, text: 'ORBIT INSERTION / 799,000 KM'},
-  blue: {points: [[252, -112], [282, -142], [430, -142]] as Array<[number, number]>, text: 'TOUCHDOWN / PAD-01 · 325 M'},
+  red: {points: [[110, -230], [140, -260], [330, -260]] as Pt[], text: 'ORBIT INSERTION / 799,000 KM'},
+  blue: {points: [[380, -170], [410, -200], [580, -200]] as Pt[], text: 'TOUCHDOWN / PAD-01 · 325 M'},
 };
-const pts = (list: Array<[number, number]>, dx = 0, dy = 0) => list.map(([x, y]) => `${x + dx},${y + dy}`).join(' ');
+const pts = (list: Pt[]) => list.map(([x, y]) => `${x},${y}`).join(' ');
 
-/* Altitude ladder: log scale, one decade = AXIS_DECADE viewBox units, 325 m
- * at the origin, altitude upwards. Minor ticks at 2..9 per decade. */
+/* Altitude ruler: log scale, one decade = AXIS_DECADE viewBox units, 325 m
+ * at the origin. The tick pattern repeats far past the labelled range so it
+ * still fills the hero after scrolling. */
 export const AXIS_DECADE = 54;
 const GROUND_M = 325;
-const axisY = (metres: number) => -AXIS_DECADE * Math.log10(metres / GROUND_M);
-const LADDER_TICKS = (() => {
+const axisPos = (metres: number) => AXIS_DECADE * Math.log10(metres / GROUND_M);
+const rulerTicks = (seg: (pos: number, kind: 0 | 1 | 2) => string) => {
   let d = '';
-  for (let k = 2; k <= 9; k += 1) {
-    for (let m = 1; m <= 9; m += 1) {
-      const y = axisY(m * 10 ** k).toFixed(2);
-      d += m === 1 ? `M-9 ${y}H9` : `M0 ${y}H${m === 5 ? 6 : 4}`;
-    }
+  for (let k = -10; k <= 25; k += 1) {
+    for (let m = 1; m <= 9; m += 1) d += seg(axisPos(m * 10 ** k), m === 1 ? 0 : m === 5 ? 1 : 2);
   }
   return d;
-})();
+};
+/** Launch ruler: ticks cross the double rail (rails at y = +-3). */
+const H_TICKS = rulerTicks((pos, kind) => {
+  const size = [9, 5, 3][kind];
+  return `M${pos.toFixed(1)} ${-size}V${size}`;
+});
+/** Landing ruler: majors cross the axis, the rest sit on its right. */
+const V_TICKS = rulerTicks((pos, kind) => {
+  const y = (-pos).toFixed(1);
+  return kind === 0 ? `M-9 ${y}H9` : `M0 ${y}H${kind === 1 ? 6 : 4}`;
+});
 const LADDER_DECADES: Array<[number, string]> = [
-  [1e3, '1 km'], [1e4, '10 km'], [1e5, '100 km'], [1e6, '1,000 km'], [1e7, '10⁴ km'], [1e8, '10⁵ km'], [1e9, '10⁶ km'],
+  [1e3, '1 km'], [1e4, '10 km'], [1e5, '100 km'], [1e6, '10³ km'], [1e7, '10⁴ km'], [1e8, '10⁵ km'], [1e9, '10⁶ km'],
 ];
 const LADDER_NAMES: Array<[number, string]> = [
   [GROUND_M, 'PAD'], [1e5, 'KÁRMÁN'], [3.6e7, 'GEO'], [3.844e8, 'MOON'], [7.99e8, 'ORBIT'],
 ];
 
-/** Full-bleed axes + scrolling altitude ladder. Rendered once per scene
- * (dark ink in the clipped day scene, light in the night scene) so it reads
- * on both sides of the clip edge. Arms are sized by the controller. */
+/** Full-bleed axes + scrolling altitude ruler. Rendered once per scene (dark
+ * ink in the clipped day scene, light in the night scene) so it reads on
+ * both sides of the clip edge. Launch uses set "h", landing set "v". Arm
+ * lengths are written by the controller. */
 function HeroAxis({scene}: {scene: 'day' | 'night'}): ReactNode {
   return (
     <svg className={`${styles.diagramArt} ${styles.axisLayer}`} data-hero-axis={scene} {...SVG_PROPS}>
       <g transform={`translate(${PAD.x} ${PAD.y})`} data-axis="" className={styles.axis}>
-        {['l', 'r', 'u', 'd'].map((arm) => (
-          <path key={arm} data-axis-arm={arm} pathLength="1" />
-        ))}
-        <path data-axis-hticks="" className={styles.axisMinor} />
-        <rect x="-6" y="-6" width="12" height="12" />
-        <g data-axis-ladder="">
-          <path className={styles.axisMinor} d={LADDER_TICKS} />
-          {LADDER_DECADES.map(([m, label]) => (
-            <text key={label} x="14" y={(axisY(m) + 4).toFixed(1)}>
-              {label}
-            </text>
+        {/* Launch: double horizontal rail, ruler scrolls sideways, square origin. */}
+        <g data-axis-set="h">
+          {['l-3', 'l3', 'r-3', 'r3'].map((arm) => (
+            <path key={arm} data-axis-arm={arm} pathLength="1" />
           ))}
-          {LADDER_NAMES.map(([m, name]) => (
-            <text key={name} className={styles.axisName} x="-14" y={(axisY(m) + 4).toFixed(1)} textAnchor="end">
-              {name}
-            </text>
+          <g data-axis-ladder="h">
+            <path className={styles.axisMinor} d={H_TICKS} />
+            {LADDER_DECADES.map(([m, label]) => (
+              <text key={label} x={(axisPos(m) + 3).toFixed(1)} y="24">
+                {label}
+              </text>
+            ))}
+            {/* Two rows so close names (MOON / ORBIT) don't collide. */}
+            {LADDER_NAMES.map(([m, name], index) => (
+              <text key={name} className={styles.axisName} x={(axisPos(m) + 3).toFixed(1)} y={index % 2 ? -29 : -16}>
+                {name}
+              </text>
+            ))}
+          </g>
+          <rect className={styles.axisOrigin} x="-6" y="-6" width="12" height="12" />
+        </g>
+        {/* Landing: single vertical axis; cross at the origin with small gaps
+            where the axis meets it. */}
+        <g data-axis-set="v">
+          {['u', 'd'].map((arm) => (
+            <path key={arm} data-axis-arm={arm} pathLength="1" />
           ))}
+          <g data-axis-ladder="v">
+            <path className={styles.axisMinor} d={V_TICKS} />
+            {LADDER_DECADES.map(([m, label]) => (
+              <text key={label} x="14" y={(-axisPos(m) + 4).toFixed(1)}>
+                {label}
+              </text>
+            ))}
+            {LADDER_NAMES.map(([m, name]) => (
+              <text key={name} className={styles.axisName} x="-14" y={(-axisPos(m) + 4).toFixed(1)} textAnchor="end">
+                {name}
+              </text>
+            ))}
+          </g>
+          <path className={styles.axisCross} d="M-10 0H10M0 -10V10" />
         </g>
       </g>
     </svg>
@@ -836,30 +925,31 @@ function HeroActor(): ReactNode {
       {/* Fixed on the pad / white star: nothing travels, so the rig is static. */}
       <g data-actor="rig" transform={`translate(${PAD.x} ${PAD.y})`}>
         <path data-actor="ring" className={styles.actorRing} d={PAD_ARC_PATH} />
-        {BLUE_LINKS.map(({points, ghost}, index) => (
+        {FAINT_LINES.map(({points, tone}, index) => (
+          <polyline key={`f${index}`} data-actor="faint" data-tone={tone} className={styles.actorFaint} points={pts(points)} pathLength="1" />
+        ))}
+        {BLUE_LINKS.map(({points}, index) => (
           <g key={`b${index}`}>
-            <polyline data-actor="blue-ghost" className={styles.actorGhostBlue} points={pts(points, ...ghost)} pathLength="1" />
             <polyline data-actor="blue-line" className={styles.actorBlue} points={pts(points)} pathLength="1" />
             <rect data-actor="square" className={styles.actorSquare} x={points[0][0] - 5} y={points[0][1] - 5} width="10" height="10" />
           </g>
         ))}
-        {RED_LINKS.map(({points, ghost}, index) => {
+        {RED_LINKS.map(({points, end = 3.5}, index) => {
           const [ex, ey] = points[points.length - 1];
           return (
             <g key={`r${index}`}>
-              <polyline data-actor="red-ghost" className={styles.actorGhostRed} points={pts(points, ...ghost)} pathLength="1" />
               <polyline data-actor="red-line" className={styles.actorRed} points={pts(points)} pathLength="1" />
-              <circle data-actor="red-end" className={styles.actorRedEnd} cx={ex} cy={ey} r="3.5" />
+              <circle data-actor="red-end" className={styles.actorRedEnd} cx={ex} cy={ey} r={end} />
             </g>
           );
         })}
         {(['red', 'blue'] as const).map((tone) => {
           const {points, text} = LEADERS[tone];
-          const [ex, ey] = points[points.length - 1];
+          const ey = points[points.length - 1][1];
           return (
             <g key={tone}>
               <polyline data-actor={`leader-${tone}`} className={styles.actorLeader} data-tone={tone} points={pts(points)} pathLength="1" />
-              <text data-actor={`caption-${tone}`} className={styles.actorCaption} x={tone === 'red' ? ex : points[1][0] + 4} y={ey - 8}>
+              <text data-actor={`caption-${tone}`} className={styles.actorCaption} x={points[1][0] + 4} y={ey - 8}>
                 {text}
               </text>
             </g>

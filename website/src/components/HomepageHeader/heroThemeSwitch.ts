@@ -45,11 +45,13 @@ class Timeline {
 
   add(el: Target, keys: Key[]): void {
     if (!el || keys.length === 0) return;
-    const frames: Keyframe[] = keys.map(({at, easing, ...props}) => ({
-      ...props,
-      offset: Math.min(1, Math.max(0, at / this.total)),
-      ...(easing ? {easing: String(easing)} : {}),
-    }));
+    // Offsets are clamped to be non-decreasing: a staggered key that runs
+    // past a later fixed key would otherwise make animate() throw.
+    let floor = 0;
+    const frames: Keyframe[] = keys.map(({at, easing, ...props}) => {
+      floor = Math.max(floor, Math.min(1, Math.max(0, at / this.total)));
+      return {...props, offset: floor, ...(easing ? {easing: String(easing)} : {})};
+    });
     // Hold the first / last values across the rest of the clock.
     if (frames[0].offset !== 0) frames.unshift({...frames[0], offset: 0, easing: 'linear'});
     const last = frames[frames.length - 1];
@@ -301,53 +303,43 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     const right = (g.w - g.ox) / g.s - pad.x;
     const top = -pad.y;
     const bottom = g.h / g.s - pad.y;
+    // Launch: double rail at y = +-3, clear of the 12px origin square.
+    // Landing: single vertical axis, 6px gap above and below the cross.
     const arms: Record<string, string> = {
-      l: `M-10 0H${n(left)}`,
-      r: `M10 0H${n(right)}`,
-      u: `M0 -10V${n(top)}`,
-      d: `M0 10V${n(bottom)}`,
+      'l-3': `M-12 -3H${n(left)}`,
+      l3: `M-12 3H${n(left)}`,
+      'r-3': `M12 -3H${n(right)}`,
+      r3: `M12 3H${n(right)}`,
+      u: `M0 -16V${n(top)}`,
+      d: `M0 16V${n(bottom)}`,
     };
-    let hticks = '';
-    for (const [side, extent] of [[-1, -left], [1, right]] as const) {
-      for (let j = 0; j < 40; j += 1) {
-        let stop = false;
-        for (let m = 1; m <= 9; m += 1) {
-          const pos = AXIS_DECADE * (j + Math.log10(m));
-          if (pos > extent) {
-            stop = true;
-            break;
-          }
-          if (pos < 14) continue;
-          hticks += `M${n(side * pos)} 0V${m === 1 ? -8 : m === 5 ? -5 : -3}`;
-        }
-        if (stop) break;
-      }
-    }
-    art.querySelectorAll('[data-hero-axis]').forEach((svg) => {
-      svg.querySelectorAll('[data-axis-arm]').forEach((arm) => {
-        arm.setAttribute('d', arms[(arm as SVGElement).dataset.axisArm ?? 'l']);
-      });
-      svg.querySelector('[data-axis-hticks]')?.setAttribute('d', hticks);
+    art.querySelectorAll('[data-axis-arm]').forEach((arm) => {
+      const d = arms[(arm as SVGElement).dataset.axisArm ?? ''];
+      if (d) arm.setAttribute('d', d);
     });
   };
 
-  /* Both axis copies share keyframes: group fade, arms drawn outwards from
-   * the origin, ladder scrolled so the current altitude sits on the origin. */
+  /* Both axis copies share keyframes: set fade, arms drawn outwards from the
+   * origin, ruler scrolled so the current altitude sits on the origin.
+   * Launch: horizontal double rail, ruler runs right-to-left. Landing:
+   * vertical axis, ruler drops back to the pad. */
   const animateAxis = (tl: Timeline, launch: boolean) => {
     const landAt = launch ? LAUNCH_LAND_MS : LANDING_LAND_MS;
+    const set = launch ? 'h' : 'v';
+    const shift = (pos: number) => (launch ? `translateX(${n(-pos)}px)` : `translateY(${n(pos)}px)`);
     const [from, to] = launch ? [0, LADDER_SPAN] : [LADDER_SPAN, 0];
     art.querySelectorAll('[data-hero-axis]').forEach((svg) => {
-      tl.add(svg.querySelector('[data-axis]'), launch
+      tl.add(svg.querySelector(`[data-axis-set="${set}"]`), launch
         ? [{at: 220, opacity: 0}, {at: 320, opacity: 1}, {at: 1080, opacity: 1}, {at: 1220, opacity: 0}]
         : [{at: 0, opacity: 0}, {at: 120, opacity: 1}, ...blink(760)]);
       const start = launch ? 240 : 0;
-      tl.each(svg.querySelectorAll('[data-axis-arm]'), (i) => [
-        {at: start + i * 30, strokeDashoffset: 1, easing: 'cubic-bezier(.2,.7,.2,1)'},
-        {at: start + 380 + i * 30, strokeDashoffset: 0},
+      tl.each(svg.querySelectorAll(`[data-axis-set="${set}"] [data-axis-arm]`), (i) => [
+        {at: start + (i >> 1) * 30, strokeDashoffset: 1, easing: 'cubic-bezier(.2,.7,.2,1)'},
+        {at: start + 380 + (i >> 1) * 30, strokeDashoffset: 0},
       ]);
-      tl.add(svg.querySelector('[data-axis-ladder]'), [
-        {at: 0, transform: `translateY(${n(from)}px)`, easing: ALT_EASE},
-        {at: landAt, transform: `translateY(${n(to)}px)`},
+      tl.add(svg.querySelector(`[data-axis-ladder="${set}"]`), [
+        {at: 0, transform: shift(from), easing: ALT_EASE},
+        {at: landAt, transform: shift(to)},
       ]);
     });
   };
@@ -444,12 +436,11 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       [440, 0, 'ease-in'],
       [600, -1],
     ]));
-    tl.each(actors('blue-ghost'), (i) => strokeKeys([
-      [50 + i * 30, 1, 'ease-out'],
-      [280 + i * 30, 0],
-      [470, 0, 'ease-in'],
-      [620, -1],
-    ]));
+    // Faint lines: own rhythm, drawn out from the star while the day peels.
+    tl.each(actors('faint'), (i) => strokeKeys([
+      [60 + i * 45, 1, 'ease-out'],
+      [420 + i * 45, 0],
+    ], 760 + i * 40));
 
     // Red rays: elbows out from the star, decelerate to their marks.
     tl.each(actors('red-line'), (i) => strokeKeys([
@@ -457,11 +448,7 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       [850, 0.45, EASE_POP],
       [1100, 0],
     ], 1150));
-    tl.each(actors('red-ghost'), (i) => strokeKeys([
-      [610 + i * 30, 1, 'ease-out'],
-      [900, 0.5, EASE_POP],
-      [1130, 0],
-    ], 1150));
+
     tl.each(actors('red-end'), (i) => [
       {at: 1060 + i * 40, opacity: 0},
       {at: 1080 + i * 40, opacity: 1},
@@ -476,8 +463,8 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       {at: 1280, opacity: 0},
     ]);
 
-    // White dot takes over as the clip lands on the star; the red star
-    // stand-in drops in at 2.8x and hands over to the real filtered disc.
+    // White dot takes over as the clip lands on the star; the flat red star
+    // stand-in fades in at its final size and hands over to the real disc.
     tl.add(actor('dot'), [
       {at: LAUNCH_CLIP.to, opacity: 0},
       {at: LAUNCH_CLIP.to + 40, opacity: 1},
@@ -485,8 +472,8 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       {at: 1300, opacity: 0},
     ]);
     tl.add(actor('disc'), [
-      {at: 820, opacity: 0, transform: move(red.x, red.y, 2.8), easing: EASE_POP},
-      {at: 880, opacity: 1, transform: move(red.x, red.y, 2.3), easing: EASE_POP},
+      {at: 820, opacity: 0, transform: move(red.x, red.y, 1), easing: 'ease-out'},
+      {at: 960, opacity: 1, transform: move(red.x, red.y, 1)},
       {at: 1160, opacity: 1, transform: move(red.x, red.y, 1)},
       {at: 1300, opacity: 0, transform: move(red.x, red.y, 1)},
     ]);
@@ -562,31 +549,27 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
 
     // Red rays out from the star and back; blue links grow out to squares.
     tl.each(actors('red-line'), (i) => strokeKeys([
-      [i * 20, 1, 'ease-out'],
-      [200 + i * 20, 0],
+      [i * 15, 1, 'ease-out'],
+      [200 + i * 15, 0],
       [260, 0, 'ease-in'],
       [460, 1],
     ]));
-    tl.each(actors('red-ghost'), (i) => strokeKeys([
-      [50 + i * 20, 1, 'ease-out'],
-      [240 + i * 20, 0],
-      [280, 0, 'ease-in'],
-      [480, 1],
-    ]));
+    // Faint lines: drawn in from the star's side, gone once the day settles.
+    tl.each(actors('faint'), (i) => strokeKeys([
+      [80 + i * 40, 1, 'ease-out'],
+      [400 + i * 40, 0],
+    ], 700 + i * 30));
     tl.each(actors('red-end'), (i) => [
-      {at: 200 + i * 20, opacity: 0},
-      {at: 210 + i * 20, opacity: 1},
-      {at: 260, opacity: 1},
-      {at: 270, opacity: 0},
+      {at: 200 + i * 15, opacity: 0},
+      {at: 210 + i * 15, opacity: 1},
+      {at: 265, opacity: 1},
+      {at: 275, opacity: 0},
     ]);
     tl.each(actors('blue-line'), (i) => [
       ...strokeKeys([[280 + i * 30, -1, 'ease-out'], [500 + i * 30, 0]]).slice(0, -1),
       ...blink(760).map((k) => ({...k, strokeDashoffset: 0})),
     ]);
-    tl.each(actors('blue-ghost'), (i) => [
-      ...strokeKeys([[330 + i * 30, -1, 'ease-out'], [540 + i * 30, 0]]).slice(0, -1),
-      ...blink(760).map((k) => ({...k, strokeDashoffset: 0})),
-    ]);
+
     tl.each(actors('square'), (i) => [
       {at: 500 + i * 30, opacity: 0},
       {at: 500 + i * 30, opacity: 1},
