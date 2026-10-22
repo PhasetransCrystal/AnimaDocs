@@ -123,19 +123,20 @@
 .actorRed { stroke: #ff5d5d; stroke-width: 1.4; }
 /* Faint lines: independent thin set, low contrast on both grounds. */
 .actorFaint { stroke-width: 0.8; }
-.actorFaint[data-tone='grey'] { stroke: #85868a; stroke-opacity: 0.45; }
-.actorFaint[data-tone='blue'] { stroke: #3474e8; stroke-opacity: 0.35; }
-.actorFaint[data-tone='red'] { stroke: #ff5d5d; stroke-opacity: 0.32; }
+.actorFaint[data-tone='grey'] { stroke: #85868a; stroke-opacity: 0.3; }
+.actorFaint[data-tone='blue'] { stroke: #3474e8; stroke-opacity: 0.26; }
+.actorFaint[data-tone='red'] { stroke: #ff5d5d; stroke-opacity: 0.24; }
 .actorRedEnd { fill: #ff5d5d; }
-.actorLeader { stroke-width: 2.2; }
+.actorLeader { stroke-opacity: 0.85; stroke-width: 1.5; }
 .actorLeader[data-tone='red'] { stroke: #ece9e3; }
 .actorLeader[data-tone='blue'] { stroke: #3474e8; }
 .actorCaption {
   fill: #ece9e3;
+  fill-opacity: 0.85;
   font-family: var(--ifm-font-family-monospace);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
 }
 /* Landing caption crosses from night onto paper: blue reads on both. */
 .actorCaption[data-actor='caption-blue'] { fill: #3474e8; }
@@ -292,6 +293,12 @@
 /* Night: observatory ------------------------------------------------------ */
 
 .nightGridLine { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.07; stroke-width: 1; }
+/* Quiet furniture: background-only, never above ~0.3 opacity. */
+.nightStars circle { fill: var(--anima-ink); }
+.nightLimb path { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.16; stroke-width: 1; }
+.nightLimb .nightLimbHaze { stroke-opacity: 0.05; stroke-width: 10; }
+.nightLimb .nightLimbTicks { stroke-opacity: 0.22; }
+.nightLimb .nightLabel text { fill-opacity: 0.28; }
 
 /* Upper-right terraces: graphite (outer) to dark ember (inner). */
 /* Lowered contrast: the inner level stops at a muted ember so the disc

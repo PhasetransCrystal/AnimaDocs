@@ -304,7 +304,8 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     const top = -pad.y;
     const bottom = g.h / g.s - pad.y;
     // Launch: double rail at y = +-3, clear of the 12px origin square.
-    // Landing: single vertical axis, 6px gap above and below the cross.
+    // Landing: vertical ruler axis + plain horizontal axis, 6px gaps on all
+    // four sides of the cross.
     const arms: Record<string, string> = {
       'l-3': `M-12 -3H${n(left)}`,
       l3: `M-12 3H${n(left)}`,
@@ -312,6 +313,8 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       r3: `M12 3H${n(right)}`,
       u: `M0 -16V${n(top)}`,
       d: `M0 16V${n(bottom)}`,
+      hl: `M-16 0H${n(left)}`,
+      hr: `M16 0H${n(right)}`,
     };
     art.querySelectorAll('[data-axis-arm]').forEach((arm) => {
       const d = arms[(arm as SVGElement).dataset.axisArm ?? ''];
@@ -357,6 +360,15 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       keys.push({...last, opacity: 0});
     }
     return keys;
+  };
+
+  /* Faint connectors grouped by tone; k is the index within that tone. */
+  const eachFaint = (tl: Timeline, keys: Record<'blue' | 'grey' | 'red', (k: number) => Key[]>) => {
+    const seen = {blue: 0, grey: 0, red: 0};
+    actors('faint').forEach((el) => {
+      const tone = ((el as SVGElement).dataset.tone ?? 'grey') as keyof typeof seen;
+      tl.add(el, keys[tone](seen[tone]++));
+    });
   };
 
   /* Day -> night: launch into orbit (1300ms). Nothing travels: the actor
@@ -436,11 +448,13 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       [440, 0, 'ease-in'],
       [600, -1],
     ]));
-    // Faint lines: own rhythm, drawn out from the star while the day peels.
-    tl.each(actors('faint'), (i) => strokeKeys([
-      [60 + i * 45, 1, 'ease-out'],
-      [420 + i * 45, 0],
-    ], 760 + i * 40));
+    // Faint lines: own rhythm, phased by tone so blue never shows over the
+    // night and red never over the day; grey spans the hand-over.
+    eachFaint(tl, {
+      blue: (k) => strokeKeys([[40 + k * 50, 1, 'ease-out'], [300 + k * 50, 0]], 400 + k * 30),
+      grey: (k) => strokeKeys([[80 + k * 50, 1, 'ease-out'], [440 + k * 50, 0]], 760 + k * 40),
+      red: (k) => strokeKeys([[700 + k * 40, 1, 'ease-out'], [960 + k * 40, 0]], 1120),
+    });
 
     // Red rays: elbows out from the star, decelerate to their marks.
     tl.each(actors('red-line'), (i) => strokeKeys([
@@ -547,24 +561,27 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       {at: 1050, opacity: 0, transform: 'scale(1)'},
     ]);
 
-    // Red rays out from the star and back; blue links grow out to squares.
+    // Red rays come home: drawn in from their end marks towards the star,
+    // then collapse into it. Blue links grow out to their squares.
     tl.each(actors('red-line'), (i) => strokeKeys([
-      [i * 15, 1, 'ease-out'],
+      [i * 15, -1, 'ease-out'],
       [200 + i * 15, 0],
-      [260, 0, 'ease-in'],
-      [460, 1],
+      [240 + i * 15, 0, 'ease-in'],
+      [440 + i * 15, 1],
     ]));
-    // Faint lines: drawn in from the star's side, gone once the day settles.
-    tl.each(actors('faint'), (i) => strokeKeys([
-      [80 + i * 40, 1, 'ease-out'],
-      [400 + i * 40, 0],
-    ], 700 + i * 30));
     tl.each(actors('red-end'), (i) => [
-      {at: 200 + i * 15, opacity: 0},
-      {at: 210 + i * 15, opacity: 1},
-      {at: 265, opacity: 1},
-      {at: 275, opacity: 0},
+      {at: i * 15, opacity: 0},
+      {at: 20 + i * 15, opacity: 1},
+      {at: 240 + i * 15, opacity: 1},
+      {at: 260 + i * 15, opacity: 0},
     ]);
+    // Faint lines phased by tone: red only while the night is up, blue only
+    // once the day is spreading, grey in between.
+    eachFaint(tl, {
+      red: (k) => strokeKeys([[k * 30, -1, 'ease-out'], [180 + k * 30, 0]], 240),
+      grey: (k) => strokeKeys([[80 + k * 40, 1, 'ease-out'], [400 + k * 40, 0]], 700 + k * 30),
+      blue: (k) => strokeKeys([[420 + k * 50, 1, 'ease-out'], [640 + k * 50, 0]], 860 + k * 30),
+    });
     tl.each(actors('blue-line'), (i) => [
       ...strokeKeys([[280 + i * 30, -1, 'ease-out'], [500 + i * 30, 0]]).slice(0, -1),
       ...blink(760).map((k) => ({...k, strokeDashoffset: 0})),

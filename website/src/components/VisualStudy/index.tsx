@@ -139,7 +139,43 @@ const STATE_DOT = polar(263, 136);
 /** Pixel squares split into step groups for the switch (cheap toggles). */
 export const NIGHT_PIXEL_GROUPS = 4;
 
-/** Night layer ①: background grid only (fades in early during the launch). */
+/* Quiet night furniture (static, no animation): a sparse seeded star field
+ * kept clear of the red star, and a faint planet limb low in the plate with
+ * a short graduated segment. All of it stays under ~0.3 opacity. */
+const NIGHT_STARS = (() => {
+  let seed = 20261023;
+  const next = () => {
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    return seed / 4294967296;
+  };
+  const stars: Array<{x: number; y: number; r: number; o: number}> = [];
+  while (stars.length < 34) {
+    const x = 360 + next() * 1060;
+    const y = 16 + next() * 560;
+    const r = 0.6 + next() * 0.9;
+    const o = 0.12 + next() * 0.24;
+    if (Math.hypot(x - FOCUS.x, y - FOCUS.y) < 270) continue;
+    stars.push({x: Math.round(x), y: Math.round(y), r: Number(r.toFixed(1)), o: Number(o.toFixed(2))});
+  }
+  return stars;
+})();
+const LIMB = {cx: 720, cy: 2300, r: 1720};
+const LIMB_PATH = `M0 ${(LIMB.cy - Math.sqrt(LIMB.r ** 2 - LIMB.cx ** 2)).toFixed(1)}A${LIMB.r} ${LIMB.r} 0 0 1 1440 ${(LIMB.cy - Math.sqrt(LIMB.r ** 2 - LIMB.cx ** 2)).toFixed(1)}`;
+const LIMB_TICKS = (() => {
+  let d = '';
+  for (let deg = -4; deg <= 10; deg += 1.5) {
+    const a = (deg * Math.PI) / 180;
+    const sx = LIMB.cx + Math.sin(a) * LIMB.r;
+    const sy = LIMB.cy - Math.cos(a) * LIMB.r;
+    const len = Math.round((deg + 4) / 1.5) % 4 === 0 ? 9 : 4;
+    const ex = LIMB.cx + Math.sin(a) * (LIMB.r - len);
+    const ey = LIMB.cy - Math.cos(a) * (LIMB.r - len);
+    d += `M${sx.toFixed(1)} ${sy.toFixed(1)}L${ex.toFixed(1)} ${ey.toFixed(1)}`;
+  }
+  return d;
+})();
+
+/** Night layer ①: background grid plus the quiet furniture (fades in early). */
 function NightGrid(): ReactNode {
   return (
     <g>
@@ -158,6 +194,19 @@ function NightGrid(): ReactNode {
         </pattern>
       </defs>
       <rect y="-240" width="1440" height="1140" fill="url(#vs-grid)" mask="url(#vs-grid-mask)" />
+      <g className={styles.nightStars}>
+        {NIGHT_STARS.map(({x, y, r, o}) => (
+          <circle key={`${x}-${y}`} cx={x} cy={y} r={r} fillOpacity={o} />
+        ))}
+      </g>
+      <g className={styles.nightLimb}>
+        <path d={LIMB_PATH} />
+        <path className={styles.nightLimbHaze} d={LIMB_PATH} transform="translate(0 7)" />
+        <path className={styles.nightLimbTicks} d={LIMB_TICKS} />
+        <g className={styles.nightLabel}>
+          <text x="742" y="566">LIMB / R 6,371 KM</text>
+        </g>
+      </g>
     </g>
   );
 }
@@ -814,19 +863,23 @@ const RED_LINKS: Connector[] = [
   {points: outward([120, 120], [330, 120]), end: 3},
 ];
 /* Faint lines have their own directions and lengths; they are not copies
- * of the bold connectors. One does not pass through the star at all. */
+ * of the bold connectors. One does not pass through the star at all. They
+ * run a little longer than the bold set but stop well short of the edges.
+ * Tone decides the phase: blue only over day, red only over night, grey
+ * spans the hand-over. */
 const FAINT_LINES: Array<{points: Pt[]; tone: 'grey' | 'blue' | 'red'}> = [
-  {points: outward([-600, 120]), tone: 'blue'},
-  {points: outward([-180, -320]), tone: 'grey'},
-  {points: outward([820, -150]), tone: 'blue'},
-  {points: [[-300, 60], [380, -330]], tone: 'grey'},
-  {points: outward([250, 500]), tone: 'red'},
-  {points: outward([520, 330]), tone: 'grey'},
+  {points: outward([-520, 110]), tone: 'blue'},
+  {points: outward([-170, -260]), tone: 'grey'},
+  {points: outward([700, -130]), tone: 'blue'},
+  {points: [[-260, 50], [330, -270]], tone: 'grey'},
+  {points: outward([210, 400]), tone: 'red'},
+  {points: outward([430, 270]), tone: 'grey'},
 ];
-/* Leader lines with a caption, one per direction, hung off an elbow end. */
+/* Leader lines with a caption, one per direction, hung off an elbow end.
+ * Short jog + modest run so they read as annotation, not as connectors. */
 const LEADERS = {
-  red: {points: [[110, -230], [140, -260], [330, -260]] as Pt[], text: 'ORBIT INSERTION / 799,000 KM'},
-  blue: {points: [[380, -170], [410, -200], [580, -200]] as Pt[], text: 'TOUCHDOWN / PAD-01 · 325 M'},
+  red: {points: [[110, -230], [128, -248], [292, -248]] as Pt[], text: 'ORBIT INSERTION / 799,000 KM'},
+  blue: {points: [[380, -170], [398, -188], [552, -188]] as Pt[], text: 'TOUCHDOWN / PAD-01 · 325 M'},
 };
 const pts = (list: Pt[]) => list.map(([x, y]) => `${x},${y}`).join(' ');
 
@@ -889,10 +942,10 @@ function HeroAxis({scene}: {scene: 'day' | 'night'}): ReactNode {
           </g>
           <rect className={styles.axisOrigin} x="-6" y="-6" width="12" height="12" />
         </g>
-        {/* Landing: single vertical axis; cross at the origin with small gaps
-            where the axis meets it. */}
+        {/* Landing: vertical ruler axis plus a plain horizontal axis (no
+            ticks); cross at the origin with small gaps where the axes meet it. */}
         <g data-axis-set="v">
-          {['u', 'd'].map((arm) => (
+          {['u', 'd', 'hl', 'hr'].map((arm) => (
             <path key={arm} data-axis-arm={arm} pathLength="1" />
           ))}
           <g data-axis-ladder="v">
@@ -919,9 +972,6 @@ function HeroAxis({scene}: {scene: 'day' | 'night'}): ReactNode {
 function HeroActor(): ReactNode {
   return (
     <svg className={`${styles.diagramArt} ${styles.actorLayer}`} data-hero-actor="" {...SVG_PROPS}>
-      <g data-actor="disc" className={styles.actorDisc}>
-        <circle r={DISC_R} />
-      </g>
       {/* Fixed on the pad / white star: nothing travels, so the rig is static. */}
       <g data-actor="rig" transform={`translate(${PAD.x} ${PAD.y})`}>
         <path data-actor="ring" className={styles.actorRing} d={PAD_ARC_PATH} />
@@ -981,6 +1031,13 @@ export default function VisualStudy({variant = 'field'}: VisualStudyProps): Reac
         </svg>
         <svg className={`${styles.diagramArt} ${styles.nightPlate}`} data-hero-layer="n-marks" {...SVG_PROPS}>
           <NightMarks />
+        </svg>
+        {/* Flat red star stand-in sits inside the night scene, under the
+            axis, so the ruler stays readable across the disc. */}
+        <svg className={`${styles.diagramArt} ${styles.actorLayer}`} data-hero-actor-disc="" {...SVG_PROPS}>
+          <g data-actor="disc" className={styles.actorDisc}>
+            <circle r={DISC_R} />
+          </g>
         </svg>
         <HeroAxis scene="night" />
       </div>
