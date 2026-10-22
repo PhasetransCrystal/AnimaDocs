@@ -186,6 +186,64 @@ const LIMB_TICKS = (() => {
   return d;
 })();
 
+/* Main orbit (rx 430, ry 112, frame rotated -16deg about FOCUS). The white
+ * satellite sits at parameter SAT_T; arcs run forward (sweep 1) from it. */
+const ORBIT = {rx: 430, ry: 112};
+const SAT_T = (Math.atan2(-38 / ORBIT.ry, -404 / ORBIT.rx) * 180) / Math.PI + 360;
+const orbitPt = (deg: number) => {
+  const a = (deg * Math.PI) / 180;
+  return `${(FOCUS.x + ORBIT.rx * Math.cos(a)).toFixed(1)} ${(FOCUS.y + ORBIT.ry * Math.sin(a)).toFixed(1)}`;
+};
+/** Arc along the main orbit from `from` to `to` degrees, split below 180. */
+function orbitArc(from: number, to: number): string {
+  const steps = Math.ceil((to - from) / 90);
+  let d = `M${orbitPt(from)}`;
+  for (let i = 1; i <= steps; i += 1) d += `A${ORBIT.rx} ${ORBIT.ry} 0 0 1 ${orbitPt(from + ((to - from) * i) / steps)}`;
+  return d;
+}
+/** Launch trace: the orbit is drawn out of the pad ahead of the night plate. */
+const ORBIT_TRACE_PATH = orbitArc(SAT_T, SAT_T + 240);
+/** Stepped trail behind the satellite (static night furniture). */
+const SAT_TRAIL = [
+  {d: orbitArc(SAT_T - 10, SAT_T - 3), o: 0.55},
+  {d: orbitArc(SAT_T - 24, SAT_T - 13), o: 0.32},
+  {d: orbitArc(SAT_T - 44, SAT_T - 28), o: 0.16},
+];
+
+/* Faint constellation links: each bright star to its nearest bright
+ * neighbour, trimmed clear of the crosses and kept off the red star. */
+const NIGHT_LINKS = (() => {
+  const bright = NIGHT_STARS.filter((star) => star.bright);
+  const seen = new Set<string>();
+  let d = '';
+  const nearDisc = (ax: number, ay: number, bx: number, by: number) => {
+    const dx = bx - ax;
+    const dy = by - ay;
+    const t = Math.max(0, Math.min(1, ((FOCUS.x - ax) * dx + (FOCUS.y - ay) * dy) / (dx * dx + dy * dy)));
+    return Math.hypot(ax + dx * t - FOCUS.x, ay + dy * t - FOCUS.y) < DISC_R + 40;
+  };
+  bright.forEach((a, i) => {
+    let best = -1;
+    let dist = Infinity;
+    bright.forEach((b, j) => {
+      const len = Math.hypot(b.x - a.x, b.y - a.y);
+      if (j !== i && len < dist) {
+        dist = len;
+        best = j;
+      }
+    });
+    if (best < 0 || dist > 340) return;
+    const key = i < best ? `${i}-${best}` : `${best}-${i}`;
+    const b = bright[best];
+    if (seen.has(key) || nearDisc(a.x, a.y, b.x, b.y)) return;
+    seen.add(key);
+    const ux = (b.x - a.x) / dist;
+    const uy = (b.y - a.y) / dist;
+    d += `M${(a.x + ux * 9).toFixed(1)} ${(a.y + uy * 9).toFixed(1)}L${(b.x - ux * 9).toFixed(1)} ${(b.y - uy * 9).toFixed(1)}`;
+  });
+  return d;
+})();
+
 /** Night layer ①: background grid plus the quiet furniture (fades in early). */
 function NightGrid(): ReactNode {
   return (
@@ -308,6 +366,11 @@ function NightOrbits(): ReactNode {
         {/* Short bright segments travelling along two orbits. */}
         <ellipse className={styles.orbitComet} cx={FOCUS.x} cy={FOCUS.y} rx="430" ry="112" pathLength={1000} />
         <ellipse className={`${styles.orbitComet} ${styles.orbitCometSlow}`} cx={FOCUS.x} cy={FOCUS.y} rx="560" ry="168" pathLength={1000} />
+        <g className={styles.satTrail}>
+          {SAT_TRAIL.map(({d, o}) => (
+            <path key={o} d={d} strokeOpacity={o} />
+          ))}
+        </g>
         <circle className={styles.satellite} cx={FOCUS.x - 404} cy={FOCUS.y - 38} r="5" data-hero-anchor="star" />
         <circle className={`${styles.satelliteRing} ${styles.pulse}`} cx={FOCUS.x - 404} cy={FOCUS.y - 38} r="13" />
       </g>
@@ -321,6 +384,7 @@ function NightMarks(): ReactNode {
     <g>
       {/* Stars sit above the terraces/halo (they were buried in the grid layer). */}
       <g className={styles.nightStars} data-night-stars="">
+        <path className={styles.nightLinks} d={NIGHT_LINKS} />
         {NIGHT_STARS.map(({x, y, r, o, bright}) => (
           <g key={`${x}-${y}`}>
             <circle cx={x} cy={y} r={r} fillOpacity={o} />
@@ -484,6 +548,10 @@ const PAD_ARC_PATH = (() => {
   return `M${at(-55)}A${PAD.r} ${PAD.r} 0 1 1 ${at(-125)}`;
 })();
 const PAD_CROSS_PATH = 'M-10 0H-4M4 0H10M0 -10V-4M0 4V10';
+/** Lock-on brackets around the pad (actor only). */
+const RETICLE_PATH = [[-1, -1], [1, -1], [1, 1], [-1, 1]]
+  .map(([sx, sy]) => `M${sx * 30} ${sy * 20}V${sy * 30}H${sx * 20}`)
+  .join('');
 
 /* Faint terrain contours in the open field under the paper plate, around
  * the pad. Deterministic: fixed harmonics per level, smoothed with
@@ -772,6 +840,11 @@ function DayGuide(): ReactNode {
       <g className={styles.padArc} transform={`translate(${PAD.x} ${PAD.y})`}>
         <path d={PAD_ARC_PATH} />
         <path className={styles.padCross} d={PAD_CROSS_PATH} />
+        {/* Quiet pad designation, lower-left of the arc. */}
+        <path className={styles.padTick} d="M-34 34L-44 44H-58" />
+        <text className={styles.padLabel} x="-62" y="47" textAnchor="end">
+          PAD-01
+        </text>
       </g>
     </g>
   );
@@ -992,8 +1065,15 @@ function HeroAxis({scene}: {scene: 'day' | 'night'}): ReactNode {
 function HeroActor(): ReactNode {
   return (
     <svg className={`${styles.diagramArt} ${styles.actorLayer}`} data-hero-actor="" {...SVG_PROPS}>
+      {/* Orbit trace: the main orbit drawn forward out of the pad. */}
+      <g transform={`rotate(-16 ${FOCUS.x} ${FOCUS.y})`}>
+        <path data-actor="trace" className={styles.actorTrace} d={ORBIT_TRACE_PATH} pathLength="1" />
+      </g>
       {/* Fixed on the pad / white star: nothing travels, so the rig is static. */}
       <g data-actor="rig" transform={`translate(${PAD.x} ${PAD.y})`}>
+        <circle data-actor="ripple" className={styles.actorRipple} r="60" />
+        <circle data-actor="ripple" className={styles.actorRipple} r="60" />
+        <path data-actor="reticle" className={styles.actorReticle} d={RETICLE_PATH} />
         <path data-actor="ring" className={styles.actorRing} d={PAD_ARC_PATH} />
         {FAINT_LINES.map(({points, tone, phase}, index) => (
           <polyline key={`f${index}`} data-actor="faint" data-tone={tone} data-phase={phase} className={styles.actorFaint} points={pts(points)} pathLength="1" />

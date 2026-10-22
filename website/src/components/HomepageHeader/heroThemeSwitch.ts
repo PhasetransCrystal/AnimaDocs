@@ -491,6 +491,24 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       {at: 1160, opacity: 1, transform: move(red.x, red.y, 1)},
       {at: 1300, opacity: 0, transform: move(red.x, red.y, 1)},
     ]);
+
+    // Free study: lock-on, ignition ripple, then the orbit traced out of the
+    // pad ahead of the night plate (the real orbit fades in under it).
+    tl.add(actor('reticle'), [
+      {at: 0, opacity: 0, transform: 'scale(1.8)', easing: EASE_POP},
+      {at: 160, opacity: 1, transform: 'scale(1)'},
+      {at: 360, opacity: 1, transform: 'scale(1)', easing: 'ease-in'},
+      {at: 460, opacity: 0, transform: 'scale(0.5)'},
+    ]);
+    tl.add(actors('ripple')[0], [
+      {at: 120, opacity: 0, transform: 'scale(0.3)'},
+      {at: 120, opacity: 0.8, transform: 'scale(0.3)', easing: 'cubic-bezier(.1,.6,.3,1)'},
+      {at: 520, opacity: 0, transform: 'scale(1.5)'},
+    ]);
+    tl.add(actor('trace'), strokeKeys([
+      [300, 1, 'cubic-bezier(.5,0,.2,1)'],
+      [980, 0],
+    ], 1180));
     animateAxis(tl, true);
   };
 
@@ -603,6 +621,26 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       {at: 840, opacity: 1},
       {at: 900, opacity: 0},
     ]);
+
+    // Free study: deorbit (the orbit trace winds back into the satellite),
+    // then touchdown: reticle locks onto the pad, two ripples, blink out.
+    tl.add(actor('trace'), strokeKeys([
+      [0, 0, 'cubic-bezier(.55,0,.75,.4)'],
+      [420, 1],
+    ]).map((k) => ({...k, stroke: '#ece9e3'})));
+    tl.add(actor('reticle'), [
+      {at: 700, opacity: 0, transform: 'scale(1.8)', easing: EASE_POP},
+      {at: 820, opacity: 1, transform: 'scale(1)'},
+      ...blink(900).map((k) => ({...k, transform: 'scale(1)'})),
+    ]);
+    tl.each(actors('ripple'), (i) => {
+      const t = 690 + i * 90;
+      return [
+        {at: t, opacity: 0, transform: 'scale(0.4)'},
+        {at: t, opacity: 0.7, transform: 'scale(0.4)', easing: 'cubic-bezier(.1,.6,.3,1)'},
+        {at: t + 260, opacity: 0, transform: 'scale(1.6)'},
+      ];
+    });
     animateAxis(tl, false);
   };
 

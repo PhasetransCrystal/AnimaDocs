@@ -118,6 +118,9 @@
 .actorRing { fill: none; stroke: #245dcc; stroke-opacity: 0.55; stroke-width: 1.2; }
 /* Connectors draw via dashoffset (pathLength 1). */
 .actorLayer polyline { fill: none; stroke-dasharray: 1 1; stroke-linejoin: miter; }
+.actorTrace { fill: none; stroke: #e34549; stroke-dasharray: 1 1; stroke-linecap: round; stroke-width: 1.6; }
+.actorReticle { fill: none; stroke: #245dcc; stroke-width: 1.4; }
+.actorRipple { fill: none; stroke: #3474e8; stroke-width: 1.2; }
 .actorBlue { stroke: #3474e8; stroke-width: 1.2; }
 .actorSquare { fill: #f1f3f2; stroke: #245dcc; stroke-width: 1.4; }
 .actorRed { stroke: #ff5d5d; stroke-width: 1.4; }
@@ -204,6 +207,15 @@
 /* Launch pad: low-opacity blue open arc on the night satellite position. */
 .padArc { fill: none; stroke: var(--anima-blue); stroke-opacity: 0.32; stroke-width: 1.2; }
 .padArc .padCross { stroke-opacity: 0.5; stroke-width: 1; }
+.padArc .padTick { stroke: var(--anima-ink-soft); stroke-opacity: 0.45; stroke-width: 0.8; }
+.padLabel {
+  fill: var(--anima-ink-soft);
+  fill-opacity: 0.6;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  stroke: none;
+}
 
 .routeMain { stroke: var(--anima-blue); stroke-opacity: 0.9; stroke-width: 1.75; }
 .routeGhost { stroke: var(--anima-line-strong); stroke-dasharray: 4 6; stroke-opacity: 0.55; }
@@ -296,6 +308,8 @@
 /* Quiet furniture: background-only, never above ~0.3 opacity. */
 .nightStars circle { fill: var(--anima-ink); }
 .nightStars path { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.3; stroke-width: 0.8; }
+.nightStars .nightLinks { stroke-dasharray: 2 6; stroke-opacity: 0.16; stroke-width: 0.7; }
+.satTrail path { fill: none; stroke: var(--anima-ink); stroke-linecap: round; stroke-width: 1.4; }
 .nightLimb path { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.16; stroke-width: 1; }
 .nightLimb .nightLimbHaze { stroke-opacity: 0.05; stroke-width: 10; }
 .nightLimb .nightLimbTicks { stroke-opacity: 0.22; }
