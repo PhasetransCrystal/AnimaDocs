@@ -445,6 +445,21 @@ html.theme-vt *::after { transition: none !important; }
   ::view-transition-old(*),
   ::view-transition-new(*) { animation: none !important; }
 }
+/* Hero mobile switch (heroThemeSwitch.ts): old frame held, the new frame is
+ * revealed by a WAAPI clip-path circle from the top centre. */
+html.hero-vt::view-transition-old(root),
+html.hero-vt::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+/* Hero desktop switch: the visible page chrome recolours in 200ms around the
+ * flip; the hero art pins its own palette so it is excluded. Kept to a short
+ * list of leaf-ish elements: transitioning `body` (inherited colour) made every
+ * frame of the 200ms restyle the whole document (~860 elements). */
+html[data-hero-switching='desktop'] :is(.navbar, .navbar__brand, .navbar__title, .navbar__link, [data-altimeter] *, header h1, header p, header a) {
+  transition:
+    color 200ms ease,
+    background-color 200ms ease,
+    border-color 200ms ease,
+    fill 200ms ease !important;
+}
 
 @media screen and (max-width: 996px) {
   main[class*='docMainContainer']::before,

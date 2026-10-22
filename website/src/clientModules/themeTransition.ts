@@ -12,6 +12,7 @@
  * the same style recalc as the theme change and no frame snaps.
  */
 import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
+import {getHeroSwitchHandler, heroSwitchState} from '../utils/heroSwitchHook';
 
 /** Keep in sync with --anima-theme-switch-duration in art-adapters.css. */
 const DURATION_MS = 520;
@@ -42,7 +43,13 @@ function installClassTransition(): void {
     const changed = records.some(
       (r) => r.oldValue !== root.getAttribute('data-theme'),
     );
-    if (!changed || viewTransitionActive || prefersReducedMotion()) return;
+      if (
+        !changed ||
+        viewTransitionActive ||
+        heroSwitchState.active ||
+        prefersReducedMotion()
+      )
+        return;
 
     // Restart the window if the user toggles again mid-transition.
     window.clearTimeout(timer);
@@ -63,16 +70,55 @@ function installViewTransition(): void {
     startViewTransition?: (cb: () => void) => ViewTransition;
   };
   const doc = document as VTDocument;
-  if (typeof doc.startViewTransition !== 'function') return;
+  const canTransition =
+    ENABLE_VIEW_TRANSITION && typeof doc.startViewTransition === 'function';
 
   const root = document.documentElement;
   let bypass = false;
+  const toggleFrom = (target: EventTarget | null): HTMLElement | null => {
+    const button = (target as Element | null)?.closest?.(TOGGLE_SELECTOR);
+    return button instanceof HTMLElement ? button : null;
+  };
+
+  // While the hero choreography runs the toggle is aria-disabled: swallow
+  // Enter/Space so the browser never synthesises a click from them.
+  document.addEventListener(
+    'keydown',
+    (event) => {
+      if (!heroSwitchState.active) return;
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      if (!toggleFrom(event.target)) return;
+      event.stopImmediatePropagation();
+      event.preventDefault();
+    },
+    true,
+  );
+
   document.addEventListener(
     'click',
     (event) => {
-      if (bypass || viewTransitionActive || prefersReducedMotion()) return;
-      const button = (event.target as Element | null)?.closest?.(TOGGLE_SELECTOR);
-      if (!(button instanceof HTMLElement)) return;
+      if (bypass) return;
+      const button = toggleFrom(event.target);
+      if (!button) return;
+      if (heroSwitchState.active) {
+        event.stopImmediatePropagation();
+        event.preventDefault();
+        return;
+      }
+      if (viewTransitionActive || prefersReducedMotion()) return;
+      const flip = () => {
+        bypass = true;
+        button.click();
+        bypass = false;
+      };
+      // The homepage hero gets first refusal: it runs its own launch/landing.
+      const hero = getHeroSwitchHandler();
+      if (hero && hero(flip)) {
+        event.stopImmediatePropagation();
+        event.preventDefault();
+        return;
+      }
+      if (!canTransition) return;
       // Swallow the original click, then replay it inside the transition so
       // Docusaurus flips data-theme while the old frame is captured.
       event.stopImmediatePropagation();
@@ -100,5 +146,5 @@ function installViewTransition(): void {
 
 if (ExecutionEnvironment.canUseDOM) {
   installClassTransition();
-  if (ENABLE_VIEW_TRANSITION) installViewTransition();
+  installViewTransition();
 }

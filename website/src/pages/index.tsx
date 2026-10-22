@@ -9,6 +9,8 @@ import VisualStudy from '@site/src/components/VisualStudy';
 
 import styles from './index.module.css';
 import useHeroPaging from '@site/src/components/HomepageHeader/useHeroPaging';
+import Altimeter from '@site/src/components/HomepageHeader/Altimeter';
+import useHeroThemeSwitch from '@site/src/components/HomepageHeader/useHeroThemeSwitch';
 
 const contributorCount = 1;
 const thirdPartyToolCount = 0;
@@ -59,6 +61,7 @@ function DirectoryPanel({tutorialCount}: {tutorialCount: number}): ReactNode {
 function HomepageHeader(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
   const {sectionRef, contentRef, copyRef, artRef} = useHeroPaging();
+  useHeroThemeSwitch(sectionRef, artRef);
   const docsData = useDocsData(undefined);
   const latestVersion = docsData.versions.find((version) => version.isLast) ?? docsData.versions[0];
   const tutorialCount = latestVersion?.docs.filter((doc) => !doc.unlisted).length ?? 0;
@@ -82,6 +85,7 @@ function HomepageHeader(): ReactNode {
         <div className="container" ref={contentRef}>
           <div className={styles.heroLayout}>
             <div className={styles.heroCopy} ref={copyRef}>
+              <Altimeter />
               <p className={styles.kicker}>CUI-ANIMA / 教程首页</p>
               <Heading as="h1" aria-label={siteConfig.title}>
                 <span>Cui-Anima</span>

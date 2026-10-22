@@ -1,0 +1,207 @@
+/* Hero altimeter. Resting text comes from html[data-theme]; heroThemeSwitch.ts
+ * only writes the .live spans and transform/opacity while a switch plays. */
+.altimeter {
+  --alt-scale-h: 152px;
+  bottom: calc(100% + 2.25rem);
+  color: var(--anima-ink);
+  display: grid;
+  font-family: var(--ifm-font-family-monospace);
+  gap: 0 1.1rem;
+  grid-template-columns: 22px auto;
+  grid-template-rows: auto 1fr;
+  height: var(--alt-scale-h);
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.scale {
+  grid-row: 1 / span 2;
+  height: var(--alt-scale-h);
+  mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+  overflow: hidden;
+  position: relative;
+  width: 22px;
+}
+
+.ticks {
+  background:
+    repeating-linear-gradient(180deg, currentColor 0 1px, transparent 1px 8px) 0 0 / 6px 100%
+      no-repeat,
+    repeating-linear-gradient(180deg, currentColor 0 1px, transparent 1px 40px) 0 0 / 12px 100%
+      no-repeat;
+  height: 300%;
+  left: 0;
+  opacity: 0.55;
+  position: absolute;
+  top: -100%;
+  width: 12px;
+}
+
+/* Zero sits at 70% of the scale; the 20% below it is the brake zone. */
+.zero {
+  background: currentColor;
+  height: 1px;
+  left: 14px;
+  opacity: 0.6;
+  position: absolute;
+  top: 70%;
+  width: 8px;
+}
+
+.speed,
+.brake {
+  left: 17px;
+  position: absolute;
+  transform: scaleY(0);
+  width: 3px;
+}
+
+.speed {
+  background: var(--anima-blue);
+  height: 70%;
+  top: 0;
+  transform-origin: 50% 100%;
+}
+
+.brake {
+  background: var(--anima-red);
+  height: 20%;
+  top: 70%;
+  transform-origin: 50% 0;
+}
+
+.reading {
+  align-self: start;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin: 0;
+  transform-origin: 0 50%;
+  white-space: nowrap;
+}
+
+.value {
+  display: inline-block;
+  mask-image: linear-gradient(180deg, #000 55%, color-mix(in srgb, #000 35%, transparent));
+}
+
+.unit {
+  margin-left: 0.35em;
+  opacity: 0.7;
+}
+
+.place {
+  align-self: end;
+  font-family: var(--ifm-heading-font-family, inherit);
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.srOnly {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+/* Theme variants. */
+.night,
+.live {
+  display: none;
+}
+
+:global(html[data-theme='dark']) .day {
+  display: none;
+}
+
+:global(html[data-theme='dark']) .night {
+  display: inline;
+}
+
+/* Screen readers keep the pre-switch reading until the switch has ended. */
+.altimeter[data-hold='day'] .srOnly.day,
+.altimeter[data-hold='night'] .srOnly.night {
+  display: inline;
+}
+
+.altimeter[data-hold='day'] .srOnly.night,
+.altimeter[data-hold='night'] .srOnly.day {
+  display: none;
+}
+
+.altimeter[data-live] :is(.value, .unit) > :not(.live) {
+  display: none;
+}
+
+.altimeter[data-live] .live {
+  display: inline;
+}
+
+:global(html[data-hero-switching]) .altimeter :is(.reading, .place, .ticks, .speed, .brake) {
+  will-change: transform, opacity;
+}
+
+@media screen and (max-width: 640px) {
+  .altimeter {
+    --alt-scale-h: 6px;
+    align-items: baseline;
+    bottom: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.8rem;
+    height: auto;
+    margin: 0 0 1rem;
+    position: relative;
+  }
+
+  .scale {
+    flex: 0 0 100%;
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    order: 3;
+    width: min(220px, 100%);
+  }
+
+  .ticks {
+    background: repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 8px);
+    height: 100%;
+    left: -100%;
+    top: 0;
+    width: 300%;
+  }
+
+  /* High orbit: the lower half of the bar reads as filled. */
+  :global(html[data-theme='dark']) .ticks {
+    background:
+      linear-gradient(0deg, currentColor 50%, transparent 50%) 0 0 / 100% 100% no-repeat,
+      repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 8px);
+  }
+
+  .zero,
+  .speed,
+  .brake {
+    display: none;
+  }
+
+  .place {
+    font-size: 0.82rem;
+    letter-spacing: 0.12em;
+    opacity: 0.75;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .altimeter * {
+    transition: none !important;
+  }
+}

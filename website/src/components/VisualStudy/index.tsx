@@ -137,9 +137,33 @@ function polar(r: number, deg: number): [number, number] {
 
 const STATE_DOT = polar(263, 136);
 
-function NightObservatory(): ReactNode {
+/** Night layer ①: background grid only (fades in early during the launch). */
+function NightGrid(): ReactNode {
   return (
-    <g className={styles.nightArt}>
+    <g>
+      <defs>
+        <radialGradient id="vs-grid-fade" cx={FOCUS.x} cy={FOCUS.y} r="900" gradientUnits="userSpaceOnUse">
+          <stop offset="0.2" stopColor="#000" />
+          <stop offset="0.25" stopColor="#fff" />
+          <stop offset="0.6" stopColor="#fff" stopOpacity="0.55" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </radialGradient>
+        <mask id="vs-grid-mask">
+          <rect y="-240" width="1440" height="1140" fill="url(#vs-grid-fade)" />
+        </mask>
+        <pattern id="vs-grid" width="48" height="48" patternUnits="userSpaceOnUse">
+          <path d="M48 0H0V48" className={styles.nightGridLine} />
+        </pattern>
+      </defs>
+      <rect y="-240" width="1440" height="1140" fill="url(#vs-grid)" mask="url(#vs-grid-mask)" />
+    </g>
+  );
+}
+
+/** Night layer ②: the filtered group (terraces, halo, disc, lens, grain). */
+function NightCore(): ReactNode {
+  return (
+    <g>
       <defs>
         {/* Near-flat disc: a shallow tonal shift only, no specular highlight. */}
         <linearGradient id="vs-disc" x1="0.2" y1="0.1" x2="0.8" y2="0.95">
@@ -165,26 +189,12 @@ function NightObservatory(): ReactNode {
           <stop offset="0.45" stopColor="#e34549" stopOpacity="0.08" />
           <stop offset="1" stopColor="#e34549" stopOpacity="0" />
         </radialGradient>
-        <radialGradient id="vs-grid-fade" cx={FOCUS.x} cy={FOCUS.y} r="900" gradientUnits="userSpaceOnUse">
-          <stop offset="0.2" stopColor="#000" />
-          <stop offset="0.25" stopColor="#fff" />
-          <stop offset="0.6" stopColor="#fff" stopOpacity="0.55" />
-          <stop offset="1" stopColor="#fff" stopOpacity="0" />
-        </radialGradient>
-        <mask id="vs-grid-mask">
-          <rect y="-240" width="1440" height="1140" fill="url(#vs-grid-fade)" />
-        </mask>
-        <pattern id="vs-grid" width="48" height="48" patternUnits="userSpaceOnUse">
-          <path d="M48 0H0V48" className={styles.nightGridLine} />
-        </pattern>
         <filter id="vs-disc-grain" x="0" y="0" width="100%" height="100%">
           <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" />
           <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 0" />
           <feComposite in2="SourceGraphic" operator="in" />
         </filter>
       </defs>
-
-      <rect y="-240" width="1440" height="1140" fill="url(#vs-grid)" mask="url(#vs-grid-mask)" />
 
       {/* Upper-right terraces: blurred fills give a continuous gradient,
           thin contour arcs keep the curved edge as the readable mark. */}
@@ -200,9 +210,6 @@ function NightObservatory(): ReactNode {
 
       <circle cx={FOCUS.x} cy={FOCUS.y} r="420" fill="url(#vs-halo)" />
 
-      <line className={styles.crosshair} x1="520" y1={FOCUS.y} x2="1440" y2={FOCUS.y} />
-      <line className={styles.crosshair} x1={FOCUS.x} y1="-240" x2={FOCUS.x} y2="560" />
-
       <circle cx={FOCUS.x} cy={FOCUS.y} r={DISC_R} fill="url(#vs-disc)" />
       {/* Overlap lens with the eccentric twin, then the twin's outline. */}
       {/* The clip stays on the wrapper so only the twin drifts, not the clip. */}
@@ -210,6 +217,16 @@ function NightObservatory(): ReactNode {
         <circle className={`${styles.discLens} ${styles.lensDrift}`} cx={FOCUS.x + TWIN.dx} cy={FOCUS.y + TWIN.dy} r={DISC_R} />
       </g>
       <circle cx={FOCUS.x} cy={FOCUS.y} r={DISC_R} fill="#000" filter="url(#vs-disc-grain)" opacity="0.42" />
+    </g>
+  );
+}
+
+/** Night layer ③: crisp marks (ticks, orbits, satellite, pixels, labels). */
+function NightRest(): ReactNode {
+  return (
+    <g>
+      <line className={styles.crosshair} x1="520" y1={FOCUS.y} x2="1440" y2={FOCUS.y} />
+      <line className={styles.crosshair} x1={FOCUS.x} y1="-240" x2={FOCUS.x} y2="560" />
 
       {/* Tick ring and state dot rotate together so the gap keeps its dot. */}
       <g className={styles.tickSpin}>
@@ -227,7 +244,7 @@ function NightObservatory(): ReactNode {
         {/* Short bright segments travelling along two orbits. */}
         <ellipse className={styles.orbitComet} cx={FOCUS.x} cy={FOCUS.y} rx="430" ry="112" pathLength={1000} />
         <ellipse className={`${styles.orbitComet} ${styles.orbitCometSlow}`} cx={FOCUS.x} cy={FOCUS.y} rx="560" ry="168" pathLength={1000} />
-        <circle className={styles.satellite} cx={FOCUS.x - 404} cy={FOCUS.y - 38} r="5" />
+        <circle className={styles.satellite} cx={FOCUS.x - 404} cy={FOCUS.y - 38} r="5" data-hero-anchor="star" />
         <circle className={`${styles.satelliteRing} ${styles.pulse}`} cx={FOCUS.x - 404} cy={FOCUS.y - 38} r="13" />
       </g>
 
@@ -324,6 +341,22 @@ function buildDayTiles(): DayTile[] {
 }
 
 const dayTiles = buildDayTiles();
+
+export const DAY_TILE_GROUPS = 7;
+
+/* Deterministic split of the tiles into a few groups (LCG, fixed seed) so the
+ * switch can toggle whole groups with steps() instead of animating ~80 tiles. */
+function groupTiles(tiles: DayTile[]): DayTile[][] {
+  const groups: DayTile[][] = Array.from({length: DAY_TILE_GROUPS}, () => []);
+  let seed = 20260816;
+  for (const tile of tiles) {
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    groups[Math.floor((seed / 4294967296) * DAY_TILE_GROUPS)].push(tile);
+  }
+  return groups;
+}
+
+const dayTileGroups = groupTiles(dayTiles);
 
 const dayRouteMain: Array<[number, number]> = [
   [520, 190],
@@ -565,21 +598,45 @@ function DayAtlas(): ReactNode {
         <rect className={styles.plateFramePaper} x="700" y="70" width="520" height="300" transform="rotate(-7 960 220)" />
         <rect className={styles.plateFrameLine} x="1140" y="42" width="300" height="200" transform="rotate(4 1290 142)" />
       </g>
-      <g className={styles.tileField}>
-        {dayTiles.map((tile, index) => (
-          <path
-            className={styles[`tile${tile.kind.charAt(0).toUpperCase()}${tile.kind.slice(1)}`]}
-            d={tile.d}
-            key={index}
-            style={{'--tile-alpha': tile.opacity} as CSSProperties}
-          />
-        ))}
-      </g>
-      <g className={styles.guideStudy}>
-        <circle className={styles.guideCircle} cx="640" cy="150" r="170" />
-        <path className={styles.guideArc} d="M640 -20 A170 170 0 0 1 810 150" />
-        <path className={styles.guideTicks} d={DAY_GUIDE_TICKS_PATH} />
-      </g>
+    </g>
+  );
+}
+
+/** Day tile grid, split into seeded groups that vanish/appear in steps. */
+function DayTiles(): ReactNode {
+  return (
+    <g className={styles.tileField}>
+      {dayTileGroups.map((group, groupIndex) => (
+        <g data-tile-group={groupIndex} key={groupIndex}>
+          {group.map((tile) => (
+            <path
+              className={styles[`tile${tile.kind.charAt(0).toUpperCase()}${tile.kind.slice(1)}`]}
+              d={tile.d}
+              key={tile.d}
+              style={{'--tile-alpha': tile.opacity} as CSSProperties}
+            />
+          ))}
+        </g>
+      ))}
+    </g>
+  );
+}
+
+/** Day guide circle study (the actor takes the circle over during a switch). */
+function DayGuide(): ReactNode {
+  return (
+    <g className={styles.guideStudy}>
+      <circle className={styles.guideCircle} cx="640" cy="150" r="170" />
+      <path className={styles.guideArc} d="M640 -20 A170 170 0 0 1 810 150" />
+      <path className={styles.guideTicks} d={DAY_GUIDE_TICKS_PATH} />
+    </g>
+  );
+}
+
+/** Day lines, labels, routes and small marks. */
+function DayLines(): ReactNode {
+  return (
+    <g>
       <polyline className={styles.routeGhost} points={toPoints(dayRouteGhost)} />
       <polyline className={styles.routeMain} points={toPoints(dayRouteMain)} />
       <polyline className={styles.routeCrawl} points={toPoints(dayRouteMain)} />
@@ -612,9 +669,8 @@ function DayAtlas(): ReactNode {
         <text x="1350" y="254" textAnchor="middle">A-05</text>
         <path d="M905 231V242H928M1305 241V251H1328" />
       </g>
+      {/* Plate "01" moved out: the hero altimeter now sits in that corner. */}
       <g className={styles.plateNumbers}>
-        <text x="86" y="118">01</text>
-        <line x1="86" x2="126" y1="130" y2="130" />
         <text x="1356" y="112">02</text>
         <line x1="1356" x2="1396" y1="124" y2="124" />
         <text x="1298" y="306">03</text>
@@ -634,29 +690,108 @@ function DayAtlas(): ReactNode {
   );
 }
 
+const SVG_PROPS = {
+  viewBox: '0 0 1440 900',
+  preserveAspectRatio: 'xMidYMin slice',
+  fill: 'none',
+  focusable: 'false',
+} as const;
+
+/* Plate anchors in viewBox units, shared with the switch controller. */
+export const HERO_ANCHORS = {
+  /** Day guide circle centre and radius. */
+  guide: {x: 640, y: 150, r: 170},
+  /** Night satellite (white star) after the orbit group's -16deg rotation. */
+  star: {x: 611.2, y: 310.8, r: 5},
+  /** Night disc (red star). */
+  disc: {x: FOCUS.x, y: FOCUS.y, r: DISC_R},
+} as const;
+
+/* Blue-edged squares just outside the guide ring and red rays from the star,
+ * both in rig-local coordinates (rig origin = actor centre). */
+const ACTOR_SQUARES: Array<[number, number]> = [-38, 84, 206].map((deg) => {
+  const rad = (deg * Math.PI) / 180;
+  return [Math.cos(rad) * 214, Math.sin(rad) * 214];
+});
+const ACTOR_RAYS: Array<[number, number]> = [[-12, 168], [18, 236], [152, 132]].map(([deg, len]) => {
+  const rad = (deg * Math.PI) / 180;
+  return [Math.cos(rad) * len, Math.sin(rad) * len];
+});
+const ACTOR_MILESTONES = ['KÁRMÁN', 'GEO', 'MOON'];
+
+/** Light overlay used only while the hero switches theme. No filters. */
+function HeroActor(): ReactNode {
+  return (
+    <svg className={`${styles.diagramArt} ${styles.actorLayer}`} data-hero-actor="" {...SVG_PROPS}>
+      <g data-actor="disc" className={styles.actorDisc}>
+        <circle r={DISC_R} />
+      </g>
+      <g data-actor="orbit" className={styles.actorOrbit}>
+        <ellipse rx="430" ry="112" transform="rotate(-16)" />
+      </g>
+      <g data-actor="rig">
+        <circle data-actor="ring" className={styles.actorRing} r={HERO_ANCHORS.guide.r} />
+        {ACTOR_SQUARES.map(([x, y], index) => (
+          <g key={`b${index}`}>
+            <line data-actor="blue-line" className={styles.actorBlue} x1={x} y1={y} x2="0" y2="0" pathLength="1" />
+            <rect data-actor="square" className={styles.actorSquare} x={x - 5} y={y - 5} width="10" height="10" />
+          </g>
+        ))}
+        {ACTOR_RAYS.map(([x, y], index) => (
+          <g key={`r${index}`}>
+            <line data-actor="red-line" className={styles.actorRed} x1="0" y1="0" x2={x} y2={y} pathLength="1" />
+            <circle data-actor="red-end" className={styles.actorRedEnd} cx={x} cy={y} r="3.5" />
+          </g>
+        ))}
+        <g data-actor="axis" className={styles.actorAxis}>
+          <rect x="-6" y="-6" width="12" height="12" />
+          <path d="M-9 0H9M0 -9V9" />
+          <path data-actor="axis-h" d="M14 0H300M80 -4V4M150 -4V4M220 -4V4M290 -4V4" />
+          <path data-actor="axis-v" d="M0 14V240M-4 70H4M-4 130H4M-4 190H4" />
+          {ACTOR_MILESTONES.map((name, index) => (
+            <text data-actor="milestone" key={name} x={80 + index * 70} y="-12" textAnchor="middle">
+              {name}
+            </text>
+          ))}
+        </g>
+        <circle data-actor="dot" className={styles.actorDot} r={HERO_ANCHORS.star.r} />
+      </g>
+    </svg>
+  );
+}
+
 export default function VisualStudy({variant = 'field'}: VisualStudyProps): ReactNode {
   return (
-    <div className={`${styles.backgroundArt} ${styles[variant]}`} aria-hidden="true" data-theme-art="">
-      {/* One SVG per mode so each keeps its own mobile geometry while both
-          are briefly visible during the day/night crossfade. */}
-      <svg
-        className={`${styles.diagramArt} ${styles.dayPlate}`}
-        data-art-mode="day"
-        viewBox="0 0 1440 900"
-        preserveAspectRatio="xMidYMin slice"
-        fill="none"
-        focusable="false">
-        <DayAtlas />
-      </svg>
-      <svg
-        className={`${styles.diagramArt} ${styles.nightPlate}`}
-        data-art-mode="night"
-        viewBox="0 0 1440 900"
-        preserveAspectRatio="xMidYMin slice"
-        fill="none"
-        focusable="false">
-        <NightObservatory />
-      </svg>
+    <div className={`${styles.backgroundArt} ${styles[variant]}`} aria-hidden="true" data-theme-art="" data-hero-art="">
+      {/* Each scene is a stack of SVG layers so the switch can fade or move a
+          whole layer (compositor-friendly) instead of individual shapes. */}
+      <div className={`${styles.scene} ${styles.nightScene}`} data-art-mode="night" data-hero-scene="night">
+        <svg className={`${styles.diagramArt} ${styles.nightPlate}`} data-hero-layer="n-grid" {...SVG_PROPS}>
+          <NightGrid />
+        </svg>
+        <svg className={`${styles.diagramArt} ${styles.nightPlate}`} data-hero-layer="n-core" {...SVG_PROPS}>
+          <NightCore />
+        </svg>
+        <svg className={`${styles.diagramArt} ${styles.nightPlate}`} data-hero-layer="n-rest" {...SVG_PROPS}>
+          <NightRest />
+        </svg>
+      </div>
+      <div className={styles.colourLayer} data-hero-colour="" />
+      <div className={`${styles.scene} ${styles.dayScene}`} data-art-mode="day" data-hero-scene="day">
+        <svg className={styles.diagramArt} data-hero-layer="d-ocean" {...SVG_PROPS}>
+          <DayAtlas />
+        </svg>
+        <svg className={styles.diagramArt} data-hero-layer="d-tiles" {...SVG_PROPS}>
+          <DayTiles />
+        </svg>
+        <svg className={styles.diagramArt} data-hero-layer="d-lines" {...SVG_PROPS}>
+          <DayLines />
+        </svg>
+        <svg className={styles.diagramArt} data-hero-layer="d-guide" {...SVG_PROPS}>
+          <DayGuide />
+        </svg>
+      </div>
+      <HeroActor />
       <div className={styles.noiseLayer} />
     </div>
   );

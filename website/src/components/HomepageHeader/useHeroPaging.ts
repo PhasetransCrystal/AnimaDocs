@@ -34,6 +34,8 @@ export default function useHeroPaging() {
     let wheelBound = false;
     let lastTransform = '';
     const writtenVars = new Map<string, string>();
+    // Hero theme switch in progress (heroThemeSwitch.ts): pause loops and snap.
+    const switching = () => document.documentElement.dataset.heroSwitching !== undefined;
 
     // Custom properties on the section inherit into the whole hero subtree, so
     // only write them when the value actually changes.
@@ -48,7 +50,7 @@ export default function useHeroPaging() {
     // CSS matches only the animated nodes, so toggling it restyles ~20
     // elements instead of the whole plate.
     const syncPause = () => {
-      const paused = scrolling || offscreen;
+      const paused = scrolling || offscreen || switching();
       if ((art.dataset.artPaused === 'true') === paused) return;
       if (paused) art.dataset.artPaused = 'true';
       else delete art.dataset.artPaused;
@@ -92,6 +94,7 @@ export default function useHeroPaging() {
       paint();
     };
 
+    let measureDeferred = false;
     const scheduleMeasure = () => {
       if (measureFrame) window.cancelAnimationFrame(measureFrame);
       measureFrame = window.requestAnimationFrame(() => {
@@ -160,7 +163,7 @@ export default function useHeroPaging() {
 
     const settle = () => {
       window.clearTimeout(settleTimer);
-      if (!pagingEnabled || pointerDown || animating || document.hidden) return;
+      if (!pagingEnabled || pointerDown || animating || document.hidden || switching()) return;
       // Cheap position check first: most scrollends land on a page edge or
       // outside the hero, and ignoreTarget() reads computed style.
       const offset = window.scrollY - sectionTop;
@@ -205,6 +208,10 @@ export default function useHeroPaging() {
     };
 
     const onWheel = (event: WheelEvent) => {
+      if (switching()) {
+        event.preventDefault();
+        return;
+      }
       if (!pagingEnabled || event.ctrlKey || event.metaKey || event.shiftKey || Math.abs(event.deltaX) >= Math.abs(event.deltaY)) return;
       const now = performance.now();
       const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1);
@@ -229,6 +236,7 @@ export default function useHeroPaging() {
     };
 
     const onKey = (event: KeyboardEvent) => {
+      if (switching()) return;
       if (!pagingEnabled || event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey || ignoreTarget(event.target)) return;
       if (event.target instanceof Element && event.target.closest('a') && event.key === ' ') return;
       const nextDirection = event.key === 'PageDown' || event.key === 'ArrowDown' || (event.key === ' ' && !event.shiftKey) ? 1 : event.key === 'PageUp' || event.key === 'ArrowUp' || (event.key === ' ' && event.shiftKey) ? -1 : 0;
@@ -255,12 +263,31 @@ export default function useHeroPaging() {
 
     const observer = new ResizeObserver(measure);
     const themeObserver = new MutationObserver((mutations) => {
+      if (mutations.some((mutation) => mutation.attributeName === 'data-hero-switching')) {
+        syncPause();
+        if (!switching()) {
+          // Re-measure once the hero choreography has ended; doing it on the
+          // mid-animation theme flip forced a ~57ms layout inside a rAF.
+          if (measureDeferred) {
+            measureDeferred = false;
+            scheduleMeasure();
+          }
+          settle();
+        }
+      }
       if (!mutations.some((mutation) => mutation.attributeName === 'data-theme')) return;
+      if (switching()) {
+        measureDeferred = true;
+        return;
+      }
       scheduleMeasure();
     });
     observer.observe(content);
     observer.observe(copy);
-    themeObserver.observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme', 'data-hero-switching'],
+    });
     measure();
     window.addEventListener('resize', cancelMotion);
     window.addEventListener('scroll', onScroll, {passive: true});

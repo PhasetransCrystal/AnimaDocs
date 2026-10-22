@@ -28,12 +28,40 @@
 
 /* Frame ------------------------------------------------------------------- */
 
+/* Scenes: one per mode. Each pins its own palette so a mid-animation
+ * data-theme flip never recolours a plate that is still on screen. The
+ * inactive scene is display:none at rest (no layout/paint/animation); it is
+ * mounted only while html[data-hero-switching] or html.theme-transitioning. */
+.scene {
+  inset: 0;
+  position: absolute;
+}
+
+.dayScene {
+  --anima-ink: #111820;
+  --anima-ink-soft: #56616d;
+  --anima-paper: #f1f3f2;
+  --anima-surface: #ffffff;
+  --anima-line: #c7cdd0;
+  --anima-line-strong: #7d8991;
+  --anima-blue: #245dcc;
+  --anima-gold: #111820;
+}
+
+.nightScene {
+  --anima-ink: #ece9e3;
+  --anima-red: #e34549;
+  --anima-red-bright: #ff5d5d;
+  --anima-art-night: #0d1014;
+  display: none;
+}
+
 /* Day frame restored from 3e7732b. */
-.field {
+.field .dayScene {
   background: linear-gradient(105deg, var(--anima-paper) 40%, #e7edf4 100%);
 }
 
-.field::after {
+.field .dayScene::after {
   background:
     linear-gradient(0deg, var(--anima-paper) 2%, transparent 52%),
     linear-gradient(90deg, var(--anima-paper) 0%, transparent 40%);
@@ -42,12 +70,66 @@
   position: absolute;
 }
 
+.field .nightScene {
+  background:
+    radial-gradient(circle at 80% 26%, color-mix(in srgb, var(--anima-red) 10%, transparent), transparent 38%),
+    var(--anima-art-night);
+}
+
+.field .nightScene::after {
+  background:
+    linear-gradient(0deg, var(--anima-art-night) 3%, transparent 40%),
+    linear-gradient(90deg, var(--anima-art-night) 20%, color-mix(in srgb, var(--anima-art-night) 55%, transparent) 44%, transparent 60%);
+  content: '';
+  inset: 0;
+  position: absolute;
+}
+
 .specimen { background: var(--anima-paper); }
 
-/* Mode plates: the inactive plate is display:none at rest so it costs no
- * layout/paint/animation. art-adapters.css dual-renders both only while
- * html.theme-transitioning is set. */
-.nightPlate { display: none; }
+/* Switch-only layers: hidden at rest, driven by heroThemeSwitch.ts. */
+.colourLayer,
+.actorLayer {
+  display: none;
+}
+
+.colourLayer {
+  border-radius: 50%;
+  height: 200px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 200px;
+}
+
+/* Desktop switch mounts both scenes + overlays; mobile only fades the
+ * current scene and lets the View Transition reveal the other. */
+:global(html[data-hero-switching='desktop']) :is(.scene, .colourLayer, .actorLayer) { display: block; }
+:global(html[data-hero-switching='desktop']) [data-hero-layer] { will-change: opacity, transform; }
+:global(html[data-hero-switching='desktop']) .dayScene { will-change: clip-path; }
+/* Grain + terrace blur are off while the night core is invisible. */
+[data-hero-filters='off'] [data-hero-layer='n-core'] * { filter: none; }
+
+/* Actor overlay: flat stand-ins, fixed colours (lives across the flip). */
+.actorLayer :is(path, circle, ellipse, line, rect) { vector-effect: none; }
+.actorLayer [data-actor] { opacity: 0; transform-box: view-box; transform-origin: 0 0; }
+.actorLayer [data-actor='rig'] { opacity: 1; }
+.actorRing { fill: none; stroke: #7d8991; stroke-dasharray: 3 9; stroke-opacity: 0.6; }
+.actorBlue { stroke: #3474e8; stroke-dasharray: 1 1; stroke-width: 1.2; }
+.actorSquare { fill: #f1f3f2; stroke: #245dcc; stroke-width: 1.4; }
+.actorRed { stroke: #ff5d5d; stroke-dasharray: 1 1; stroke-width: 1.4; }
+.actorRedEnd { fill: #ff5d5d; }
+.actorAxis { fill: none; stroke: #ece9e3; stroke-opacity: 0.7; stroke-width: 1; }
+.actorAxis text {
+  fill: #ece9e3;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  stroke: none;
+}
+.actorDot { fill: #ece9e3; }
+.actorDisc circle { fill: #d93f43; }
+.actorOrbit ellipse { fill: none; stroke: #ece9e3; stroke-opacity: 0.5; stroke-width: 0.9; }
 
 /* Day: tiled atlas plate (restored from 3e7732b) ---------------------------- */
 
@@ -277,19 +359,11 @@
 
 /* Theme switching ---------------------------------------------------------- */
 
-:global([data-theme='dark']) .dayPlate { display: none; }
-:global([data-theme='dark']) .nightPlate { display: block; }
-:global([data-theme='dark']) .field {
-  background:
-    radial-gradient(circle at 80% 26%, color-mix(in srgb, var(--anima-red) 10%, transparent), transparent 38%),
-    var(--anima-art-night);
-}
-:global([data-theme='dark']) .field::after {
-  background:
-    linear-gradient(0deg, var(--anima-art-night) 3%, transparent 40%),
-    linear-gradient(90deg, var(--anima-art-night) 20%, color-mix(in srgb, var(--anima-art-night) 55%, transparent) 44%, transparent 60%);
-}
+:global([data-theme='dark']) .dayScene { display: none; }
+:global([data-theme='dark']) .nightScene { display: block; }
 :global([data-theme='dark']) .noiseLayer { opacity: 0.16; }
+/* Mid-switch both scenes are mounted; the controller owns their visibility. */
+:global(html[data-hero-switching='desktop']) .scene { display: block; }
 
 /* Mobile: the slice crop would only show the centre strip, so scale the
  * plate down and anchor the focal object to the top right instead. */
@@ -307,7 +381,7 @@
     width: 205%;
   }
 
-  :global([data-theme='dark']) .field::after {
+  .field .nightScene::after {
     background: linear-gradient(0deg, var(--anima-art-night) 22%, transparent 46%);
   }
 
