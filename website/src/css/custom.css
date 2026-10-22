@@ -1,6 +1,6 @@
 /**
  * AnimaDocs dual-mode visual system.
- * Day: paper, cobalt, graphite, and brass for indexing and calibration.
+ * Day: paper, cobalt, and graphite for indexing and calibration.
  * Night: graphite, warm gray, and vermilion for observation and replay.
  */
 
@@ -25,7 +25,8 @@
   --anima-selected-marker-radius: 0;
   --anima-red: #c6383d;
   --anima-red-bright: #e14b4c;
-  --anima-gold: #a77836;
+  /* Day accent marks read as ink; night keeps the warm brass below. */
+  --anima-gold: var(--anima-ink);
   --anima-gray: #89939a;
   --anima-shadow: rgba(17, 24, 32, 0.14);
   --anima-grid: rgba(17, 24, 32, 0.11);
