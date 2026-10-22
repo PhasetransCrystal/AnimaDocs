@@ -89,7 +89,8 @@
 
 /* Switch-only layers: hidden at rest, driven by heroThemeSwitch.ts. */
 .colourLayer,
-.actorLayer {
+.actorLayer,
+.axisLayer {
   display: none;
 }
 
@@ -104,7 +105,7 @@
 
 /* Desktop switch mounts both scenes + overlays; mobile only fades the
  * current scene and lets the View Transition reveal the other. */
-:global(html[data-hero-switching='desktop']) :is(.scene, .colourLayer, .actorLayer) { display: block; }
+:global(html[data-hero-switching='desktop']) :is(.scene, .colourLayer, .actorLayer, .axisLayer) { display: block; }
 :global(html[data-hero-switching='desktop']) [data-hero-layer] { will-change: opacity, transform; }
 :global(html[data-hero-switching='desktop']) .dayScene { will-change: clip-path; }
 /* Grain + terrace blur are off while the night core is invisible. */
@@ -114,22 +115,49 @@
 .actorLayer :is(path, circle, ellipse, line, rect) { vector-effect: none; }
 .actorLayer [data-actor] { opacity: 0; transform-box: view-box; transform-origin: 0 0; }
 .actorLayer [data-actor='rig'] { opacity: 1; }
-.actorRing { fill: none; stroke: #7d8991; stroke-dasharray: 3 9; stroke-opacity: 0.6; }
-.actorBlue { stroke: #3474e8; stroke-dasharray: 1 1; stroke-width: 1.2; }
+.actorRing { fill: none; stroke: #245dcc; stroke-opacity: 0.55; stroke-width: 1.2; }
+/* Connectors draw via dashoffset (pathLength 1). Ghosts = faint second layer. */
+.actorLayer polyline { fill: none; stroke-dasharray: 1 1; stroke-linejoin: miter; }
+.actorBlue { stroke: #3474e8; stroke-width: 1.2; }
+.actorGhostBlue { stroke: #3474e8; stroke-opacity: 0.3; stroke-width: 0.8; }
 .actorSquare { fill: #f1f3f2; stroke: #245dcc; stroke-width: 1.4; }
-.actorRed { stroke: #ff5d5d; stroke-dasharray: 1 1; stroke-width: 1.4; }
+.actorRed { stroke: #ff5d5d; stroke-width: 1.4; }
+.actorGhostRed { stroke: #ff5d5d; stroke-opacity: 0.32; stroke-width: 0.8; }
 .actorRedEnd { fill: #ff5d5d; }
-.actorAxis { fill: none; stroke: #ece9e3; stroke-opacity: 0.7; stroke-width: 1; }
-.actorAxis text {
+.actorLeader { stroke-width: 2.2; }
+.actorLeader[data-tone='red'] { stroke: #ece9e3; }
+.actorLeader[data-tone='blue'] { stroke: #3474e8; }
+.actorCaption {
   fill: #ece9e3;
   font-family: var(--ifm-font-family-monospace);
   font-size: 11px;
-  letter-spacing: 0.12em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+/* Landing caption crosses from night onto paper: blue reads on both. */
+.actorCaption[data-actor='caption-blue'] { fill: #3474e8; }
+.actorDot { fill: #ece9e3; }
+
+/* Full-bleed axes: one copy per scene, coloured for that scene's ground. */
+.axis { fill: none; stroke-width: 1; }
+.axis text {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 10px;
+  letter-spacing: 0.08em;
   stroke: none;
 }
-.actorDot { fill: #ece9e3; }
+.axis .axisName { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; }
+.axis [data-axis-arm] { stroke-dasharray: 1 1; }
+.axisLayer[data-hero-axis='day'] .axis { stroke: #111820; stroke-opacity: 0.55; }
+.axisLayer[data-hero-axis='day'] .axis text { fill: #111820; fill-opacity: 0.7; }
+.axisLayer[data-hero-axis='night'] .axis { stroke: #ece9e3; stroke-opacity: 0.6; }
+.axisLayer[data-hero-axis='night'] .axis text { fill: #ece9e3; fill-opacity: 0.75; }
+.axisMinor { stroke-opacity: 0.7; }
+.axisLayer,
+.axisLayer [data-axis],
+.axisLayer [data-axis] * { transform-box: view-box; transform-origin: 0 0; }
+.axisLayer :is(path, rect) { vector-effect: none; }
 .actorDisc circle { fill: #d93f43; }
-.actorOrbit ellipse { fill: none; stroke: #ece9e3; stroke-opacity: 0.5; stroke-width: 0.9; }
 
 /* Day: tiled atlas plate (restored from 3e7732b) ---------------------------- */
 
@@ -163,6 +191,9 @@
 }
 .guideArc { stroke: var(--anima-blue); stroke-opacity: 0.8; stroke-width: 1.2; }
 .guideTicks { fill: none; stroke: var(--anima-line-strong); stroke-opacity: 0.5; }
+/* Launch pad: low-opacity blue open arc on the night satellite position. */
+.padArc { fill: none; stroke: var(--anima-blue); stroke-opacity: 0.32; stroke-width: 1.2; }
+.padArc .padCross { stroke-opacity: 0.5; stroke-width: 1; }
 
 .routeMain { stroke: var(--anima-blue); stroke-opacity: 0.9; stroke-width: 1.75; }
 .routeGhost { stroke: var(--anima-line-strong); stroke-dasharray: 4 6; stroke-opacity: 0.55; }
@@ -386,6 +417,8 @@
   }
 
   .nightLabel { display: none; }
+  /* The pad only lines up with the satellite on the desktop night plate. */
+  .padArc { display: none; }
 }
 
 /* Pause hook: an ancestor with [data-art-paused] (the hero wrapper, set by

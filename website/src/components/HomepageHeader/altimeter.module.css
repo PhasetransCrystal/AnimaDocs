@@ -8,7 +8,8 @@
   font-family: var(--ifm-font-family-monospace);
   gap: 0 1.1rem;
   grid-template-columns: 22px auto;
-  grid-template-rows: auto 1fr;
+  /* Number + place sit tight against the band's lower edge. */
+  grid-template-rows: 1fr auto auto;
   height: var(--alt-scale-h);
   left: 0;
   pointer-events: none;
@@ -16,7 +17,7 @@
 }
 
 .scale {
-  grid-row: 1 / span 2;
+  grid-row: 1 / span 3;
   height: var(--alt-scale-h);
   mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
   overflow: hidden;
@@ -71,23 +72,30 @@
   transform-origin: 50% 0;
 }
 
+/* At rest both lines are quiet (opacity 0.42); the switch lifts the number
+ * to full opacity and scales it onto the zero index. */
 .reading {
-  align-self: start;
-  font-size: 0.82rem;
+  align-self: end;
+  font-size: 20px;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  grid-column: 2;
+  grid-row: 2;
+  letter-spacing: 0.02em;
+  line-height: 1;
   margin: 0;
+  opacity: 0.42;
   transform-origin: 0 50%;
   white-space: nowrap;
 }
 
 .value {
   display: inline-block;
-  mask-image: linear-gradient(180deg, #000 55%, color-mix(in srgb, #000 35%, transparent));
+  mask-image: linear-gradient(180deg, #000 25%, color-mix(in srgb, #000 30%, transparent));
 }
 
 .unit {
+  font-size: 12px;
   margin-left: 0.35em;
   opacity: 0.7;
 }
@@ -95,11 +103,14 @@
 .place {
   align-self: end;
   font-family: var(--ifm-heading-font-family, inherit);
-  font-size: 1.45rem;
+  font-size: 30px;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  line-height: 1.1;
-  margin: 0;
+  grid-column: 2;
+  grid-row: 3;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  margin: 2px 0 -3px;
+  opacity: 0.42;
   white-space: nowrap;
 }
 
@@ -196,7 +207,7 @@
   .place {
     font-size: 0.82rem;
     letter-spacing: 0.12em;
-    opacity: 0.75;
+    margin: 0;
   }
 }
 

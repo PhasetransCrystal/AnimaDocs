@@ -3,7 +3,7 @@
  * Mobile (≤640px): View Transition circle reveal from the top centre.
  * Every animation is cancelled at the end, so the static plate is the end
  * state and nothing has to be swapped back by hand. */
-import {DAY_TILE_GROUPS, HERO_ANCHORS} from '@site/src/components/VisualStudy';
+import {AXIS_DECADE, HERO_ANCHORS} from '@site/src/components/VisualStudy';
 import {heroSwitchState, setHeroSwitchHandler} from '@site/src/utils/heroSwitchHook';
 
 import {ALT_EASE, bezier, driveAltimeter} from './altimeterDriver';
@@ -15,11 +15,17 @@ type Target = Element | null | undefined;
 type ViewTransitionLike = {ready: Promise<void>; finished: Promise<void>};
 type VTDocument = {startViewTransition?: (update: () => void) => ViewTransitionLike};
 
-const LAUNCH_MS = 1600;
-const LANDING_MS = 1250;
-const LAUNCH_FLIP_MS = 800;
-const LANDING_FLIP_MS = 550;
-const LAUNCH_FILTERS_ON_MS = 1200;
+const LAUNCH_MS = 1300;
+const LANDING_MS = 1050;
+const LAUNCH_FLIP_MS = 700;
+const LANDING_FLIP_MS = 450;
+const LAUNCH_FILTERS_ON_MS = 1000;
+/** Altimeter number lands (and the axis ladder stops) at these times. */
+const LAUNCH_LAND_MS = 1150;
+const LANDING_LAND_MS = 850;
+/** Ladder travel from 325 m to 799,000 km in decade units. */
+const LADDER_SPAN = AXIS_DECADE * Math.log10(799_000_000 / 325);
+const REST_READING_OPACITY = 0.42;
 const FILTERS_OFF_DURING_LAUNCH = true;
 const MOBILE_FADE_MS = 180;
 const MOBILE_REVEAL_MS = 600;
@@ -96,8 +102,8 @@ function blink(start: number): Key[] {
 }
 
 /* Clip curves, shared by the keyframes and the theme-flip timing. */
-const LAUNCH_CLIP = {from: 550, to: 1050, curve: [0.7, 0, 0.85, 0.3]} as const;
-const LANDING_CLIP = {from: 300, to: 900, curve: [0.6, 0, 0.4, 1]} as const;
+const LAUNCH_CLIP = {from: 440, to: 840, curve: [0.7, 0, 0.85, 0.3]} as const;
+const LANDING_CLIP = {from: 240, to: 720, curve: [0.6, 0, 0.4, 1]} as const;
 const cssBezier = (c: readonly number[]) => `cubic-bezier(${c.join(',')})`;
 /** Half of the 200ms page colour transition: flip this early so the colour
  * change is half done when the clip edge crosses the title. */
@@ -224,7 +230,7 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     const tl = run.timeline;
     const launch = dir === 'launch';
     const end = tl.total;
-    const landAt = mode === 'mobile' ? end : launch ? 1450 : 1050;
+    const landAt = mode === 'mobile' ? end : launch ? LAUNCH_LAND_MS : LANDING_LAND_MS;
     const ticks = alt('[data-alt-ticks]');
     const axis = mode === 'mobile' ? 'translateX' : 'translateY';
     const travel = (launch ? 1 : -1) * 120; // multiple of the 40px tick period
@@ -233,32 +239,42 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       {at: landAt, transform: `${axis}(${travel}px)`},
     ]);
 
-    if (mode === 'desktop') {
-      const reading = alt('[data-alt-reading]');
+    const reading = alt('[data-alt-reading]');
+    const rest = REST_READING_OPACITY;
+    if (mode === 'mobile') {
+      tl.add(reading, [
+        {at: 0, opacity: rest},
+        {at: 150, opacity: 1},
+        {at: end - 150, opacity: 1},
+        {at: end, opacity: rest},
+      ]);
+    } else {
       const place = alt('[data-alt-place]');
       const band = ticks?.parentElement;
-      const outEnd = launch ? 300 : 250;
-      const backAt = launch ? 1400 : 1100;
+      const outEnd = 250;
+      const backAt = landAt;
+      // The number grows and lines up with the zero index (70% of the band),
+      // which is where the speed bar starts.
       let lift = 'none';
       if (reading && band) {
         const r = reading.getBoundingClientRect();
         const b = band.getBoundingClientRect();
-        lift = `translateY(${n(b.top + b.height / 2 - (r.top + r.height / 2))}px) scale(1.8)`;
+        lift = `translateY(${n(b.top + b.height * 0.7 - (r.top + r.height / 2))}px) scale(1.6)`;
       }
       tl.add(place, [
-        {at: 0, opacity: 1, easing: 'ease-out'},
-        {at: outEnd * 0.7, opacity: 0},
-        {at: backAt, opacity: 0, easing: 'ease-out'},
-        {at: end, opacity: 1},
+        {at: 0, opacity: rest, easing: 'ease-out'},
+        {at: outEnd * 0.6, opacity: 0},
+        {at: backAt + 60, opacity: 0, easing: 'ease-out'},
+        {at: end, opacity: rest},
       ]);
       tl.add(reading, [
-        {at: 0, transform: 'none', easing: EASE_IO},
-        {at: outEnd, transform: lift},
-        {at: backAt, transform: lift, easing: EASE_IO},
-        {at: end, transform: 'none'},
+        {at: 0, opacity: rest, transform: 'none', easing: EASE_IO},
+        {at: outEnd, opacity: 1, transform: lift},
+        {at: backAt, opacity: 1, transform: lift, easing: EASE_IO},
+        {at: end, opacity: rest, transform: 'none'},
       ]);
-      const sp = launch ? [0, 450, 1100, 1200] : [0, 300, 700, 850];
-      const br = launch ? [1200, 1320, 1450] : [850, 950, 1050];
+      const sp = launch ? [0, 350, 900, 1000] : [0, 250, 600, 700];
+      const br = launch ? [1000, 1080, 1150] : [700, 780, 850];
       tl.add(alt('[data-alt-speed]'), [
         {at: sp[0], transform: 'scaleY(0)', easing: 'ease-out'},
         {at: sp[1], transform: 'scaleY(1)'},
@@ -277,202 +293,317 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     if (value && unit) run.stops.push(driveAltimeter(value, unit, launch ? 0 : 1, 0, landAt));
   };
 
-  /* Day -> night: launch into orbit (1600ms). */
+  /* Axis arms reach the hero edges; sized per run (resize-safe). Ticks on the
+   * horizontal arm follow a log pattern (1..9 per decade). */
+  const setupAxis = (g: Geometry) => {
+    const {pad} = HERO_ANCHORS;
+    const left = -g.ox / g.s - pad.x;
+    const right = (g.w - g.ox) / g.s - pad.x;
+    const top = -pad.y;
+    const bottom = g.h / g.s - pad.y;
+    const arms: Record<string, string> = {
+      l: `M-10 0H${n(left)}`,
+      r: `M10 0H${n(right)}`,
+      u: `M0 -10V${n(top)}`,
+      d: `M0 10V${n(bottom)}`,
+    };
+    let hticks = '';
+    for (const [side, extent] of [[-1, -left], [1, right]] as const) {
+      for (let j = 0; j < 40; j += 1) {
+        let stop = false;
+        for (let m = 1; m <= 9; m += 1) {
+          const pos = AXIS_DECADE * (j + Math.log10(m));
+          if (pos > extent) {
+            stop = true;
+            break;
+          }
+          if (pos < 14) continue;
+          hticks += `M${n(side * pos)} 0V${m === 1 ? -8 : m === 5 ? -5 : -3}`;
+        }
+        if (stop) break;
+      }
+    }
+    art.querySelectorAll('[data-hero-axis]').forEach((svg) => {
+      svg.querySelectorAll('[data-axis-arm]').forEach((arm) => {
+        arm.setAttribute('d', arms[(arm as SVGElement).dataset.axisArm ?? 'l']);
+      });
+      svg.querySelector('[data-axis-hticks]')?.setAttribute('d', hticks);
+    });
+  };
+
+  /* Both axis copies share keyframes: group fade, arms drawn outwards from
+   * the origin, ladder scrolled so the current altitude sits on the origin. */
+  const animateAxis = (tl: Timeline, launch: boolean) => {
+    const landAt = launch ? LAUNCH_LAND_MS : LANDING_LAND_MS;
+    const [from, to] = launch ? [0, LADDER_SPAN] : [LADDER_SPAN, 0];
+    art.querySelectorAll('[data-hero-axis]').forEach((svg) => {
+      tl.add(svg.querySelector('[data-axis]'), launch
+        ? [{at: 220, opacity: 0}, {at: 320, opacity: 1}, {at: 1080, opacity: 1}, {at: 1220, opacity: 0}]
+        : [{at: 0, opacity: 0}, {at: 120, opacity: 1}, ...blink(760)]);
+      const start = launch ? 240 : 0;
+      tl.each(svg.querySelectorAll('[data-axis-arm]'), (i) => [
+        {at: start + i * 30, strokeDashoffset: 1, easing: 'cubic-bezier(.2,.7,.2,1)'},
+        {at: start + 380 + i * 30, strokeDashoffset: 0},
+      ]);
+      tl.add(svg.querySelector('[data-axis-ladder]'), [
+        {at: 0, transform: `translateY(${n(from)}px)`, easing: ALT_EASE},
+        {at: landAt, transform: `translateY(${n(to)}px)`},
+      ]);
+    });
+  };
+
+  /* Connector draw helpers (pathLength 1, dasharray 1 1). Offset 1 hides the
+   * line, 0 shows it, -1 erases it from its start point. */
+  const strokeKeys = (steps: Array<[number, number, string?]>, fadeAt?: number): Key[] => {
+    const keys: Key[] = steps.map(([at, offset, easing]) => ({at, opacity: 1, strokeDashoffset: offset, ...(easing ? {easing} : {})}));
+    keys.unshift({...keys[0], opacity: 0});
+    if (fadeAt !== undefined) {
+      const last = keys[keys.length - 1];
+      keys.push({...last, at: fadeAt, opacity: 1}, {...last, at: fadeAt + 80, opacity: 0});
+    } else {
+      const last = keys[keys.length - 1];
+      keys.push({...last, opacity: 0});
+    }
+    return keys;
+  };
+
+  /* Day -> night: launch into orbit (1300ms). Nothing travels: the actor
+   * rig sits on the pad arc, which is the white star's position. */
   const buildLaunch = (tl: Timeline, g: Geometry) => {
-    const {guide, star, disc: red} = HERO_ANCHORS;
+    const {star, disc: red, pad} = HERO_ANCHORS;
     const S = toPx(g, star.x, star.y);
+    const F = toPx(g, red.x, red.y);
     const rs = star.r * g.s;
     const full = farthest(g, S);
-    const origin = `${n(S[0])}px ${n(S[1])}px`;
+    const starOrigin = `${n(S[0])}px ${n(S[1])}px`;
+    const focusOrigin = `${n(F[0])}px ${n(F[1])}px`;
 
-    // Day scenery (whole layers).
-    tl.add(layer('d-ocean'), [{at: 0, opacity: 1, easing: 'ease-out'}, {at: 250, opacity: 0}]);
-    tl.add(layer('d-guide'), [{at: 0, opacity: 1, easing: 'ease-out'}, {at: 200, opacity: 0}]);
+    // Day scenery peels off as whole layers.
+    tl.add(layer('d-ocean'), [{at: 0, opacity: 1, easing: 'ease-out'}, {at: 200, opacity: 0}]);
+    tl.add(layer('d-guide'), [{at: 0, opacity: 1, easing: 'ease-out'}, {at: 180, opacity: 0}]);
     tl.add(layer('d-lines'), [
-      {at: 200, opacity: 1, transform: 'scale(1)', transformOrigin: origin, easing: 'ease-in'},
-      {at: 650, opacity: 0, transform: 'scale(0.96)', transformOrigin: origin},
+      {at: 150, opacity: 1, transform: 'scale(1)', transformOrigin: starOrigin, easing: 'ease-in'},
+      {at: 480, opacity: 0, transform: 'scale(0.96)', transformOrigin: starOrigin},
     ]);
     tl.each(tiles(), (i) => {
-      const t = 250 + i * 64;
+      const t = 200 + i * 45;
       return [{at: t, opacity: 1}, {at: t, opacity: 0}];
     });
 
-    // Colour layer and the day clip, both centred on the white star.
+    // Colour layer and the day clip, both centred on the white star. The
+    // clip ends 40ms before the colour disc, so red shows ~790-880ms.
     tl.add(q('[data-hero-colour]'), [
-      {at: 450, opacity: 1, transform: disc(full, S), backgroundColor: '#c6383d', easing: 'cubic-bezier(.5,0,.75,.4)'},
-      {at: 1100, opacity: 1, transform: disc(rs, S), backgroundColor: '#e34549'},
-      {at: 1150, opacity: 0, transform: disc(rs, S), backgroundColor: '#e34549'},
+      {at: 360, opacity: 1, transform: disc(full, S), backgroundColor: '#c6383d', easing: 'cubic-bezier(.5,0,.75,.4)'},
+      {at: 880, opacity: 1, transform: disc(rs, S), backgroundColor: '#e34549'},
+      {at: 920, opacity: 0, transform: disc(rs, S), backgroundColor: '#e34549'},
     ]);
-    // The clip ends 50ms before the colour disc, so it overtakes it at ~1000ms
-    // and the red disc is briefly seen shrinking onto the star.
     tl.add(scene('day'), [
       {at: LAUNCH_CLIP.from, clipPath: clip(full, S), easing: cssBezier(LAUNCH_CLIP.curve)},
       {at: LAUNCH_CLIP.to, clipPath: clip(rs, S)},
-      {at: 1150, clipPath: clip(0, S)},
+      {at: 920, clipPath: clip(0, S)},
     ]);
 
-    // Night scenery fades in as whole layers.
-    tl.add(layer('n-grid'), [{at: 1050, opacity: 0}, {at: 1300, opacity: 1}]);
-    tl.add(layer('n-core'), [{at: 1350, opacity: 0}, {at: 1600, opacity: 1}]);
-    tl.add(layer('n-rest'), [{at: 1350, opacity: 0}, {at: 1600, opacity: 1}]);
-
-    // Actor rig: guide circle -> white star.
-    tl.add(actor('rig'), [
-      {at: 200, transform: move(guide.x, guide.y), easing: EASE_IO},
-      {at: 650, transform: move(star.x, star.y)},
+    // Night builds up under the shrinking clip: grid, tick ring turning in,
+    // orbits settling, pixels stepping on, labels, then the red star last.
+    tl.add(layer('n-grid'), [{at: 440, opacity: 0}, {at: 700, opacity: 1}]);
+    tl.add(layer('n-ticks'), [
+      {at: 520, opacity: 0, transform: 'rotate(-10deg)', transformOrigin: focusOrigin, easing: 'cubic-bezier(.2,.7,.3,1)'},
+      {at: 920, opacity: 1, transform: 'rotate(0deg)', transformOrigin: focusOrigin},
     ]);
+    tl.add(layer('n-orbits'), [
+      {at: 600, opacity: 0, transform: 'scale(1.08)', transformOrigin: focusOrigin, easing: 'cubic-bezier(.2,.7,.3,1)'},
+      {at: 980, opacity: 1, transform: 'scale(1)', transformOrigin: focusOrigin},
+    ]);
+    tl.each(art.querySelectorAll('[data-pixel-group]'), (i) => {
+      const t = 760 + i * 70;
+      return [{at: t, opacity: 0}, {at: t, opacity: 1}];
+    });
+    tl.add(q('[data-night-labels]'), [{at: 950, opacity: 0}, {at: 1150, opacity: 1}]);
+    tl.add(layer('n-core'), [{at: 1000, opacity: 0}, {at: 1250, opacity: 1}]);
+
+    // Pad arc stand-in: holds until the clip edge reaches it, then shrinks
+    // with the clip onto the star.
+    const t44 = timeAtRadius(pad.r * g.s, full, rs, LAUNCH_CLIP);
     tl.add(actor('ring'), [
       {at: 0, opacity: 1, transform: 'scale(1)'},
-      {at: 600, opacity: 1, transform: 'scale(1)', easing: 'ease-in'},
-      {at: 1100, opacity: 0, transform: `scale(${(star.r / guide.r).toFixed(4)})`},
+      {at: t44, opacity: 1, transform: 'scale(1)', easing: 'ease-in'},
+      {at: LAUNCH_CLIP.to, opacity: 1, transform: `scale(${(star.r / pad.r).toFixed(4)})`},
+      {at: LAUNCH_CLIP.to + 40, opacity: 0, transform: `scale(${(star.r / pad.r).toFixed(4)})`},
     ]);
+
+    // Blue survey links: squares pop, elbows draw in to the pad, then retract.
     tl.each(actors('square'), (i) => [
-      {at: i * 40, opacity: 0},
-      {at: i * 40 + 120, opacity: 1},
-      {at: 550, opacity: 1},
-      {at: 620, opacity: 0},
+      {at: i * 30, opacity: 0},
+      {at: i * 30 + 90, opacity: 1},
+      {at: 420 + i * 20, opacity: 1},
+      {at: 440 + i * 20, opacity: 0},
     ]);
-    tl.each(actors('blue-line'), (i) => [
-      {at: i * 40, opacity: 1, strokeDashoffset: 1, easing: 'ease-out'},
-      {at: i * 40 + 200, opacity: 1, strokeDashoffset: 0},
-      {at: 600, opacity: 1, strokeDashoffset: 0, easing: 'ease-in'},
-      {at: 800, opacity: 1, strokeDashoffset: -1},
-      {at: 800, opacity: 0, strokeDashoffset: -1},
+    tl.each(actors('blue-line'), (i) => strokeKeys([
+      [i * 30, 1, 'ease-out'],
+      [220 + i * 30, 0],
+      [440, 0, 'ease-in'],
+      [600, -1],
+    ]));
+    tl.each(actors('blue-ghost'), (i) => strokeKeys([
+      [50 + i * 30, 1, 'ease-out'],
+      [280 + i * 30, 0],
+      [470, 0, 'ease-in'],
+      [620, -1],
+    ]));
+
+    // Red rays: elbows out from the star, decelerate to their marks.
+    tl.each(actors('red-line'), (i) => strokeKeys([
+      [550 + i * 30, 1, 'ease-out'],
+      [850, 0.45, EASE_POP],
+      [1100, 0],
+    ], 1150));
+    tl.each(actors('red-ghost'), (i) => strokeKeys([
+      [610 + i * 30, 1, 'ease-out'],
+      [900, 0.5, EASE_POP],
+      [1130, 0],
+    ], 1150));
+    tl.each(actors('red-end'), (i) => [
+      {at: 1060 + i * 40, opacity: 0},
+      {at: 1080 + i * 40, opacity: 1},
+      {at: 1160 + i * 30, opacity: 1},
+      {at: 1180 + i * 30, opacity: 0},
     ]);
-    tl.each(actors('red-line'), () => [
-      {at: 750, opacity: 1, strokeDashoffset: 1, easing: 'ease-out'},
-      {at: 1100, opacity: 1, strokeDashoffset: 0.55, easing: EASE_POP},
-      {at: 1450, opacity: 1, strokeDashoffset: 0, easing: 'ease-in'},
-      {at: 1580, opacity: 0, strokeDashoffset: 0},
+    tl.add(actor('leader-red'), strokeKeys([[1000, 1, 'ease-out'], [1120, 0]], 1200));
+    tl.add(actor('caption-red'), [
+      {at: 1060, opacity: 0},
+      {at: 1120, opacity: 1},
+      {at: 1200, opacity: 1},
+      {at: 1280, opacity: 0},
     ]);
-    tl.each(actors('red-end'), () => [
-      {at: 1420, opacity: 0},
-      {at: 1440, opacity: 1},
-      {at: 1520, opacity: 1},
-      {at: 1540, opacity: 0},
-    ]);
-    tl.add(actor('axis'), [
-      {at: 600, opacity: 0, easing: 'ease-in'},
-      {at: 700, opacity: 1},
-      {at: 1300, opacity: 1},
-      {at: 1450, opacity: 0},
-    ]);
-    tl.add(actor('axis-h'), [{at: 0, opacity: 1}]);
-    tl.each(actors('milestone'), (i) => {
-      const x = 80 + i * 70;
-      const t = 700 + i * 80;
-      return [
-        {at: 600, opacity: 1, transform: shift(0, 0), easing: 'ease-in'},
-        {at: t + 200, opacity: 1, transform: shift(-x * 0.8, 0)},
-        {at: t + 260, opacity: 0, transform: shift(-x, 0)},
-      ];
-    });
+
+    // White dot takes over as the clip lands on the star; the red star
+    // stand-in drops in at 2.8x and hands over to the real filtered disc.
     tl.add(actor('dot'), [
-      {at: 1050, opacity: 0},
-      {at: 1150, opacity: 1},
-      {at: 1450, opacity: 1},
-      {at: 1600, opacity: 0},
+      {at: LAUNCH_CLIP.to, opacity: 0},
+      {at: LAUNCH_CLIP.to + 40, opacity: 1},
+      {at: 1200, opacity: 1},
+      {at: 1300, opacity: 0},
     ]);
-    // Red star + main orbit stand-ins: flat shapes scaled 2.8x -> 1.
-    for (const name of ['disc', 'orbit']) {
-      tl.add(actor(name), [
-        {at: 1000, transform: move(red.x, red.y, 2.8), easing: EASE_POP},
-        {at: 1400, transform: move(red.x, red.y, 1)},
-      ]);
-      tl.add(actor(name), [
-        {at: 1000, opacity: 0},
-        {at: 1080, opacity: 1},
-        {at: 1480, opacity: 1},
-        {at: 1600, opacity: 0},
-      ]);
-    }
+    tl.add(actor('disc'), [
+      {at: 820, opacity: 0, transform: move(red.x, red.y, 2.8), easing: EASE_POP},
+      {at: 880, opacity: 1, transform: move(red.x, red.y, 2.3), easing: EASE_POP},
+      {at: 1160, opacity: 1, transform: move(red.x, red.y, 1)},
+      {at: 1300, opacity: 0, transform: move(red.x, red.y, 1)},
+    ]);
+    animateAxis(tl, true);
   };
 
-  /* Night -> day: landing (1250ms). */
+  /* Night -> day: landing (1050ms). */
   const buildLanding = (tl: Timeline, g: Geometry) => {
-    const {guide, star, disc: red} = HERO_ANCHORS;
+    const {star, disc: red, pad} = HERO_ANCHORS;
     const S = toPx(g, star.x, star.y);
+    const F = toPx(g, red.x, red.y);
     const rs = star.r * g.s;
     const full = farthest(g, S);
+    const focusOrigin = `${n(F[0])}px ${n(F[1])}px`;
 
-    // Day clip opens from the white star.
+    // Day clip opens from the white star; cobalt wave runs ahead of it.
     tl.add(scene('day'), [
       {at: 0, clipPath: clip(0, S)},
       {at: LANDING_CLIP.from, clipPath: clip(rs, S), easing: cssBezier(LANDING_CLIP.curve)},
       {at: LANDING_CLIP.to, clipPath: clip(full, S)},
     ]);
-    tl.add(layer('n-core'), [{at: 0, opacity: 1, easing: 'ease-in'}, {at: 200, opacity: 0}]);
-    tl.add(layer('n-rest'), [{at: 0, opacity: 1, easing: 'ease-in'}, {at: 200, opacity: 0}]);
     tl.add(q('[data-hero-colour]'), [
-      {at: 250, opacity: 1, transform: disc(rs, S), backgroundColor: '#245dcc', easing: 'cubic-bezier(.4,0,.8,.5)'},
-      {at: 750, opacity: 1, transform: disc(full, S), backgroundColor: '#e4ecf8'},
-      {at: 900, opacity: 0, transform: disc(full, S), backgroundColor: '#e4ecf8'},
+      {at: 200, opacity: 1, transform: disc(rs, S), backgroundColor: '#245dcc', easing: 'cubic-bezier(.4,0,.8,.5)'},
+      {at: 600, opacity: 1, transform: disc(full, S), backgroundColor: '#e4ecf8'},
+      {at: 720, opacity: 0, transform: disc(full, S), backgroundColor: '#e4ecf8'},
     ]);
 
-    // Day layers come back after the clip has covered the hero.
-    tl.add(layer('d-ocean'), [
-      {at: 950, opacity: 0, transform: 'translateY(12px)', easing: 'ease-out'},
-      {at: 1250, opacity: 1, transform: 'translateY(0px)'},
+    // Night peels off in layers while the day clip spreads: labels, pixels,
+    // red star, tick ring turning out; orbits and grid stay until covered.
+    tl.add(q('[data-night-labels]'), [{at: 0, opacity: 1}, {at: 120, opacity: 0}]);
+    tl.each(art.querySelectorAll('[data-pixel-group]'), (i) => {
+      const t = 60 + i * 50;
+      return [{at: t, opacity: 1}, {at: t, opacity: 0}];
+    });
+    tl.add(layer('n-core'), [{at: 180, opacity: 1, easing: 'ease-in'}, {at: 420, opacity: 0}]);
+    tl.add(layer('n-ticks'), [
+      {at: 120, opacity: 1, transform: 'rotate(0deg)', transformOrigin: focusOrigin, easing: 'ease-in'},
+      {at: 420, opacity: 0, transform: 'rotate(8deg)', transformOrigin: focusOrigin},
     ]);
-    tl.add(layer('d-lines'), [{at: 950, opacity: 0, easing: 'ease-out'}, {at: 1250, opacity: 1}]);
-    tl.add(layer('d-guide'), [{at: 950, opacity: 0, easing: 'ease-out'}, {at: 1250, opacity: 1}]);
+    tl.add(layer('n-orbits'), [
+      {at: 380, opacity: 1, transform: 'scale(1)', transformOrigin: focusOrigin, easing: 'ease-in'},
+      {at: 640, opacity: 0, transform: 'scale(1.06)', transformOrigin: focusOrigin},
+    ]);
+
+    // Day layers return once the clip covers the hero (short rise).
+    tl.add(layer('d-ocean'), [
+      {at: 760, opacity: 0, transform: 'translateY(4px)', easing: 'ease-out'},
+      {at: 1050, opacity: 1, transform: 'translateY(0px)'},
+    ]);
+    tl.add(layer('d-lines'), [{at: 760, opacity: 0, easing: 'ease-out'}, {at: 1050, opacity: 1}]);
+    tl.add(layer('d-guide'), [{at: 760, opacity: 0, easing: 'ease-out'}, {at: 1050, opacity: 1}]);
     tl.each(tiles(), (i) => {
-      const t = 700 + i * 50;
+      const t = 560 + i * 40;
       return [{at: t, opacity: 0}, {at: t, opacity: 1}];
     });
 
-    // Actor takes the white star + main orbit at t=0.
-    tl.add(actor('rig'), [
-      {at: 300, transform: move(star.x, star.y), easing: EASE_IO},
-      {at: 800, transform: move(guide.x, guide.y)},
-    ]);
+    // White star goes paper-white and hands over to the clip.
     tl.add(actor('dot'), [
       {at: 0, opacity: 1, fill: '#ece9e3'},
-      {at: 300, opacity: 1, fill: '#ece9e3'},
-      {at: 400, opacity: 1, fill: '#f1f3f2'},
-      {at: 450, opacity: 0, fill: '#f1f3f2'},
+      {at: 240, opacity: 1, fill: '#ece9e3'},
+      {at: 320, opacity: 1, fill: '#f1f3f2'},
+      {at: 380, opacity: 0, fill: '#f1f3f2'},
     ]);
-    tl.add(actor('orbit'), [
-      {at: 0, opacity: 1, transform: move(red.x, red.y)},
-      {at: 400, opacity: 1, transform: move(red.x, red.y), easing: 'ease-in'},
-      {at: 600, opacity: 0, transform: move(red.x, red.y)},
-    ]);
-    tl.each(actors('red-line'), () => [
-      {at: 0, opacity: 1, strokeDashoffset: 1, easing: 'ease-out'},
-      {at: 250, opacity: 1, strokeDashoffset: 0},
-      {at: 300, opacity: 1, strokeDashoffset: 0, easing: 'ease-in'},
-      {at: 600, opacity: 1, strokeDashoffset: 1},
-      {at: 600, opacity: 0, strokeDashoffset: 1},
-    ]);
-    tl.add(actor('axis'), [
-      {at: 0, opacity: 0, easing: 'ease-out'},
-      {at: 250, opacity: 1},
-      ...blink(950),
-    ]);
-    tl.add(actor('axis-v'), [{at: 0, opacity: 1}]);
-    tl.each(actors('milestone'), (i) => {
-      // Park each name beside a vertical-axis node, then fly it outwards.
-      const x = 80 + i * 70;
-      const y = 70 + i * 60 + 12;
-      return [
-        {at: 0, opacity: 0, transform: shift(18 - x, y)},
-        {at: 250, opacity: 1, transform: shift(18 - x, y)},
-        {at: 350, opacity: 1, transform: shift(18 - x, y), easing: EASE_ACCEL},
-        {at: 850, opacity: 0, transform: shift(18 - x + 260, y)},
-      ];
-    });
-    tl.each(actors('blue-line'), () => [
-      {at: 300, opacity: 1, strokeDashoffset: -1, easing: 'ease-out'},
-      {at: 600, opacity: 1, strokeDashoffset: 0},
-      ...blink(950).map((k) => ({...k, strokeDashoffset: 0})),
-    ]);
-    tl.each(actors('square'), () => [{at: 600, opacity: 0}, {at: 600, opacity: 1}, ...blink(950)]);
+    // Pad arc grows with the clip until it reaches its own radius.
+    const t44 = timeAtRadius(pad.r * g.s, rs, full, LANDING_CLIP);
     tl.add(actor('ring'), [
-      {at: 300, opacity: 0, transform: `scale(${(star.r / guide.r).toFixed(4)})`, easing: EASE_IO},
-      {at: 800, opacity: 1, transform: 'scale(1)'},
-      {at: 950, opacity: 1, transform: 'scale(1)'},
-      {at: 1250, opacity: 0, transform: 'scale(1)'},
+      {at: LANDING_CLIP.from, opacity: 0, transform: `scale(${(star.r / pad.r).toFixed(4)})`, easing: 'ease-out'},
+      {at: LANDING_CLIP.from + 30, opacity: 1, transform: `scale(${(star.r / pad.r).toFixed(4)})`, easing: 'ease-out'},
+      {at: t44, opacity: 1, transform: 'scale(1)'},
+      {at: 900, opacity: 1, transform: 'scale(1)'},
+      {at: 1050, opacity: 0, transform: 'scale(1)'},
     ]);
+
+    // Red rays out from the star and back; blue links grow out to squares.
+    tl.each(actors('red-line'), (i) => strokeKeys([
+      [i * 20, 1, 'ease-out'],
+      [200 + i * 20, 0],
+      [260, 0, 'ease-in'],
+      [460, 1],
+    ]));
+    tl.each(actors('red-ghost'), (i) => strokeKeys([
+      [50 + i * 20, 1, 'ease-out'],
+      [240 + i * 20, 0],
+      [280, 0, 'ease-in'],
+      [480, 1],
+    ]));
+    tl.each(actors('red-end'), (i) => [
+      {at: 200 + i * 20, opacity: 0},
+      {at: 210 + i * 20, opacity: 1},
+      {at: 260, opacity: 1},
+      {at: 270, opacity: 0},
+    ]);
+    tl.each(actors('blue-line'), (i) => [
+      ...strokeKeys([[280 + i * 30, -1, 'ease-out'], [500 + i * 30, 0]]).slice(0, -1),
+      ...blink(760).map((k) => ({...k, strokeDashoffset: 0})),
+    ]);
+    tl.each(actors('blue-ghost'), (i) => [
+      ...strokeKeys([[330 + i * 30, -1, 'ease-out'], [540 + i * 30, 0]]).slice(0, -1),
+      ...blink(760).map((k) => ({...k, strokeDashoffset: 0})),
+    ]);
+    tl.each(actors('square'), (i) => [
+      {at: 500 + i * 30, opacity: 0},
+      {at: 500 + i * 30, opacity: 1},
+      ...blink(760),
+    ]);
+    tl.add(actor('leader-blue'), [
+      ...strokeKeys([[400, 1, 'ease-out'], [520, 0]]).slice(0, -1),
+      {at: 840, opacity: 1, strokeDashoffset: 0},
+      {at: 900, opacity: 0, strokeDashoffset: 0},
+    ]);
+    tl.add(actor('caption-blue'), [
+      {at: 470, opacity: 0},
+      {at: 530, opacity: 1},
+      {at: 840, opacity: 1},
+      {at: 900, opacity: 0},
+    ]);
+    animateAxis(tl, false);
   };
 
   /* Theme flip: timed to the clip edge passing the title, so the page text
@@ -487,7 +618,9 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     const at = launch
       ? timeAtRadius(d, full, rs, LAUNCH_CLIP)
       : timeAtRadius(d, rs, full, LANDING_CLIP);
-    const [lo, hi] = launch ? [650, 1050] : [350, 800];
+    const [lo, hi] = launch
+      ? [LAUNCH_CLIP.from + 60, LAUNCH_CLIP.to]
+      : [LANDING_CLIP.from + 40, LANDING_CLIP.to - 60];
     return Math.round(Math.min(hi, Math.max(lo, at - FLIP_LEAD_MS)));
   };
 
@@ -497,6 +630,7 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     const total = launch ? LAUNCH_MS : LANDING_MS;
     const run = begin('desktop', total, flip, target);
     const g = measure(art);
+    setupAxis(g);
     if (launch) {
       if (FILTERS_OFF_DURING_LAUNCH) {
         art.dataset.heroFilters = 'off';

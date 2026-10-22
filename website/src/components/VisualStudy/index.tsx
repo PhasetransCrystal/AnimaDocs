@@ -136,6 +136,8 @@ function polar(r: number, deg: number): [number, number] {
 }
 
 const STATE_DOT = polar(263, 136);
+/** Pixel squares split into step groups for the switch (cheap toggles). */
+export const NIGHT_PIXEL_GROUPS = 4;
 
 /** Night layer ①: background grid only (fades in early during the launch). */
 function NightGrid(): ReactNode {
@@ -221,8 +223,8 @@ function NightCore(): ReactNode {
   );
 }
 
-/** Night layer ③: crisp marks (ticks, orbits, satellite, pixels, labels). */
-function NightRest(): ReactNode {
+/** Night layer ③: crosshair + tick ring (turns in as one layer). */
+function NightTicks(): ReactNode {
   return (
     <g>
       <line className={styles.crosshair} x1="520" y1={FOCUS.y} x2="1440" y2={FOCUS.y} />
@@ -236,7 +238,14 @@ function NightRest(): ReactNode {
         </g>
         <circle className={styles.stateDot} cx={STATE_DOT[0].toFixed(1)} cy={STATE_DOT[1].toFixed(1)} r="4" />
       </g>
+    </g>
+  );
+}
 
+/** Night layer ④: orbits, satellite and its pulse ring. */
+function NightOrbits(): ReactNode {
+  return (
+    <g>
       <g className={styles.orbits} transform={`rotate(-16 ${FOCUS.x} ${FOCUS.y})`}>
         <ellipse cx={FOCUS.x} cy={FOCUS.y} rx="430" ry="112" />
         <ellipse className={styles.orbitSoft} cx={FOCUS.x} cy={FOCUS.y} rx="560" ry="168" />
@@ -247,30 +256,45 @@ function NightRest(): ReactNode {
         <circle className={styles.satellite} cx={FOCUS.x - 404} cy={FOCUS.y - 38} r="5" data-hero-anchor="star" />
         <circle className={`${styles.satelliteRing} ${styles.pulse}`} cx={FOCUS.x - 404} cy={FOCUS.y - 38} r="13" />
       </g>
+    </g>
+  );
+}
 
+/** Night layer ⑤: pixels (4 step groups), plus marks, labels. */
+function NightMarks(): ReactNode {
+  return (
+    <g>
       <g className={styles.pixels}>
-        {PIXELS.map(([x, y, s, tone], index) => (
-          <rect
-            key={`${x}-${y}`}
-            x={FOCUS.x + x}
-            y={FOCUS.y + y}
-            width={s}
-            height={s}
-            className={`${tone === 'light' ? styles.pixelLight : styles.pixelDark} ${index % 3 === 0 ? styles.flicker : ''}`}
-            style={{animationDelay: `${(index * 0.7) % 5}s`}}
-          />
+        {Array.from({length: NIGHT_PIXEL_GROUPS}, (_v, group) => (
+          <g key={group} data-pixel-group={group}>
+            {PIXELS.map(([x, y, s, tone], index) =>
+              index % NIGHT_PIXEL_GROUPS !== group ? null : (
+                <rect
+                  key={`${x}-${y}`}
+                  x={FOCUS.x + x}
+                  y={FOCUS.y + y}
+                  width={s}
+                  height={s}
+                  className={`${tone === 'light' ? styles.pixelLight : styles.pixelDark} ${index % 3 === 0 ? styles.flicker : ''}`}
+                  style={{animationDelay: `${(index * 0.7) % 5}s`}}
+                />
+              ),
+            )}
+          </g>
         ))}
       </g>
 
-      <g className={styles.plusMarks}>
-        <path d={PLUS_MARKS.map(([x, y]) => `M${x - 5} ${y}H${x + 5}M${x} ${y - 5}V${y + 5}`).join('')} />
-      </g>
+      <g data-night-labels="">
+        <g className={styles.plusMarks}>
+          <path d={PLUS_MARKS.map(([x, y]) => `M${x - 5} ${y}H${x + 5}M${x} ${y - 5}V${y + 5}`).join('')} />
+        </g>
 
-      <g className={styles.nightLabel}>
-        <text x="560" y="98">FIG.01 — OBSERVATION</text>
-        <text x="560" y="114">GRID SYSTEMS ........ : 02</text>
-        <text x="628" y="324">ORB / 0.42 · 16°</text>
-        <text x="1412" y="96" transform="rotate(90 1412 96)">SIGNAL / ANIMA-01</text>
+        <g className={styles.nightLabel}>
+          <text x="560" y="98">FIG.01 — OBSERVATION</text>
+          <text x="560" y="114">GRID SYSTEMS ........ : 02</text>
+          <text x="628" y="324">ORB / 0.42 · 16°</text>
+          <text x="1412" y="96" transform="rotate(90 1412 96)">SIGNAL / ANIMA-01</text>
+        </g>
       </g>
     </g>
   );
@@ -374,14 +398,28 @@ const dayRouteGhost: Array<[number, number]> = [
   [1290, 340],
 ];
 
-/* 36 guide ticks as one path (one element instead of 36 lines). */
+/* 36 guide ticks as one path (one element instead of 36 lines). Ticks 9-11
+ * sit inside the launch pad arc below, so they are left out. */
 const DAY_GUIDE_TICKS_PATH = Array.from({length: 36}, (_value, index) => {
+  if (index >= 9 && index <= 11) return '';
   const angle = (index * 10 * Math.PI) / 180;
   const inner = index % 3 === 0 ? 156 : 163;
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
   return `M${(640 + cos * inner).toFixed(3)} ${(150 + sin * inner).toFixed(3)}L${(640 + cos * 170).toFixed(3)} ${(150 + sin * 170).toFixed(3)}`;
 }).join('');
+
+/* Launch pad = night satellite after the orbit group's -16deg rotation. */
+const PAD = {x: 611.2, y: 310.8, r: 44};
+/** Large arc with a 70deg gap at the top (pad-local coordinates). */
+const PAD_ARC_PATH = (() => {
+  const at = (deg: number) => {
+    const rad = (deg * Math.PI) / 180;
+    return `${(Math.cos(rad) * PAD.r).toFixed(2)} ${(Math.sin(rad) * PAD.r).toFixed(2)}`;
+  };
+  return `M${at(-55)}A${PAD.r} ${PAD.r} 0 1 1 ${at(-125)}`;
+})();
+const PAD_CROSS_PATH = 'M-10 0H-4M4 0H10M0 -10V-4M0 4V10';
 
 function toPoints(points: Array<[number, number]>): string {
   return points.map(([x, y]) => `${x},${y}`).join(' ');
@@ -629,6 +667,12 @@ function DayGuide(): ReactNode {
       <circle className={styles.guideCircle} cx="640" cy="150" r="170" />
       <path className={styles.guideArc} d="M640 -20 A170 170 0 0 1 810 150" />
       <path className={styles.guideTicks} d={DAY_GUIDE_TICKS_PATH} />
+      {/* Launch pad: open arc on the night satellite's position, so the
+          switch shrinks onto a mark that exists in both plates. */}
+      <g className={styles.padArc} transform={`translate(${PAD.x} ${PAD.y})`}>
+        <path d={PAD_ARC_PATH} />
+        <path className={styles.padCross} d={PAD_CROSS_PATH} />
+      </g>
     </g>
   );
 }
@@ -705,19 +749,82 @@ export const HERO_ANCHORS = {
   star: {x: 611.2, y: 310.8, r: 5},
   /** Night disc (red star). */
   disc: {x: FOCUS.x, y: FOCUS.y, r: DISC_R},
+  /** Day launch pad arc (same centre as the star). */
+  pad: PAD,
 } as const;
 
-/* Blue-edged squares just outside the guide ring and red rays from the star,
- * both in rig-local coordinates (rig origin = actor centre). */
-const ACTOR_SQUARES: Array<[number, number]> = [-38, 84, 206].map((deg) => {
-  const rad = (deg * Math.PI) / 180;
-  return [Math.cos(rad) * 214, Math.sin(rad) * 214];
-});
-const ACTOR_RAYS: Array<[number, number]> = [[-12, 168], [18, 236], [152, 132]].map(([deg, len]) => {
-  const rad = (deg * Math.PI) / 180;
-  return [Math.cos(rad) * len, Math.sin(rad) * len];
-});
-const ACTOR_MILESTONES = ['KÁRMÁN', 'GEO', 'MOON'];
+/* Actor connectors in pad-local coordinates (origin = white star). Each has
+ * an elbow and a faint parallel copy offset by `ghost`. Blue runs from a
+ * survey square to the pad ring; red runs from the star out to a mark. */
+type Connector = {points: Array<[number, number]>; ghost: [number, number]};
+const BLUE_LINKS: Connector[] = [
+  {points: [[-264, -140], [-140, -140], [-31, -31]], ghost: [0, -7]},
+  {points: [[252, -112], [112, -112], [31, -31]], ghost: [0, -7]},
+  {points: [[-120, 196], [-120, 120], [-31, 31]], ghost: [-7, 0]},
+];
+const RED_LINKS: Connector[] = [
+  {points: [[6, -6], [58, -58], [214, -58]], ghost: [0, 7]},
+  {points: [[6, 6], [40, 40], [40, 152]], ghost: [7, 0]},
+  {points: [[-6, -6], [-64, -64], [-64, -188]], ghost: [-7, 0]},
+];
+/* Leader lines with a caption, one per direction. */
+const LEADERS = {
+  red: {points: [[-64, -188], [-94, -218], [-236, -218]] as Array<[number, number]>, text: 'ORBIT INSERTION / 799,000 KM'},
+  blue: {points: [[252, -112], [282, -142], [430, -142]] as Array<[number, number]>, text: 'TOUCHDOWN / PAD-01 · 325 M'},
+};
+const pts = (list: Array<[number, number]>, dx = 0, dy = 0) => list.map(([x, y]) => `${x + dx},${y + dy}`).join(' ');
+
+/* Altitude ladder: log scale, one decade = AXIS_DECADE viewBox units, 325 m
+ * at the origin, altitude upwards. Minor ticks at 2..9 per decade. */
+export const AXIS_DECADE = 54;
+const GROUND_M = 325;
+const axisY = (metres: number) => -AXIS_DECADE * Math.log10(metres / GROUND_M);
+const LADDER_TICKS = (() => {
+  let d = '';
+  for (let k = 2; k <= 9; k += 1) {
+    for (let m = 1; m <= 9; m += 1) {
+      const y = axisY(m * 10 ** k).toFixed(2);
+      d += m === 1 ? `M-9 ${y}H9` : `M0 ${y}H${m === 5 ? 6 : 4}`;
+    }
+  }
+  return d;
+})();
+const LADDER_DECADES: Array<[number, string]> = [
+  [1e3, '1 km'], [1e4, '10 km'], [1e5, '100 km'], [1e6, '1,000 km'], [1e7, '10⁴ km'], [1e8, '10⁵ km'], [1e9, '10⁶ km'],
+];
+const LADDER_NAMES: Array<[number, string]> = [
+  [GROUND_M, 'PAD'], [1e5, 'KÁRMÁN'], [3.6e7, 'GEO'], [3.844e8, 'MOON'], [7.99e8, 'ORBIT'],
+];
+
+/** Full-bleed axes + scrolling altitude ladder. Rendered once per scene
+ * (dark ink in the clipped day scene, light in the night scene) so it reads
+ * on both sides of the clip edge. Arms are sized by the controller. */
+function HeroAxis({scene}: {scene: 'day' | 'night'}): ReactNode {
+  return (
+    <svg className={`${styles.diagramArt} ${styles.axisLayer}`} data-hero-axis={scene} {...SVG_PROPS}>
+      <g transform={`translate(${PAD.x} ${PAD.y})`} data-axis="" className={styles.axis}>
+        {['l', 'r', 'u', 'd'].map((arm) => (
+          <path key={arm} data-axis-arm={arm} pathLength="1" />
+        ))}
+        <path data-axis-hticks="" className={styles.axisMinor} />
+        <rect x="-6" y="-6" width="12" height="12" />
+        <g data-axis-ladder="">
+          <path className={styles.axisMinor} d={LADDER_TICKS} />
+          {LADDER_DECADES.map(([m, label]) => (
+            <text key={label} x="14" y={(axisY(m) + 4).toFixed(1)}>
+              {label}
+            </text>
+          ))}
+          {LADDER_NAMES.map(([m, name]) => (
+            <text key={name} className={styles.axisName} x="-14" y={(axisY(m) + 4).toFixed(1)} textAnchor="end">
+              {name}
+            </text>
+          ))}
+        </g>
+      </g>
+    </svg>
+  );
+}
 
 /** Light overlay used only while the hero switches theme. No filters. */
 function HeroActor(): ReactNode {
@@ -726,34 +833,38 @@ function HeroActor(): ReactNode {
       <g data-actor="disc" className={styles.actorDisc}>
         <circle r={DISC_R} />
       </g>
-      <g data-actor="orbit" className={styles.actorOrbit}>
-        <ellipse rx="430" ry="112" transform="rotate(-16)" />
-      </g>
-      <g data-actor="rig">
-        <circle data-actor="ring" className={styles.actorRing} r={HERO_ANCHORS.guide.r} />
-        {ACTOR_SQUARES.map(([x, y], index) => (
+      {/* Fixed on the pad / white star: nothing travels, so the rig is static. */}
+      <g data-actor="rig" transform={`translate(${PAD.x} ${PAD.y})`}>
+        <path data-actor="ring" className={styles.actorRing} d={PAD_ARC_PATH} />
+        {BLUE_LINKS.map(({points, ghost}, index) => (
           <g key={`b${index}`}>
-            <line data-actor="blue-line" className={styles.actorBlue} x1={x} y1={y} x2="0" y2="0" pathLength="1" />
-            <rect data-actor="square" className={styles.actorSquare} x={x - 5} y={y - 5} width="10" height="10" />
+            <polyline data-actor="blue-ghost" className={styles.actorGhostBlue} points={pts(points, ...ghost)} pathLength="1" />
+            <polyline data-actor="blue-line" className={styles.actorBlue} points={pts(points)} pathLength="1" />
+            <rect data-actor="square" className={styles.actorSquare} x={points[0][0] - 5} y={points[0][1] - 5} width="10" height="10" />
           </g>
         ))}
-        {ACTOR_RAYS.map(([x, y], index) => (
-          <g key={`r${index}`}>
-            <line data-actor="red-line" className={styles.actorRed} x1="0" y1="0" x2={x} y2={y} pathLength="1" />
-            <circle data-actor="red-end" className={styles.actorRedEnd} cx={x} cy={y} r="3.5" />
-          </g>
-        ))}
-        <g data-actor="axis" className={styles.actorAxis}>
-          <rect x="-6" y="-6" width="12" height="12" />
-          <path d="M-9 0H9M0 -9V9" />
-          <path data-actor="axis-h" d="M14 0H300M80 -4V4M150 -4V4M220 -4V4M290 -4V4" />
-          <path data-actor="axis-v" d="M0 14V240M-4 70H4M-4 130H4M-4 190H4" />
-          {ACTOR_MILESTONES.map((name, index) => (
-            <text data-actor="milestone" key={name} x={80 + index * 70} y="-12" textAnchor="middle">
-              {name}
-            </text>
-          ))}
-        </g>
+        {RED_LINKS.map(({points, ghost}, index) => {
+          const [ex, ey] = points[points.length - 1];
+          return (
+            <g key={`r${index}`}>
+              <polyline data-actor="red-ghost" className={styles.actorGhostRed} points={pts(points, ...ghost)} pathLength="1" />
+              <polyline data-actor="red-line" className={styles.actorRed} points={pts(points)} pathLength="1" />
+              <circle data-actor="red-end" className={styles.actorRedEnd} cx={ex} cy={ey} r="3.5" />
+            </g>
+          );
+        })}
+        {(['red', 'blue'] as const).map((tone) => {
+          const {points, text} = LEADERS[tone];
+          const [ex, ey] = points[points.length - 1];
+          return (
+            <g key={tone}>
+              <polyline data-actor={`leader-${tone}`} className={styles.actorLeader} data-tone={tone} points={pts(points)} pathLength="1" />
+              <text data-actor={`caption-${tone}`} className={styles.actorCaption} x={tone === 'red' ? ex : points[1][0] + 4} y={ey - 8}>
+                {text}
+              </text>
+            </g>
+          );
+        })}
         <circle data-actor="dot" className={styles.actorDot} r={HERO_ANCHORS.star.r} />
       </g>
     </svg>
@@ -772,9 +883,16 @@ export default function VisualStudy({variant = 'field'}: VisualStudyProps): Reac
         <svg className={`${styles.diagramArt} ${styles.nightPlate}`} data-hero-layer="n-core" {...SVG_PROPS}>
           <NightCore />
         </svg>
-        <svg className={`${styles.diagramArt} ${styles.nightPlate}`} data-hero-layer="n-rest" {...SVG_PROPS}>
-          <NightRest />
+        <svg className={`${styles.diagramArt} ${styles.nightPlate}`} data-hero-layer="n-ticks" {...SVG_PROPS}>
+          <NightTicks />
         </svg>
+        <svg className={`${styles.diagramArt} ${styles.nightPlate}`} data-hero-layer="n-orbits" {...SVG_PROPS}>
+          <NightOrbits />
+        </svg>
+        <svg className={`${styles.diagramArt} ${styles.nightPlate}`} data-hero-layer="n-marks" {...SVG_PROPS}>
+          <NightMarks />
+        </svg>
+        <HeroAxis scene="night" />
       </div>
       <div className={styles.colourLayer} data-hero-colour="" />
       <div className={`${styles.scene} ${styles.dayScene}`} data-art-mode="day" data-hero-scene="day">
@@ -790,6 +908,7 @@ export default function VisualStudy({variant = 'field'}: VisualStudyProps): Reac
         <svg className={styles.diagramArt} data-hero-layer="d-guide" {...SVG_PROPS}>
           <DayGuide />
         </svg>
+        <HeroAxis scene="day" />
       </div>
       <HeroActor />
       <div className={styles.noiseLayer} />
