@@ -4,12 +4,14 @@ export default function useHeroPaging() {
   const sectionRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
+  const artRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
     const content = contentRef.current;
     const copy = copyRef.current;
-    if (!section || !content || !copy) return;
+    const art = artRef.current;
+    if (!section || !content || !copy || !art) return;
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const desktop = window.matchMedia('(min-width: 997px) and (pointer: fine)');
@@ -27,38 +29,66 @@ export default function useHeroPaging() {
     let wheelAmount = 0;
     let lastWheel = 0;
     let scrollIdleTimer = 0;
+    let scrolling = false;
+    let offscreen = false;
+    let wheelBound = false;
+    let lastTransform = '';
+    const writtenVars = new Map<string, string>();
+
+    // Custom properties on the section inherit into the whole hero subtree, so
+    // only write them when the value actually changes.
+    const setVar = (name: string, value: string) => {
+      if (writtenVars.get(name) === value) return;
+      writtenVars.set(name, value);
+      section.style.setProperty(name, value);
+    };
+
+    // The art plate pauses its loops while the page scrolls and once it has
+    // left the viewport. The flag sits on the art wrapper and VisualStudy's
+    // CSS matches only the animated nodes, so toggling it restyles ~20
+    // elements instead of the whole plate.
+    const syncPause = () => {
+      const paused = scrolling || offscreen;
+      if ((art.dataset.artPaused === 'true') === paused) return;
+      if (paused) art.dataset.artPaused = 'true';
+      else delete art.dataset.artPaused;
+    };
 
     const paint = () => {
       frame = 0;
-      const progress = Math.max(0, Math.min(1, (window.scrollY - sectionTop) / sceneHeight));
-      section.style.setProperty('--hero-progress', String(progress));
-      section.style.setProperty('--art-travel', `${-progress * 120}px`);
-      // Once the scene has fully left the viewport, stop its loops entirely.
-      const offscreen = progress >= 1;
-      if ((section.dataset.artOffscreen === 'true') !== offscreen) {
-        if (offscreen) section.dataset.artOffscreen = 'true';
-        else delete section.dataset.artOffscreen;
+      const progress = sceneHeight > 0 ? Math.max(0, Math.min(1, (window.scrollY - sectionTop) / sceneHeight)) : 0;
+      // Transform goes straight onto the composited art layer: no inherited
+      // custom property, so a scroll frame restyles one element.
+      const transform = reducedMotion.matches ? 'none' : `translateY(${-progress * 120}px)`;
+      if (transform !== lastTransform) {
+        lastTransform = transform;
+        art.style.transform = transform;
       }
+      offscreen = progress >= 1;
+      syncPause();
+      syncWheel();
     };
 
     const measure = () => {
+      // All layout and style reads first, then writes: one layout per measure.
       const navbarHeight = document.querySelector('.navbar')?.getBoundingClientRect().height ?? 60;
       const viewport = window.innerHeight - navbarHeight;
       const narrow = window.innerWidth < 997;
       const contentHeight = content.getBoundingClientRect().height;
       const copyHeight = copy.getBoundingClientRect().height;
-      const bottomSpace = narrow ? 32 : 64;
-      const artSpace = Math.max(narrow ? 220 : 240, viewport - (narrow ? copyHeight : contentHeight) - bottomSpace);
-      sceneHeight = narrow ? artSpace + contentHeight + bottomSpace : Math.max(viewport, artSpace + contentHeight + bottomSpace);
-      sectionTop = section.getBoundingClientRect().top + window.scrollY - navbarHeight;
-      pagingEnabled = desktop.matches && !reducedMotion.matches && contentHeight < viewport - 72 && sceneHeight <= viewport + 2;
-      section.dataset.paging = pagingEnabled ? 'enabled' : 'natural';
-      section.style.setProperty('--scene-height', `${sceneHeight}px`);
-      section.style.setProperty('--art-space', `${artSpace}px`);
       const sectionStyle = getComputedStyle(section);
       const carryOffset = parseFloat(sectionStyle.getPropertyValue('--carry-offset')) || 20;
       const borderHeight = parseFloat(sectionStyle.borderBottomWidth) || 0;
-      section.style.setProperty('--carry-height', pagingEnabled ? `${contentHeight + carryOffset + borderHeight}px` : '0px');
+      sectionTop = section.getBoundingClientRect().top + window.scrollY - navbarHeight;
+      const bottomSpace = narrow ? 32 : 64;
+      const artSpace = Math.max(narrow ? 220 : 240, viewport - (narrow ? copyHeight : contentHeight) - bottomSpace);
+      sceneHeight = narrow ? artSpace + contentHeight + bottomSpace : Math.max(viewport, artSpace + contentHeight + bottomSpace);
+      pagingEnabled = desktop.matches && !reducedMotion.matches && contentHeight < viewport - 72 && sceneHeight <= viewport + 2;
+      const paging = pagingEnabled ? 'enabled' : 'natural';
+      if (section.dataset.paging !== paging) section.dataset.paging = paging;
+      setVar('--scene-height', `${sceneHeight}px`);
+      setVar('--art-space', `${artSpace}px`);
+      setVar('--carry-height', pagingEnabled ? `${contentHeight + carryOffset + borderHeight}px` : '0px');
       paint();
     };
 
@@ -70,17 +100,41 @@ export default function useHeroPaging() {
       });
     };
 
-    // Flag active scrolling so CSS can pause the art loops and keep the layer cached.
+    // Flag active scrolling so CSS can pause the art loops and keep the layer
+    // cached. section[data-scrolling] only drives the dark panel's blur rule;
+    // the art pause goes through syncPause().
     const markScrolling = () => {
-      if (section.dataset.scrolling !== 'true') section.dataset.scrolling = 'true';
+      if (!scrolling) {
+        scrolling = true;
+        section.dataset.scrolling = 'true';
+        syncPause();
+      }
       window.clearTimeout(scrollIdleTimer);
       scrollIdleTimer = window.setTimeout(() => {
+        scrolling = false;
         delete section.dataset.scrolling;
+        syncPause();
       }, 220);
+    };
+
+    // A non-passive wheel listener turns the whole page into a slow-scroll
+    // region (the compositor must wait for the main thread on every wheel
+    // event). Bind it only while the viewport is inside the paging range, so
+    // reading the rest of the page scrolls on the compositor.
+    const syncWheel = () => {
+      const offset = window.scrollY - sectionTop;
+      const inZone = pagingEnabled && (animating || (offset >= -3 && offset <= sceneHeight + 3));
+      if (inZone === wheelBound) return;
+      wheelBound = inZone;
+      if (inZone) window.addEventListener('wheel', onWheel, {passive: false});
+      else window.removeEventListener('wheel', onWheel);
     };
 
     const onScroll = () => {
       if (!frame) frame = window.requestAnimationFrame(paint);
+      // Bind synchronously as well: the next wheel event can arrive before
+      // the paint frame when the user scrolls back up into the hero.
+      syncWheel();
       markScrolling();
       window.clearTimeout(settleTimer);
       if (!supportsScrollEnd && !animating && !pointerDown) settleTimer = window.setTimeout(settle, 160);
@@ -90,11 +144,13 @@ export default function useHeroPaging() {
       if (!animating) return;
       animating = false;
       window.clearTimeout(animationTimer);
+      syncWheel();
     };
 
     const turn = (nextDirection: number) => {
       direction = nextDirection;
       animating = true;
+      syncWheel();
       wheelAmount = 0;
       window.clearTimeout(settleTimer);
       window.clearTimeout(animationTimer);
@@ -105,10 +161,13 @@ export default function useHeroPaging() {
     const settle = () => {
       window.clearTimeout(settleTimer);
       if (!pagingEnabled || pointerDown || animating || document.hidden) return;
+      // Cheap position check first: most scrollends land on a page edge or
+      // outside the hero, and ignoreTarget() reads computed style.
+      const offset = window.scrollY - sectionTop;
+      if (!(offset > 3 && offset < sceneHeight - 3)) return;
       const focused = document.activeElement;
       if (focused instanceof Element && (ignoreTarget(focused, false) || focused.closest('a'))) return;
-      const offset = window.scrollY - sectionTop;
-      if (offset > 3 && offset < sceneHeight - 3) turn(offset >= sceneHeight / 2 ? 1 : -1);
+      turn(offset >= sceneHeight / 2 ? 1 : -1);
     };
 
     const onScrollEnd = () => {
@@ -135,27 +194,33 @@ export default function useHeroPaging() {
       if (!(target instanceof Element)) return true;
       if (ignoreButtons && target.closest('button')) return true;
       if (target.closest('input, textarea, select, [contenteditable="true"], [role="dialog"], .navbar-sidebar')) return true;
-      for (let element: Element | null = target; element && element !== section; element = element.parentElement) {
-        const style = getComputedStyle(element);
-        if (/(auto|scroll)/.test(style.overflowY) && element.scrollHeight > element.clientHeight + 1 && element !== document.documentElement && element !== document.body) return true;
+      const root = document.documentElement;
+      for (let element: Element | null = target; element && element !== section && element !== root && element !== document.body; element = element.parentElement) {
+        // Only elements that actually overflow can be inner scrollers; the
+        // computed-style read is skipped for everything else.
+        if (element.scrollHeight <= element.clientHeight + 1) continue;
+        if (/(auto|scroll)/.test(getComputedStyle(element).overflowY)) return true;
       }
       return document.querySelector('.navbar__toggle[aria-expanded="true"]') !== null;
     };
 
     const onWheel = (event: WheelEvent) => {
-      if (!pagingEnabled || event.ctrlKey || event.metaKey || event.shiftKey || Math.abs(event.deltaX) >= Math.abs(event.deltaY) || ignoreTarget(event.target)) return;
+      if (!pagingEnabled || event.ctrlKey || event.metaKey || event.shiftKey || Math.abs(event.deltaX) >= Math.abs(event.deltaY)) return;
       const now = performance.now();
       const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1);
       const nextDirection = Math.sign(delta);
       const offset = window.scrollY - sectionTop;
       const atCover = offset >= -3 && offset < sceneHeight - 3;
       const atLanding = offset > 3 && offset <= sceneHeight + 3;
+      // Position checks are cheap; the DOM walk in ignoreTarget() runs only
+      // when this event would actually be taken over.
+      if (!animating && !((atCover && nextDirection > 0) || (atLanding && nextDirection < 0))) return;
+      if (ignoreTarget(event.target)) return;
       if (animating) {
         event.preventDefault();
         if (nextDirection !== direction && Math.abs(delta) >= 12) turn(nextDirection);
         return;
       }
-      if (!((atCover && nextDirection > 0) || (atLanding && nextDirection < 0))) return;
       event.preventDefault();
       if (now - lastWheel > 160 || Math.sign(wheelAmount) !== nextDirection) wheelAmount = 0;
       lastWheel = now;
@@ -204,7 +269,6 @@ export default function useHeroPaging() {
     window.addEventListener('pointerup', onPointerUp, true);
     window.addEventListener('pointercancel', onPointerUp, true);
     window.addEventListener('blur', onPointerUp);
-    window.addEventListener('wheel', onWheel, {passive: false});
     window.addEventListener('keydown', onKey);
     reducedMotion.addEventListener('change', cancelMotion);
     desktop.addEventListener('change', cancelMotion);
@@ -225,11 +289,12 @@ export default function useHeroPaging() {
       window.removeEventListener('pointercancel', onPointerUp, true);
       window.removeEventListener('blur', onPointerUp);
       window.removeEventListener('wheel', onWheel);
+      wheelBound = false;
       window.removeEventListener('keydown', onKey);
       reducedMotion.removeEventListener('change', cancelMotion);
       desktop.removeEventListener('change', cancelMotion);
     };
   }, []);
 
-  return {sectionRef, contentRef, copyRef};
+  return {sectionRef, contentRef, copyRef, artRef};
 }

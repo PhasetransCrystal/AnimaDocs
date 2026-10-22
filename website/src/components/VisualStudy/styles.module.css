@@ -60,23 +60,27 @@
 }
 
 /* Gradient diamonds (defs vsDayBlue / vsDayPale / vsDayGray). */
-.tileBlue { fill: url(#vsDayBlue); fill-opacity: 0.9; }
-.tilePale { fill: url(#vsDayPale); }
-.tilePaper { fill: url(#vsDayGray); stroke: var(--anima-line); }
-.tileOutline { fill: none; stroke: var(--anima-line-strong); stroke-opacity: 0.6; }
-.tileInk { fill: var(--anima-ink); fill-opacity: 0.85; }
-.tileBrass { fill: var(--anima-gold); }
+/* --tile-alpha is the per-tile distance fade (inline on each path). It scales
+ * fill/stroke opacity instead of element opacity, which would give each tile
+ * its own effect node and split the field into compositor layers. */
+.tileBlue { fill: url(#vsDayBlue); fill-opacity: calc(0.9 * var(--tile-alpha, 1)); }
+.tilePale { fill: url(#vsDayPale); fill-opacity: var(--tile-alpha, 1); }
+.tilePaper { fill: url(#vsDayGray); fill-opacity: var(--tile-alpha, 1); stroke: var(--anima-line); stroke-opacity: var(--tile-alpha, 1); }
+.tileOutline { fill: none; stroke: var(--anima-line-strong); stroke-opacity: calc(0.6 * var(--tile-alpha, 1)); }
+.tileInk { fill: var(--anima-ink); fill-opacity: calc(0.85 * var(--tile-alpha, 1)); }
+.tileBrass { fill: var(--anima-gold); fill-opacity: var(--tile-alpha, 1); }
 
+/* The dash pattern crawls along the circle (main-thread paint, no layer)
+ * instead of rotating the element, which forced a composited layer and made
+ * everything painted above it overlap-promote. 1068.14 = 2πr for r=170. */
 .guideCircle {
-  animation: spin360 160s linear infinite;
+  animation: guideCrawl 160s linear infinite;
   stroke: var(--anima-line-strong);
   stroke-dasharray: 3 9;
   stroke-opacity: 0.45;
-  transform-box: fill-box;
-  transform-origin: center;
 }
 .guideArc { stroke: var(--anima-blue); stroke-opacity: 0.8; stroke-width: 1.2; }
-.guideTicks line { stroke: var(--anima-line-strong); stroke-opacity: 0.5; }
+.guideTicks { fill: none; stroke: var(--anima-line-strong); stroke-opacity: 0.5; }
 
 .routeMain { stroke: var(--anima-blue); stroke-opacity: 0.9; stroke-width: 1.75; }
 .routeGhost { stroke: var(--anima-line-strong); stroke-dasharray: 4 6; stroke-opacity: 0.55; }
@@ -139,14 +143,14 @@
 /* Right-side terraces: base to peak, light to deeper blue. Rows inside a
  * level share one fill so the stepped edge reads as a single band. */
 /* The coastline in index.tsx already bounds the land; no extra fade mask. */
-.landShadow rect { fill: var(--anima-ink); fill-opacity: 0.05; }
-.land0 rect { fill: #e2eaf6; }
-.land1 rect { fill: #d6e1f3; }
-.land2 rect { fill: #cfdcf1; }
-.land3 rect { fill: #bfd0ec; }
-.land4 rect { fill: #aec3e7; }
-.land5 rect { fill: #9cb6e2; }
-.land6 rect { fill: #8aa8dc; }
+.landShadow path { fill: var(--anima-ink); fill-opacity: 0.05; }
+.land0 path { fill: #e2eaf6; }
+.land1 path { fill: #d6e1f3; }
+.land2 path { fill: #cfdcf1; }
+.land3 path { fill: #bfd0ec; }
+.land4 path { fill: #aec3e7; }
+.land5 path { fill: #9cb6e2; }
+.land6 path { fill: #8aa8dc; }
 
 /* Lattice redrawn on top of the land in the land's own rotated frame, in
  * white so it stays legible over the blue terraces. */
@@ -154,6 +158,7 @@
 .landLatticeCross { fill: none; stroke: var(--anima-blue); stroke-opacity: 0.45; }
 
 @keyframes spin360 { to { transform: rotate(360deg); } }
+@keyframes guideCrawl { to { stroke-dashoffset: -1068.14px; } }
 @keyframes routeCrawl { to { stroke-dashoffset: -160; } }
 
 .nightLabel text {
@@ -244,10 +249,12 @@
 
 .flicker { animation: flicker 5s steps(1, end) infinite; }
 
+/* fill-opacity rather than opacity: same look on a fill-only rect, but it
+ * repaints inside the art layer instead of promoting each node to its own. */
 @keyframes nodeBlink {
-  0%, 70%, 100% { opacity: 1; }
-  78% { opacity: 0.15; }
-  86% { opacity: 1; }
+  0%, 70%, 100% { fill-opacity: 1; }
+  78% { fill-opacity: 0.15; }
+  86% { fill-opacity: 1; }
 }
 @keyframes terraceDrift {
   from { transform: translate(0, 0); }
@@ -305,6 +312,14 @@
   }
 
   .nightLabel { display: none; }
+}
+
+/* Pause hook: an ancestor with [data-art-paused] (the hero wrapper, set by
+ * useHeroPaging while scrolling / offscreen) freezes the loops. The selector
+ * ends in the animated classes, so toggling the flag restyles only these
+ * ~20 nodes instead of every element in the plate. */
+:global([data-art-paused]) :is(.guideCircle, .routeCrawl, .nodeBlink, .terraceDrift, .lensDrift, .tickSpin, .orbitComet, .pulse, .flicker) {
+  animation-play-state: paused !important;
 }
 
 /* Fallbacks ---------------------------------------------------------------- */

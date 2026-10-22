@@ -1,4 +1,4 @@
-import type {ReactNode} from 'react';
+import type {CSSProperties, ReactNode} from 'react';
 
 import styles from './styles.module.css';
 
@@ -111,7 +111,10 @@ function buildTerraces(): Terrace[] {
  * deeper red and the rest of the twin is an outline only. */
 const TWIN = {dx: 180, dy: 110};
 
-const NIGHT_TICKS = buildTicks();
+/* Tick ring as two paths (major / minor) instead of one element per tick. */
+const NIGHT_TICK_LIST = buildTicks();
+const NIGHT_TICKS_MAJOR = NIGHT_TICK_LIST.filter((tick) => tick.major).map((tick) => tick.d).join('');
+const NIGHT_TICKS_MINOR = NIGHT_TICK_LIST.filter((tick) => !tick.major).map((tick) => tick.d).join('');
 const NIGHT_TERRACES = buildTerraces();
 
 /* Pixel island where the grid "breaks" over the lower-left disc edge
@@ -211,9 +214,8 @@ function NightObservatory(): ReactNode {
       {/* Tick ring and state dot rotate together so the gap keeps its dot. */}
       <g className={styles.tickSpin}>
         <g className={styles.tickRing}>
-          {NIGHT_TICKS.map((tick) => (
-            <path key={tick.d} d={tick.d} className={tick.major ? styles.tickMajor : styles.tickMinor} />
-          ))}
+          <path d={NIGHT_TICKS_MINOR} className={styles.tickMinor} />
+          <path d={NIGHT_TICKS_MAJOR} className={styles.tickMajor} />
         </g>
         <circle className={styles.stateDot} cx={STATE_DOT[0].toFixed(1)} cy={STATE_DOT[1].toFixed(1)} r="4" />
       </g>
@@ -244,9 +246,7 @@ function NightObservatory(): ReactNode {
       </g>
 
       <g className={styles.plusMarks}>
-        {PLUS_MARKS.map(([x, y]) => (
-          <path key={`${x}-${y}`} d={`M${x - 5} ${y}H${x + 5}M${x} ${y - 5}V${y + 5}`} />
-        ))}
+        <path d={PLUS_MARKS.map(([x, y]) => `M${x - 5} ${y}H${x + 5}M${x} ${y - 5}V${y + 5}`).join('')} />
       </g>
 
       <g className={styles.nightLabel}>
@@ -268,12 +268,29 @@ const TILE_GAP = 1.32;
 type TileKind = 'blue' | 'pale' | 'paper' | 'outline' | 'ink' | 'brass';
 
 type DayTile = {
-  x: number;
-  y: number;
-  size: number;
+  /** Square already rotated 32deg about its centre. */
+  d: string;
   kind: TileKind;
   opacity: number;
 };
+
+const TILE_ANGLE = (32 * Math.PI) / 180;
+
+/* Rotation is baked into the geometry: a per-tile transform under the
+ * tileField mask-image made Chrome composite every tile on its own layer. */
+function tilePath(x: number, y: number, size: number): string {
+  const half = size / 2;
+  const cos = Math.cos(TILE_ANGLE);
+  const sin = Math.sin(TILE_ANGLE);
+  const corners: Array<[number, number]> = [[-half, -half], [half, -half], [half, half], [-half, half]];
+  return `${corners
+    .map(([dx, dy], index) => `${index ? 'L' : 'M'}${(x + dx * cos - dy * sin).toFixed(3)} ${(y + dx * sin + dy * cos).toFixed(3)}`)
+    .join('')}Z`;
+}
+
+/* objectBoundingBox of a rotated square is a larger axis-aligned square; this
+ * maps the gradient back onto the tile so it runs corner to corner as before. */
+const TILE_GRADIENT = `translate(0.5 0.5) rotate(32) scale(${(1 / (Math.cos(TILE_ANGLE) + Math.sin(TILE_ANGLE))).toFixed(6)}) translate(-0.5 -0.5)`;
 
 function buildDayTiles(): DayTile[] {
   const tiles: DayTile[] = [];
@@ -300,7 +317,7 @@ function buildDayTiles(): DayTile[] {
       if (y < 110 && kind !== 'outline' && kind !== 'pale') kind = 'outline';
       const distance = Math.hypot(gridX, gridY);
       const opacity = Math.max(0.2, 1 - distance / 640);
-      tiles.push({x, y, size: kind === 'brass' ? TILE_SIZE * 0.46 : TILE_SIZE, kind, opacity});
+      tiles.push({d: tilePath(x, y, kind === 'brass' ? TILE_SIZE * 0.46 : TILE_SIZE), kind, opacity});
     }
   }
   return tiles;
@@ -324,16 +341,14 @@ const dayRouteGhost: Array<[number, number]> = [
   [1290, 340],
 ];
 
-const dayGuideTicks = Array.from({length: 36}, (_value, index) => {
+/* 36 guide ticks as one path (one element instead of 36 lines). */
+const DAY_GUIDE_TICKS_PATH = Array.from({length: 36}, (_value, index) => {
   const angle = (index * 10 * Math.PI) / 180;
   const inner = index % 3 === 0 ? 156 : 163;
-  return {
-    x1: 640 + Math.cos(angle) * inner,
-    y1: 150 + Math.sin(angle) * inner,
-    x2: 640 + Math.cos(angle) * 170,
-    y2: 150 + Math.sin(angle) * 170,
-  };
-});
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  return `M${(640 + cos * inner).toFixed(3)} ${(150 + sin * inner).toFixed(3)}L${(640 + cos * 170).toFixed(3)} ${(150 + sin * 170).toFixed(3)}`;
+}).join('');
 
 function toPoints(points: Array<[number, number]>): string {
   return points.map(([x, y]) => `${x},${y}`).join(' ');
@@ -459,21 +474,31 @@ function buildLandTerraces(): LandRow[][] {
 }
 
 const landTerraces = buildLandTerraces();
+
+/* Each terrace level as one path of clockwise row rectangles (rows within and
+ * across levels never overlap), instead of ~one <rect> per row. */
+function rowsPath(rows: LandRow[]): string {
+  return rows.map((row) => `M${row.x} ${row.y}h${row.width}v${LAND_STEP}h${-row.width}Z`).join('');
+}
+const LAND_LEVEL_PATHS = landTerraces.map(rowsPath);
+const LAND_ALL_PATH = LAND_LEVEL_PATHS.join('');
 const washToneClass = ['washA', 'washB', 'washC'] as const;
 
 function DayAtlas(): ReactNode {
   return (
     <g className={styles.dayArt}>
       <defs>
-        <linearGradient id="vsDayBlue" x1="0" x2="1" y1="0" y2="1">
+        {/* Tiles are pre-rotated paths, so the gradient box is the rotated
+            square's bounding box; TILE_GRADIENT maps it back onto the tile. */}
+        <linearGradient gradientTransform={TILE_GRADIENT} id="vsDayBlue" x1="0" x2="1" y1="0" y2="1">
           <stop offset="0" stopColor="#3474e8" />
           <stop offset="1" stopColor="#1d4aa6" />
         </linearGradient>
-        <linearGradient id="vsDayPale" x1="0" x2="1" y1="0" y2="1">
+        <linearGradient gradientTransform={TILE_GRADIENT} id="vsDayPale" x1="0" x2="1" y1="0" y2="1">
           <stop offset="0" stopColor="#e4ecf8" />
           <stop offset="1" stopColor="#b9cbe8" />
         </linearGradient>
-        <linearGradient id="vsDayGray" x1="0" x2="1" y1="1" y2="0">
+        <linearGradient gradientTransform={TILE_GRADIENT} id="vsDayGray" x1="0" x2="1" y1="1" y2="0">
           <stop offset="0" stopColor="#ffffff" />
           <stop offset="1" stopColor="#d5dce3" />
         </linearGradient>
@@ -492,9 +517,7 @@ function DayAtlas(): ReactNode {
         </pattern>
         {/* Clip the white lattice to the land so it only appears over blue. */}
         <clipPath id="vsDayLandClip">
-          {landTerraces.flat().map((row, index) => (
-            <rect height={LAND_STEP} key={index} width={row.width} x={row.x} y={row.y} />
-          ))}
+          <path d={LAND_ALL_PATH} />
         </clipPath>
         <mask id="vsDayLatticeMask">
           <rect fill="url(#vsDayLatticeFade)" height="560" width="1440" />
@@ -504,9 +527,11 @@ function DayAtlas(): ReactNode {
         {washBlocks.map((block, index) => (
           <rect
             className={styles[washToneClass[block.tone]]}
+            // fill-opacity, not opacity: a fill-only rect looks the same, and
+            // per-element opacity makes Chrome split the plate into layers.
+            fillOpacity={block.opacity}
             height={block.height}
             key={index}
-            opacity={block.opacity}
             width={block.width}
             x={block.x}
             y={block.y}
@@ -514,17 +539,15 @@ function DayAtlas(): ReactNode {
         ))}
       </g>
       <g className={styles.landField} transform="rotate(-7 960 220)">
-        {/* Cast shadow of the base terrace, offset like the plate wash. */}
+        {/* Cast shadow of the base terrace, offset like the plate wash. One
+            path per level: rows never overlap, and separate paths keep the
+            translucent shadow stacking exactly as the per-row rects did. */}
         <g className={styles.landShadow} transform="translate(14 16)">
-          {landTerraces.flat().map((row, index) => (
-            <rect height={LAND_STEP} key={index} width={row.width} x={row.x} y={row.y} />
-          ))}
+          {LAND_LEVEL_PATHS.map((d, level) => <path d={d} key={level} />)}
         </g>
-        {landTerraces.map((rows, level) => (
+        {LAND_LEVEL_PATHS.map((d, level) => (
           <g className={styles[`land${level}`]} key={level}>
-            {rows.map((row, index) => (
-              <rect height={LAND_STEP} key={index} width={row.width} x={row.x} y={row.y} />
-            ))}
+            <path d={d} />
           </g>
         ))}
         <rect
@@ -544,24 +567,18 @@ function DayAtlas(): ReactNode {
       </g>
       <g className={styles.tileField}>
         {dayTiles.map((tile, index) => (
-          <rect
+          <path
             className={styles[`tile${tile.kind.charAt(0).toUpperCase()}${tile.kind.slice(1)}`]}
-            height={tile.size}
+            d={tile.d}
             key={index}
-            opacity={tile.opacity}
-            transform={`rotate(32 ${tile.x} ${tile.y})`}
-            width={tile.size}
-            x={tile.x - tile.size / 2}
-            y={tile.y - tile.size / 2}
+            style={{'--tile-alpha': tile.opacity} as CSSProperties}
           />
         ))}
       </g>
       <g className={styles.guideStudy}>
         <circle className={styles.guideCircle} cx="640" cy="150" r="170" />
         <path className={styles.guideArc} d="M640 -20 A170 170 0 0 1 810 150" />
-        <g className={styles.guideTicks}>
-          {dayGuideTicks.map((tick, index) => <line key={index} {...tick} />)}
-        </g>
+        <path className={styles.guideTicks} d={DAY_GUIDE_TICKS_PATH} />
       </g>
       <polyline className={styles.routeGhost} points={toPoints(dayRouteGhost)} />
       <polyline className={styles.routeMain} points={toPoints(dayRouteMain)} />

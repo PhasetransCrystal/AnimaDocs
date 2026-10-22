@@ -7,7 +7,6 @@
   --art-space: 300px;
   --carry-height: 0px;
   --carry-offset: 20px;
-  --hero-progress: 0;
   min-height: calc(var(--scene-height) + var(--carry-height));
   overflow: clip;
   padding-top: var(--art-space);
@@ -20,9 +19,9 @@
   overflow: hidden;
   pointer-events: none;
   position: absolute;
-  transform: translateY(var(--art-travel, 0px));
-  /* Promote the art plate to its own layer so scroll-driven travel is a
-     composite-only move instead of a full SVG/filter repaint. */
+  /* useHeroPaging writes the scroll travel as an inline transform on this
+     element. Promote it to its own layer so the travel is a composite-only
+     move instead of a full SVG/filter repaint. */
   will-change: transform;
   contain: paint;
 }
@@ -403,12 +402,10 @@
 :global([data-theme='dark']) .panelBody,
 :global([data-theme='dark']) .panelStats { background: transparent; }
 
-/* Scroll performance: freeze loops while paging and when the art is offscreen;
-   drop the panel blur during scroll so it does not re-sample the art per frame. */
-.heroBanner[data-scrolling='true'] .heroArt *,
-.heroBanner[data-art-offscreen='true'] .heroArt * {
-  animation-play-state: paused !important;
-}
+/* Scroll performance: the art loops pause through [data-art-paused] on
+   .heroArt (rules in VisualStudy/styles.module.css, scoped to the animated
+   nodes only). Drop the panel blur during scroll so it does not re-sample the
+   art per frame. */
 :global([data-theme='dark']) .heroBanner[data-scrolling='true'] .signalPanel {
   backdrop-filter: none;
   background: color-mix(in srgb, #111318 92%, transparent);

@@ -58,14 +58,14 @@ function DirectoryPanel({tutorialCount}: {tutorialCount: number}): ReactNode {
 
 function HomepageHeader(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
-  const {sectionRef, contentRef, copyRef} = useHeroPaging();
+  const {sectionRef, contentRef, copyRef, artRef} = useHeroPaging();
   const docsData = useDocsData(undefined);
   const latestVersion = docsData.versions.find((version) => version.isLast) ?? docsData.versions[0];
   const tutorialCount = latestVersion?.docs.filter((doc) => !doc.unlisted).length ?? 0;
 
   return (
     <header className={styles.heroBanner} ref={sectionRef}>
-      <div className={styles.heroArt} aria-hidden="true">
+      <div className={styles.heroArt} aria-hidden="true" ref={artRef}>
         <VisualStudy />
         <span className={styles.heroArtRule} />
       </div>

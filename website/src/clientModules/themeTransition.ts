@@ -78,10 +78,13 @@ function installViewTransition(): void {
       event.stopImmediatePropagation();
       event.preventDefault();
       viewTransitionActive = true;
-      // Freeze art loops before the old snapshot so the live new frame does
-      // not repaint the SVG plates on every animation frame.
-      root.classList.add(VT_CLASS_NAME);
       const transition = doc.startViewTransition!(() => {
+        // Add the class in the same update as the theme flip: one full style
+        // recalc instead of an extra one before the old frame is captured
+        // (the old snapshot is a static image, so it needs no freezing).
+        // Transitions see `transition: none` in the after-change style, so
+        // none of the flipped colours start easing under the crossfade.
+        root.classList.add(VT_CLASS_NAME);
         bypass = true;
         button.click();
         bypass = false;
