@@ -871,11 +871,14 @@ const polarPt = (deg: number, r: number): Pt => {
 };
 const inward = (...path: Pt[]): Pt[] => [...path, onRing(path[path.length - 1], PAD.r + 2)];
 const outward = (...path: Pt[]): Pt[] => [onRing(path[0], 8), ...path];
-const BLUE_LINKS: Connector[] = [210, 330, 90].map((deg) => ({points: inward(polarPt(deg, 214))}));
+/* Bold lengths: blue squares at one radius, red marks at three. */
+const BLUE_LEN = 143;
+const RED_LEN = [133, 157, 100] as const;
+const BLUE_LINKS: Connector[] = [210, 330, 90].map((deg) => ({points: inward(polarPt(deg, BLUE_LEN))}));
 const RED_LINKS: Connector[] = [
-  {points: outward(polarPt(270, 200)), end: 2.5},
-  {points: outward(polarPt(30, 236)), end: 4.5},
-  {points: outward(polarPt(150, 150)), end: 3.5},
+  {points: outward(polarPt(270, RED_LEN[0])), end: 2.5},
+  {points: outward(polarPt(30, RED_LEN[1])), end: 4.5},
+  {points: outward(polarPt(150, RED_LEN[2])), end: 3.5},
 ];
 /* Faint lines have their own directions and lengths (a little longer than
  * the bold set, well short of the edges); some take one elbow. Each belongs
@@ -892,8 +895,8 @@ const FAINT_LINES: Array<{points: Pt[]; tone: 'grey' | 'blue' | 'red'; phase: 'd
 ];
 /* Leader lines with a caption, one per direction: red hangs off the top
  * ray's mark, blue off the upper-right survey square. */
-const RED_TOP = polarPt(270, 200);
-const BLUE_UR = polarPt(330, 214);
+const RED_TOP = polarPt(270, RED_LEN[0]);
+const BLUE_UR = polarPt(330, BLUE_LEN);
 const LEADERS = {
   red: {points: [RED_TOP, [RED_TOP[0] + 18, RED_TOP[1] - 18], [RED_TOP[0] + 182, RED_TOP[1] - 18]] as Pt[], text: 'ORBIT INSERTION / 799,000 KM'},
   blue: {points: [BLUE_UR, [BLUE_UR[0] + 18, BLUE_UR[1] - 18], [BLUE_UR[0] + 172, BLUE_UR[1] - 18]] as Pt[], text: 'TOUCHDOWN / PAD-01 · 325 M'},
