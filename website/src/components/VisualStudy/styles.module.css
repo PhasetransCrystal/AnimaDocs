@@ -341,6 +341,18 @@
 .nightLimb .nightLimbHaze { stroke-opacity: 0.05; stroke-width: 10; }
 .nightLimb .nightLimbTicks { stroke-opacity: 0.22; }
 .nightLimb .nightLabel text { fill-opacity: 0.28; }
+/* free-v3 night furniture */
+.nightHatchLine { stroke: var(--anima-ink); stroke-opacity: 0.22; stroke-width: 1; }
+.hexChain path { fill: none; stroke: var(--anima-red-bright); stroke-opacity: 0.34; stroke-width: 1; }
+.hexChain .hexFill { opacity: 0.5; }
+.hexChain .nightLabel text { fill: var(--anima-red-bright); fill-opacity: 0.5; }
+.rangeArc path { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.2; stroke-width: 0.8; }
+.rangeArc .rangeTicks { stroke-opacity: 0.3; }
+.rangeArc .nightLabel text { fill-opacity: 0.38; }
+.telemetry .mosaicLight { fill: var(--anima-ink); fill-opacity: 0.08; }
+.telemetry .mosaicDark { fill: #000; fill-opacity: 0.32; }
+.telemetry .telemetryPlate { opacity: 0.7; }
+.telemetry .telemetryBars { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.35; stroke-width: 2; }
 
 /* Upper-right terraces: graphite (outer) to dark ember (inner). */
 /* Lowered contrast: the inner level stops at a muted ember so the disc

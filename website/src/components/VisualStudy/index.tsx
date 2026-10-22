@@ -251,6 +251,61 @@ const NIGHT_LINKS = (() => {
   return d;
 })();
 
+/* free-v3 night furniture (static, low opacity, no filters):
+ *  - HEX_CHAIN: a broken chain of pointy hex outlines in the empty field
+ *    below the satellite; some cells drop edges, two carry a hatched fill.
+ *  - RANGE_ARC: a graduated ranging arc outside the tick ring (upper right).
+ *  - TELEMETRY: hatched plate + bar ticks under the FIG.01 caption.
+ *  - MOSAIC: a few dark/light pixel blocks above the caption. */
+const HEX_R = 30;
+const HEX_W = HEX_R * Math.sqrt(3);
+const HEX_CELLS: Array<{c: number; r: number; open?: number[]; fill?: boolean}> = [
+  {c: 0, r: 0, open: [4]},
+  {c: 1, r: 0, fill: true},
+  {c: 1, r: 1, open: [0, 1]},
+  {c: 2, r: 1},
+  {c: 3, r: 1, open: [2, 3, 4]},
+  {c: 2, r: 2, fill: true, open: [5]},
+  {c: 3, r: 2, open: [0, 1, 5]},
+];
+const HEX_ORIGIN = {x: 690, y: 404};
+const hexCorner = (cx: number, cy: number, k: number): [number, number] => {
+  const a = ((60 * k - 90) * Math.PI) / 180;
+  return [cx + HEX_R * Math.cos(a), cy + HEX_R * Math.sin(a)];
+};
+const HEX_CHAIN = HEX_CELLS.map(({c, r, open = [], fill = false}) => {
+  const cx = HEX_ORIGIN.x + c * HEX_W + (r % 2) * (HEX_W / 2);
+  const cy = HEX_ORIGIN.y + r * HEX_R * 1.5;
+  let edges = '';
+  for (let k = 0; k < 6; k += 1) {
+    if (open.includes(k)) continue;
+    const [ax, ay] = hexCorner(cx, cy, k);
+    const [bx, by] = hexCorner(cx, cy, k + 1);
+    edges += `M${ax.toFixed(1)} ${ay.toFixed(1)}L${bx.toFixed(1)} ${by.toFixed(1)}`;
+  }
+  const shape = Array.from({length: 6}, (_v, k) => hexCorner(cx, cy, k).map((n) => n.toFixed(1)).join(' ')).join(' ');
+  return {edges, shape, fill, key: `${c}-${r}`};
+});
+
+const RANGE = {r: 292, from: -64, to: -6};
+const RANGE_ARC = (() => {
+  const at = (deg: number, r: number) => {
+    const a = (deg * Math.PI) / 180;
+    return `${(FOCUS.x + r * Math.cos(a)).toFixed(1)} ${(FOCUS.y + r * Math.sin(a)).toFixed(1)}`;
+  };
+  let ticks = '';
+  for (let deg = RANGE.from; deg <= RANGE.to; deg += 2) {
+    const major = (deg - RANGE.from) % 10 === 0;
+    ticks += `M${at(deg, RANGE.r)}L${at(deg, RANGE.r + (major ? 10 : 4))}`;
+  }
+  return {arc: `M${at(RANGE.from, RANGE.r)}A${RANGE.r} ${RANGE.r} 0 0 1 ${at(RANGE.to, RANGE.r)}`, ticks};
+})();
+
+const NIGHT_MOSAIC: Array<[number, number, 'light' | 'dark']> = [
+  [560, 46, 'light'], [576, 46, 'dark'], [576, 62, 'light'], [592, 30, 'dark'], [608, 62, 'dark'], [624, 46, 'light'],
+];
+const TELEMETRY_BARS = [3, 7, 4, 9, 5, 2, 8, 6, 3, 10, 4, 7].map((h, i) => `M${696 + i * 5} 140V${140 - h}`).join('');
+
 /** Night layer ①: background grid plus the quiet furniture (fades in early). */
 function NightGrid(): ReactNode {
   return (
@@ -276,6 +331,22 @@ function NightGrid(): ReactNode {
         <path className={styles.nightLimbTicks} d={LIMB_TICKS} />
         <g className={styles.nightLabel}>
           <text x="742" y="566">LIMB / R 6,371 KM</text>
+        </g>
+      </g>
+      <defs>
+        <pattern id="vs-night-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <path d="M0 0V6" className={styles.nightHatchLine} />
+        </pattern>
+      </defs>
+      <g className={styles.hexChain}>
+        {HEX_CHAIN.map(({edges, shape, fill, key}) => (
+          <g key={key}>
+            {fill ? <polygon className={styles.hexFill} points={shape} fill="url(#vs-night-hatch)" /> : null}
+            <path d={edges} />
+          </g>
+        ))}
+        <g className={styles.nightLabel}>
+          <text x="700" y="364">SECTOR / N-07</text>
         </g>
       </g>
     </g>
@@ -349,6 +420,13 @@ function NightTicks(): ReactNode {
     <g>
       <line className={styles.crosshair} x1="520" y1={FOCUS.y} x2="1440" y2={FOCUS.y} />
       <line className={styles.crosshair} x1={FOCUS.x} y1="-240" x2={FOCUS.x} y2="560" />
+      <g className={styles.rangeArc}>
+        <path d={RANGE_ARC.arc} />
+        <path className={styles.rangeTicks} d={RANGE_ARC.ticks} />
+        <g className={styles.nightLabel}>
+          <text x="1272" y="62">RNG 292 / 4.6°</text>
+        </g>
+      </g>
 
       {/* Tick ring and state dot rotate together so the gap keeps its dot. */}
       <g className={styles.tickSpin}>
@@ -430,6 +508,13 @@ function NightMarks(): ReactNode {
           <path d={PLUS_MARKS.map(([x, y]) => `M${x - 5} ${y}H${x + 5}M${x} ${y - 5}V${y + 5}`).join('')} />
         </g>
 
+        <g className={styles.telemetry}>
+          {NIGHT_MOSAIC.map(([x, y, tone]) => (
+            <rect key={`${x}-${y}`} className={tone === 'light' ? styles.mosaicLight : styles.mosaicDark} x={x} y={y} width="16" height="16" />
+          ))}
+          <rect className={styles.telemetryPlate} x="560" y="126" width="124" height="10" fill="url(#vs-night-hatch)" />
+          <path className={styles.telemetryBars} d={TELEMETRY_BARS} />
+        </g>
         <g className={styles.nightLabel}>
           <text x="560" y="98">FIG.01 — OBSERVATION</text>
           <text x="560" y="114">GRID SYSTEMS ........ : 02</text>
