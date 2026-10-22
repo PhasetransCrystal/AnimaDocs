@@ -177,6 +177,31 @@
 /* Terrain contours in the open field under the paper plate. */
 .contours path { fill: none; stroke: var(--anima-line-strong); stroke-opacity: 0.16; stroke-width: 0.8; }
 .contours path[data-major] { stroke-opacity: 0.26; }
+/* Survey furniture (static). Labels knock their contour line out with a
+ * paper-coloured stroke painted under the glyphs. */
+.surveyDot { fill: var(--anima-line-strong); fill-opacity: 0.6; }
+.surveyHatchLine { stroke: var(--anima-blue); stroke-opacity: 0.45; stroke-width: 1.4; }
+.survey .surveyPlate { stroke: var(--anima-blue); stroke-opacity: 0.4; stroke-width: 0.8; }
+.survey .mosaicPaper { fill: var(--anima-surface); stroke: var(--anima-line); stroke-width: 0.8; }
+.survey .mosaicPale { fill: #e4ecf8; stroke: #b9cbe8; stroke-width: 0.8; }
+.survey .surveyLine { fill: none; stroke: var(--anima-ink-soft); stroke-dasharray: 2 4; stroke-opacity: 0.45; stroke-width: 0.8; }
+.survey .summit { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.55; stroke-width: 1; }
+.survey .surveyCross { fill: none; stroke: var(--anima-line-strong); stroke-opacity: 0.5; stroke-width: 1; }
+.survey text {
+  fill: var(--anima-ink-soft);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+.survey .surveyText { fill-opacity: 0.62; }
+.survey .contourHeight {
+  fill-opacity: 0.5;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  paint-order: stroke;
+  stroke: var(--anima-paper);
+  stroke-width: 4px;
+}
 
 .tileField {
   mask-image: linear-gradient(180deg, #000 55%, transparent 88%);
@@ -450,6 +475,8 @@
   .nightLabel { display: none; }
   /* The pad only lines up with the satellite on the desktop night plate. */
   .padArc { display: none; }
+  /* The open field sits right behind the stacked copy on phones. */
+  .survey { display: none; }
 }
 
 /* Pause hook: an ancestor with [data-art-paused] (the hero wrapper, set by

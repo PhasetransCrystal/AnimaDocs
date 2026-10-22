@@ -558,24 +558,24 @@ const RETICLE_PATH = [[-1, -1], [1, -1], [1, 1], [-1, 1]]
 /* Faint terrain contours in the open field under the paper plate, around
  * the pad. Deterministic: fixed harmonics per level, smoothed with
  * midpoint quadratics. One static path, no animation. */
-const DAY_CONTOURS = (() => {
-  const cx = 770;
-  const cy = 520;
+const SUMMIT = {x: 770, y: 520};
+/** Point on contour `level` at angle `a` (radians), viewBox units. */
+function contourPoint(level: number, a: number): [number, number] {
   const tilt = (-7 * Math.PI) / 180;
+  const base = 34 + level * 30;
+  const r = base * (1
+    + 0.16 * Math.sin(2 * a + 0.7 + level * 0.22)
+    + 0.09 * Math.sin(3 * a + 2.1 - level * 0.35)
+    + 0.04 * Math.sin(5 * a + level));
+  const x = Math.cos(a) * r * 1.35;
+  const y = Math.sin(a) * r * 0.82;
+  return [SUMMIT.x + x * Math.cos(tilt) - y * Math.sin(tilt), SUMMIT.y + x * Math.sin(tilt) + y * Math.cos(tilt)];
+}
+const DAY_CONTOURS = (() => {
   const levels: string[] = [];
   for (let level = 0; level < 6; level += 1) {
-    const base = 34 + level * 30;
     const pts: Array<[number, number]> = [];
-    for (let i = 0; i < 64; i += 1) {
-      const a = (i / 64) * Math.PI * 2;
-      const r = base * (1
-        + 0.16 * Math.sin(2 * a + 0.7 + level * 0.22)
-        + 0.09 * Math.sin(3 * a + 2.1 - level * 0.35)
-        + 0.04 * Math.sin(5 * a + level));
-      const x = Math.cos(a) * r * 1.35;
-      const y = Math.sin(a) * r * 0.82;
-      pts.push([cx + x * Math.cos(tilt) - y * Math.sin(tilt), cy + x * Math.sin(tilt) + y * Math.cos(tilt)]);
-    }
+    for (let i = 0; i < 64; i += 1) pts.push(contourPoint(level, (i / 64) * Math.PI * 2));
     const mid = (p: [number, number], q: [number, number]) => `${((p[0] + q[0]) / 2).toFixed(1)} ${((p[1] + q[1]) / 2).toFixed(1)}`;
     let d = `M${mid(pts[pts.length - 1], pts[0])}`;
     pts.forEach((p, i) => {
@@ -585,6 +585,38 @@ const DAY_CONTOURS = (() => {
   }
   return levels;
 })();
+
+/* Survey furniture for the open field (static, part of the ocean layer):
+ * contour heights knocked out of their lines, a ranging line from the pad
+ * to the summit, a stepped block mosaic off the paper plate's corner, a
+ * halftone shading patch, a hatched sector plate and two large crosses. */
+const CONTOUR_HEIGHTS = [1, 3, 5].map((level) => {
+  const [x, y] = contourPoint(level, Math.PI - 0.22);
+  return {x: Math.round(x), y: Math.round(y), text: String(420 - level * 60)};
+});
+const SURVEY = (() => {
+  const dx = SUMMIT.x - PAD.x;
+  const dy = SUMMIT.y - PAD.y;
+  const len = Math.hypot(dx, dy);
+  const ux = dx / len;
+  const uy = dy / len;
+  const from = [PAD.x + ux * (PAD.r + 8), PAD.y + uy * (PAD.r + 8)];
+  const to = [SUMMIT.x - ux * 9, SUMMIT.y - uy * 9];
+  const mid = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
+  return {
+    d: `M${from[0].toFixed(1)} ${from[1].toFixed(1)}L${to[0].toFixed(1)} ${to[1].toFixed(1)}`,
+    // Label sits on the right of the line, reading downhill.
+    label: {x: mid[0] + uy * 9, y: mid[1] - ux * 9, angle: (Math.atan2(dy, dx) * 180) / Math.PI},
+  };
+})();
+const MOSAIC: Array<[number, number, 'paper' | 'pale']> = [
+  [668, 462, 'pale'],
+  [646, 462, 'paper'],
+  [646, 484, 'paper'],
+  [624, 484, 'pale'],
+  [624, 506, 'paper'],
+  [602, 528, 'paper'],
+];
 
 function toPoints(points: Array<[number, number]>): string {
   return points.map(([x, y]) => `${x},${y}`).join(' ');
@@ -758,6 +790,26 @@ function DayAtlas(): ReactNode {
         <mask id="vsDayLatticeMask">
           <rect fill="url(#vsDayLatticeFade)" height="560" width="1440" />
         </mask>
+        {/* Halftone shading for the survey patch (soft elliptical falloff). */}
+        <pattern id="vsDayDots" height="9" patternUnits="userSpaceOnUse" width="9">
+          <circle className={styles.surveyDot} cx="4.5" cy="4.5" r="0.85" />
+        </pattern>
+        <radialGradient
+          cx={SUMMIT.x + 60}
+          cy={SUMMIT.y + 40}
+          gradientTransform={`translate(${SUMMIT.x + 60} ${SUMMIT.y + 40}) scale(1.6 1) translate(${-(SUMMIT.x + 60)} ${-(SUMMIT.y + 40)})`}
+          gradientUnits="userSpaceOnUse"
+          id="vsDayDotsFade"
+          r="150">
+          <stop offset="0" stopColor="#fff" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </radialGradient>
+        <mask id="vsDayDotsMask">
+          <rect fill="url(#vsDayDotsFade)" height="340" width="560" x={SUMMIT.x - 220} y={SUMMIT.y - 130} />
+        </mask>
+        <pattern id="vsDayHatch" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse" width="6">
+          <path className={styles.surveyHatchLine} d="M0 0V6" />
+        </pattern>
       </defs>
       <g className={styles.washField} mask="url(#vsDayLatticeMask)">
         {washBlocks.map((block, index) => (
@@ -800,6 +852,33 @@ function DayAtlas(): ReactNode {
         {DAY_CONTOURS.map((d, level) => (
           <path d={d} key={level} data-major={level % 3 === 2 ? '' : undefined} />
         ))}
+      </g>
+      <g className={styles.survey}>
+        <rect fill="url(#vsDayDots)" height="340" mask="url(#vsDayDotsMask)" width="560" x={SUMMIT.x - 220} y={SUMMIT.y - 130} />
+        {MOSAIC.map(([x, y, tone]) => (
+          <rect className={tone === 'pale' ? styles.mosaicPale : styles.mosaicPaper} height="20" key={`${x}-${y}`} width="20" x={x} y={y} />
+        ))}
+        <path className={styles.surveyLine} d={SURVEY.d} />
+        <text
+          className={styles.surveyText}
+          transform={`translate(${SURVEY.label.x.toFixed(1)} ${SURVEY.label.y.toFixed(1)}) rotate(${SURVEY.label.angle.toFixed(1)})`}
+          textAnchor="middle">
+          R 2.6 KM · 052°
+        </text>
+        <path className={styles.summit} d={`M${SUMMIT.x} ${SUMMIT.y - 5}L${SUMMIT.x + 4.5} ${SUMMIT.y + 3}H${SUMMIT.x - 4.5}Z`} />
+        <text className={styles.surveyText} x={SUMMIT.x + 10} y={SUMMIT.y - 6}>
+          ▲ 480
+        </text>
+        {CONTOUR_HEIGHTS.map(({x, y, text}) => (
+          <text className={styles.contourHeight} key={text} x={x} y={y + 3} textAnchor="middle">
+            {text}
+          </text>
+        ))}
+        <rect className={styles.surveyPlate} fill="url(#vsDayHatch)" height="10" width="84" x="604" y="652" />
+        <text className={styles.surveyText} x="604" y="644">
+          SECTOR 04 / TERRAIN
+        </text>
+        <path className={styles.surveyCross} d="M556 454h18M565 445v18M876 668h18M885 659v18" />
       </g>
       <g className={styles.plateFrames}>
         <rect className={styles.plateFrameWash} x="718" y="84" width="520" height="300" transform="rotate(-7 978 234)" />
