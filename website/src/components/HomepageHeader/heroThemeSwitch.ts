@@ -423,6 +423,7 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       return [{at: t, opacity: 0}, {at: t, opacity: 1}];
     });
     tl.add(q('[data-night-labels]'), [{at: 950, opacity: 0}, {at: 1150, opacity: 1}]);
+    tl.add(q('[data-night-stars]'), [{at: 440, opacity: 0}, {at: 700, opacity: 1}]);
     tl.add(layer('n-core'), [{at: 1000, opacity: 0}, {at: 1250, opacity: 1}]);
 
     // Pad arc stand-in: holds until the clip edge reaches it, then shrinks
@@ -518,6 +519,7 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     // Night peels off in layers while the day clip spreads: labels, pixels,
     // red star, tick ring turning out; orbits and grid stay until covered.
     tl.add(q('[data-night-labels]'), [{at: 0, opacity: 1}, {at: 120, opacity: 0}]);
+    tl.add(q('[data-night-stars]'), [{at: 120, opacity: 1, easing: 'ease-in'}, {at: 360, opacity: 0}]);
     tl.each(art.querySelectorAll('[data-pixel-group]'), (i) => {
       const t = 60 + i * 50;
       return [{at: t, opacity: 1}, {at: t, opacity: 0}];

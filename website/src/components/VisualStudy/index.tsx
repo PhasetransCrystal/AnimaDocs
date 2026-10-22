@@ -141,21 +141,32 @@ export const NIGHT_PIXEL_GROUPS = 4;
 
 /* Quiet night furniture (static, no animation): a sparse seeded star field
  * kept clear of the red star, and a faint planet limb low in the plate with
- * a short graduated segment. All of it stays under ~0.3 opacity. */
+ * a short graduated segment. Stars peak at ~0.6, the limb stays under 0.3. */
+/* Jittered grid (one star per cell) so the field spreads evenly instead of
+ * clumping; cells on the red star, its tick ring and behind the directory
+ * panel are skipped. Every 7th star is a brighter one with a small cross. */
 const NIGHT_STARS = (() => {
   let seed = 20261023;
   const next = () => {
     seed = (seed * 1664525 + 1013904223) % 4294967296;
     return seed / 4294967296;
   };
-  const stars: Array<{x: number; y: number; r: number; o: number}> = [];
-  while (stars.length < 34) {
-    const x = 360 + next() * 1060;
-    const y = 16 + next() * 560;
-    const r = 0.6 + next() * 0.9;
-    const o = 0.12 + next() * 0.24;
-    if (Math.hypot(x - FOCUS.x, y - FOCUS.y) < 270) continue;
-    stars.push({x: Math.round(x), y: Math.round(y), r: Number(r.toFixed(1)), o: Number(o.toFixed(2))});
+  const stars: Array<{x: number; y: number; r: number; o: number; bright: boolean}> = [];
+  const cols = 10;
+  const rows = 6;
+  const cw = 1120 / cols;
+  const ch = 560 / rows;
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      const x = 300 + (col + 0.15 + next() * 0.7) * cw;
+      const y = 24 + (row + 0.15 + next() * 0.7) * ch;
+      const r = 0.9 + next() * 0.9;
+      const o = 0.3 + next() * 0.3;
+      if (Math.hypot(x - FOCUS.x, y - FOCUS.y) < TICK_R + 14) continue;
+      if (x > 880 && y > 400) continue;
+      const bright = stars.length % 7 === 3;
+      stars.push({x: Math.round(x), y: Math.round(y), r: Number(r.toFixed(1)), o: Number((bright ? 0.7 : o).toFixed(2)), bright});
+    }
   }
   return stars;
 })();
@@ -194,11 +205,6 @@ function NightGrid(): ReactNode {
         </pattern>
       </defs>
       <rect y="-240" width="1440" height="1140" fill="url(#vs-grid)" mask="url(#vs-grid-mask)" />
-      <g className={styles.nightStars}>
-        {NIGHT_STARS.map(({x, y, r, o}) => (
-          <circle key={`${x}-${y}`} cx={x} cy={y} r={r} fillOpacity={o} />
-        ))}
-      </g>
       <g className={styles.nightLimb}>
         <path d={LIMB_PATH} />
         <path className={styles.nightLimbHaze} d={LIMB_PATH} transform="translate(0 7)" />
@@ -313,6 +319,15 @@ function NightOrbits(): ReactNode {
 function NightMarks(): ReactNode {
   return (
     <g>
+      {/* Stars sit above the terraces/halo (they were buried in the grid layer). */}
+      <g className={styles.nightStars} data-night-stars="">
+        {NIGHT_STARS.map(({x, y, r, o, bright}) => (
+          <g key={`${x}-${y}`}>
+            <circle cx={x} cy={y} r={r} fillOpacity={o} />
+            {bright ? <path d={`M${x - 5} ${y}H${x + 5}M${x} ${y - 5}V${y + 5}`} /> : null}
+          </g>
+        ))}
+      </g>
       <g className={styles.pixels}>
         {Array.from({length: NIGHT_PIXEL_GROUPS}, (_v, group) => (
           <g key={group} data-pixel-group={group}>
@@ -851,16 +866,16 @@ const onRing = ([x, y]: Pt, r: number): Pt => {
 const inward = (...path: Pt[]): Pt[] => [...path, onRing(path[path.length - 1], PAD.r + 2)];
 const outward = (...path: Pt[]): Pt[] => [onRing(path[0], 8), ...path];
 const BLUE_LINKS: Connector[] = [
-  {points: inward([-470, -200])},
-  {points: inward([380, -170], [200, -170])},
-  {points: inward([560, 120])},
-  {points: inward([40, 300], [40, 150])},
+  {points: inward([-190, -90])},
+  {points: inward([170, -80], [95, -80])},
+  {points: inward([205, 40])},
+  {points: inward([24, 150], [24, 85])},
 ];
 const RED_LINKS: Connector[] = [
-  {points: outward([-330, -250]), end: 3.5},
-  {points: outward([110, -110], [110, -230]), end: 2.5},
-  {points: outward([620, 20]), end: 4.5},
-  {points: outward([120, 120], [330, 120]), end: 3},
+  {points: outward([-150, -115]), end: 3.5},
+  {points: outward([60, -60], [60, -120]), end: 2.5},
+  {points: outward([236, 10]), end: 4.5},
+  {points: outward([70, 70], [160, 70]), end: 3},
 ];
 /* Faint lines have their own directions and lengths; they are not copies
  * of the bold connectors. One does not pass through the star at all. They
@@ -868,18 +883,18 @@ const RED_LINKS: Connector[] = [
  * Tone decides the phase: blue only over day, red only over night, grey
  * spans the hand-over. */
 const FAINT_LINES: Array<{points: Pt[]; tone: 'grey' | 'blue' | 'red'}> = [
-  {points: outward([-520, 110]), tone: 'blue'},
-  {points: outward([-170, -260]), tone: 'grey'},
-  {points: outward([700, -130]), tone: 'blue'},
-  {points: [[-260, 50], [330, -270]], tone: 'grey'},
-  {points: outward([210, 400]), tone: 'red'},
-  {points: outward([430, 270]), tone: 'grey'},
+  {points: outward([-290, 60]), tone: 'blue'},
+  {points: outward([-130, -200]), tone: 'grey'},
+  {points: outward([320, -62]), tone: 'blue'},
+  {points: [[-150, 30], [180, -150]], tone: 'grey'},
+  {points: outward([120, 230]), tone: 'red'},
+  {points: outward([250, 160]), tone: 'grey'},
 ];
 /* Leader lines with a caption, one per direction, hung off an elbow end.
  * Short jog + modest run so they read as annotation, not as connectors. */
 const LEADERS = {
-  red: {points: [[110, -230], [128, -248], [292, -248]] as Pt[], text: 'ORBIT INSERTION / 799,000 KM'},
-  blue: {points: [[380, -170], [398, -188], [552, -188]] as Pt[], text: 'TOUCHDOWN / PAD-01 · 325 M'},
+  red: {points: [[60, -120], [78, -138], [242, -138]] as Pt[], text: 'ORBIT INSERTION / 799,000 KM'},
+  blue: {points: [[170, -80], [188, -98], [342, -98]] as Pt[], text: 'TOUCHDOWN / PAD-01 · 325 M'},
 };
 const pts = (list: Pt[]) => list.map(([x, y]) => `${x},${y}`).join(' ');
 
