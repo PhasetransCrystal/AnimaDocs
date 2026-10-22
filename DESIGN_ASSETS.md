@@ -6,7 +6,7 @@
 
 | 模式 | 视觉职责 | 主要颜色 | 几何与材质 | 优先使用的实现方式 |
 | --- | --- | --- | --- | --- |
-| 日间 | 索引、校准、拆解、路线 | 纸白、冷灰、钴蓝、石墨黑、旧金 | 直线分割、矩形块、有限切角、网格、清晰留白 | CSS 网格、边界线、SVG 图表，必要时使用信息图 |
+| 日间 | 索引、校准、拆解、路线 | 纸白、冷灰、钴蓝、石墨黑；强调标记用墨黑 | 直线分割、矩形块、有限切角、网格、清晰留白 | CSS 网格、边界线、SVG 图表，必要时使用信息图 |
 | 夜间 | 观测、生成、回放、状态 | 石墨黑、暖灰、朱红、暗红、低亮白 | 圆润面板、轨道/环线、柔和阴影、局部红色光源 | CSS 圆环、伪元素、SVG 轨迹，必要时使用环境图 |
 
 两种模式共用导航、侧栏、正文宽度、编号和交互语义。图片只承担环境、材质或真实对象的职责，不承担标题、导航或关键说明。
@@ -20,11 +20,11 @@
 | N-03 | 夜间 | `static/img/theme/night/workflow-object.webp` | 教程文章的可选导图或引导图 | 灰阶真实对象/设备局部，朱红只标出一个关键部位；圆润高光、轻微景深，不做赛博霓虹 | 4:3 或 3:2，WebP/AVIF，宽度 1200px 左右 |
 | N-04 | 夜间 | `static/img/theme/night/state-ring.svg` | 加载、处理中、完成状态的辅助图形 | 同心圆、短弧段和一个明确缺口；缺口表示状态变化，不能只用旋转动画传递信息 | SVG，必须同时有文字状态和 `prefers-reduced-motion` 静态版本 |
 | N-05 | 夜间 | `static/img/theme/night/grain-soft.png` | 仅用于大面积背景的轻微材质 | 很低对比度的胶片/纸面颗粒，不能压过正文、代码和表格 | 512px 平铺 PNG/WebP，透明度由 CSS 控制；没有素材时直接不用 |
-| D-01 | 日间 | `static/img/theme/day/index-grid.svg` | 首页阅读路径、文档章节封面 | 冷灰纸面、细黑网格、钴蓝方块和少量旧金编号；结构比纹理更重要 | SVG，网格线可缩放，文字不嵌入图像 |
-| D-02 | 日间 | `static/img/theme/day/route-map.svg` | 理论篇、工作流关系图 | 直线和折线连接节点，蓝色表示主路径，黑色表示结构，旧金表示注释/里程碑；避免伪造地理地图 | SVG，节点需有文本替代或旁路表格 |
+| D-01 | 日间 | `static/img/theme/day/index-grid.svg` | 首页阅读路径、文档章节封面 | 冷灰纸面、细黑网格、钴蓝方块和少量墨黑编号；结构比纹理更重要 | SVG，网格线可缩放，文字不嵌入图像 |
+| D-02 | 日间 | `static/img/theme/day/route-map.svg` | 理论篇、工作流关系图 | 直线和折线连接节点，蓝色表示主路径，黑色表示结构，墨黑小方块表示注释/里程碑；避免伪造地理地图 | SVG，节点需有文本替代或旁路表格 |
 | D-03 | 日间 | `static/img/theme/day/editorial-panels.webp` | 长文页或专题页顶部的可选引导图 | 纸白底、蓝黑矩形分栏、少量半透明叠层；像研究档案/编辑版面，不使用人物海报式大图 | 3:2 或 4:3，WebP，宽度 1400px 左右 |
-| D-04 | 日间 | `static/img/theme/day/calibration-detail.webp` | 参数、模型或节点教程中的真实对象图 | 冷灰/黑色硬件或界面局部，钴蓝高反差标注，旧金只做细节；保留可检查的真实内容 | 16:9，WebP/AVIF，提供原图裁切说明 |
-| D-05 | 日间 | `static/img/theme/day/number-seals.svg` | 章节编号、步骤徽记、列表状态 | 01/02/03 等大号数字、短横线和小型旧金标记；几何简单，能用 CSS 复现时优先 CSS | SVG 图标集，单图不超过 4KB |
+| D-04 | 日间 | `static/img/theme/day/calibration-detail.webp` | 参数、模型或节点教程中的真实对象图 | 冷灰/黑色硬件或界面局部，钴蓝高反差标注，墨黑只做细节；保留可检查的真实内容 | 16:9，WebP/AVIF，提供原图裁切说明 |
+| D-05 | 日间 | `static/img/theme/day/number-seals.svg` | 章节编号、步骤徽记、列表状态 | 01/02/03 等大号数字、短横线和小型墨黑标记；几何简单，能用 CSS 复现时优先 CSS | SVG 图标集，单图不超过 4KB |
 | S-01 | 共用 | `static/img/theme/shared/empty-state.svg` | 无数据、待补充、错误恢复状态 | 只用结构线和一个空缺节点表达“尚未建立”，不使用生成式插画或无意义占位人物 | SVG，必须配合可读文本和恢复操作 |
 
 ## CSS 优先替代方案
@@ -46,3 +46,37 @@
 ## 建议准备顺序
 
 先做 D-01、D-02、N-02、N-04 这四类可由 CSS/SVG 完成的结构素材；确认信息层级和模式切换稳定后，再评估 N-01、N-03、D-03、D-04 是否真的需要真实图片。这样不会让生成式或装饰性图片主导文档阅读体验。
+
+## 实现约定
+
+### 两层颜色
+
+- Token 层：`website/src/css/custom.css` 的 `:root` 与 `[data-theme='dark']` 定义 `--anima-*`。组件和美术样式只引用 token，不写新的颜色字面量。日间 `--anima-gold` 指向 `var(--anima-ink)`，强调标记读作墨黑；夜间保留黄铜 `#c5a26b`，琥珀 `#f2b35d` 只用于悬停和键盘焦点。
+- 美术适配层：`website/src/css/art-adapters.css` 把 token 映射到导航、侧栏、标题、代码、表格、提示块等共享材质，并放置主题切换规则。
+
+### 昼夜图版切换
+
+- 同一容器标 `data-theme-art`，内部两张图版分别标 `data-art-mode="day"` / `"night"`。非当前图版用 `display: none`，不用 `opacity: 0`，避免隐藏图版继续占用图层和动画。
+- 主题切换走 View Transition（`website/src/clientModules/themeTransition.ts`）：在 `startViewTransition` 的更新回调内加 `theme-vt` 类并重放切换按钮点击，让类名与主题属性共用一次样式计算；切换期间暂停美术动画、关闭过渡。
+- `::view-transition-new(root)` 使用自定义 `animaThemeFadeIn` 关键帧并设 `mix-blend-mode: normal`。Chrome 默认动画自带 plus-lighter 混合，会覆盖作者样式，导致画面过曝偏粉。
+- 不支持 View Transition 时回退到 `theme-transitioning`（520ms 颜色过渡，图版交叉淡化，图版内部动画停止）。`prefers-reduced-motion: reduce` 时两条路径都跳过。
+- 渐变颜色需要过渡时用 `@property` 注册颜色变量（如学习路线卡片的 `--route-surface` / `--route-wash`）。
+
+### 动效
+
+- 优先使用不触发图层爆炸的属性：`stroke-dashoffset`、`fill-opacity`。不要在 SVG 元素上逐个写 `opacity` 属性，也不要在 `mask-image` 区域内对元素使用 `transform` 属性；旋转等几何直接写进路径。
+- 重复元素合并为单条路径（刻度、地块层级、加号标记、裁剪路径）。
+- 首屏滚动时或滚出视口后，`useHeroPaging` 在 `.heroArt` 上设置 `data-art-paused`，动画暂停；滚动位移直接写在 `.heroArt` 的内联 `transform`，不通过根节点继承变量。
+- reduced-motion 下动画全部关闭，彗星轨迹隐藏。
+
+### 确定性与移动端
+
+- 生成内容固定 seed：颗粒纹理 `feTurbulence` seed 17，夜间滤镜 seed 7，日间色块 LCG seed 20260816。同一构建每次渲染一致，截图可以逐像素比较。
+- ≤640px 的夜间图版放大到 205% 并 `overflow: visible`，绘制图形上方的出血区域，而不是用渐隐遮掉边缘；裁切只发生在首屏外框。
+
+### 验证流程
+
+1. `website/` 下 `npx.cmd tsc --noEmit`，`npm.cmd run build` 输出 `[SUCCESS]`。
+2. 用生产构建预览检查；本机关闭了系统动画时 Chrome 会报告 reduced-motion，探针需模拟 `reducedMotion: 'no-preference'`。
+3. 视觉回归：暂停全部动画到固定时间点截图，与改动前逐像素比较，只接受抗锯齿级差异。
+4. 性能：4 倍 CPU 节流下记录图层数、样式重算、Layerize、长帧；切换主题和滚动后做 GC 前后的堆与监听器对比。

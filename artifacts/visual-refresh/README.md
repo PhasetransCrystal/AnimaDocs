@@ -86,7 +86,7 @@
 
 | 维度 | 日间 | 夜间 |
 | --- | --- | --- |
-| 色彩角色 | 保留纸白、钴蓝、墨黑、黄铜；蓝色用于制图及结构 | 保留石墨、朱红、暖灰；琥珀色用于悬停和键盘焦点 |
+| 色彩角色 | 保留纸白、钴蓝、墨黑；蓝色用于制图及结构，强调标记用墨黑（黄铜仅保留在夜间，2026-10-22 调整） | 保留石墨、朱红、暖灰；琥珀色用于悬停和键盘焦点 |
 | 几何 | 直角纸面、透视坐标、薄片叠层、定位标记 | 圆角主框、镜片截面、刻度环、椭圆轨道 |
 | 线条与材质 | 受控网格弯曲形成曲面；细线与实色底板分层 | 原创光学装置示意；暖灰线描、红色圆形焦点 |
 | 排版 | 大标题与等宽索引对比；取消过密的标题行叠压 | 同一语义骨架；强调暖白标题与红色信号 |
@@ -146,3 +146,9 @@ node artifacts/visual-refresh/verify.cjs
 - Passed workflow-art regression, paging regression, TypeScript checking and production build. Existing broken documentation anchor and update-check permission warnings remain unrelated.
 - Browser checks at 1920, 1024 and 320 pixels found no horizontal overflow, clipped nodes or decorative-log/card intersections. Switching to day mode shows only the day adapter.
 - Actual production preview: `workflow-art/night-knockout-1920.png`; DOM measurements: `workflow-art/knockout-report.json`.
+
+### 性能与主题切换整理 — 2026-10-22
+
+- `dec071c`：首屏滚轮监听只在翻页区间内绑定；滚动位移改为 `.heroArt` 内联 transform；`measure()` 先读后写；日间图版去掉逐元素 `opacity` 属性和 mask 下的 transform，重复元素合并为路径。4 倍 CPU 生产构建下：日间图层 38 → 7（45.9 → 26.1 MB），空闲 Layerize 408 → 约 50 ms，交互样式重算 501 → 约 326 ms，scrollend 强制重算 31.9 → 约 3 ms；10 次切换 + 10 次滚动后无泄漏。像素对比只有抗锯齿差异。
+- `6862f28`：日间 `--anima-gold` 改为 `var(--anima-ink)`，夜间黄铜不变。对比图在 `artifacts/hero-redesign/gold-preview/`。
+- 主题切换使用 View Transition，自定义关键帧避开 Chrome 默认的 plus-lighter 混合。实现约定见根目录 `DESIGN_ASSETS.md` 的「实现约定」。
