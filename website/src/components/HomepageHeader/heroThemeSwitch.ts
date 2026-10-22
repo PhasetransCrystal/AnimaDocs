@@ -61,8 +61,8 @@ class Timeline {
     this.anims.push(el.animate(frames, {duration: this.total, fill: 'both'}));
   }
 
-  each(list: ArrayLike<Element>, keys: (index: number) => Key[]): void {
-    for (let i = 0; i < list.length; i += 1) this.add(list[i], keys(i));
+  each(list: ArrayLike<Element>, keys: (index: number, el: Element) => Key[]): void {
+    for (let i = 0; i < list.length; i += 1) this.add(list[i], keys(i, list[i]));
   }
 
   cancel(): void {
@@ -108,13 +108,15 @@ function blink(start: number): Key[] {
 /* Clip curves, shared by the keyframes and the theme-flip timing. */
 const LAUNCH_CLIP = {from: 440, to: 840, curve: [0.7, 0, 0.85, 0.3]} as const;
 const LANDING_CLIP = {from: 390, to: 870, curve: [0.6, 0, 0.4, 1]} as const;
+/** Ignition shock ring (pad-local radius 18 -> 900 viewBox units). */
+const SHOCK = {from: 200, to: 620, curve: [0.15, 0.55, 0.35, 1], r0: 18, r1: 900} as const;
 const cssBezier = (c: readonly number[]) => `cubic-bezier(${c.join(',')})`;
 /** Half of the 200ms page colour transition: flip this early so the colour
  * change is half done when the clip edge crosses the title. */
 const FLIP_LEAD_MS = 100;
 
 /** Time at which an eased radius r0 -> r1 over [from, to] reaches `r`. */
-function timeAtRadius(r: number, r0: number, r1: number, seg: typeof LAUNCH_CLIP | typeof LANDING_CLIP): number {
+function timeAtRadius(r: number, r0: number, r1: number, seg: {from: number; to: number; curve: readonly number[]}): number {
   const [x1, y1, x2, y2] = seg.curve;
   const ease = bezier(x1, y1, x2, y2);
   const target = (r - r0) / (r1 - r0);
@@ -391,8 +393,10 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       {at: 150, opacity: 1, transform: 'scale(1)', transformOrigin: starOrigin, easing: 'ease-in'},
       {at: 480, opacity: 0, transform: 'scale(0.96)', transformOrigin: starOrigin},
     ]);
-    tl.each(tiles(), (i) => {
-      const t = 200 + i * 45;
+    // Tiles go as the ignition shock passes their distance band.
+    tl.each(tiles(), (_i, el) => {
+      const dist = Number((el as HTMLElement).dataset.tileDist ?? 0);
+      const t = Math.round(Math.max(SHOCK.from + 20, timeAtRadius(Math.max(dist, SHOCK.r0), SHOCK.r0, SHOCK.r1, SHOCK)));
       return [{at: t, opacity: 1}, {at: t, opacity: 0}];
     });
 
@@ -425,7 +429,10 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       return [{at: t, opacity: 0}, {at: t, opacity: 1}];
     });
     tl.add(q('[data-night-labels]'), [{at: 900, opacity: 0}, {at: 1100, opacity: 1}]);
-    tl.add(q('[data-night-stars]'), [{at: 440, opacity: 0}, {at: 700, opacity: 1}]);
+    tl.each(art.querySelectorAll('[data-star-group]'), (k) => [
+      {at: 440 + k * 110, opacity: 0, easing: 'ease-out'},
+      {at: 600 + k * 110, opacity: 1},
+    ]);
     tl.add(layer('n-core'), [{at: 950, opacity: 0}, {at: 1180, opacity: 1}]);
 
     // Pad arc stand-in: holds until the clip edge reaches it, then shrinks
@@ -503,10 +510,21 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       {at: 360, opacity: 1, transform: 'scale(1)', easing: 'ease-in'},
       {at: 460, opacity: 0, transform: 'scale(0.5)'},
     ]);
+    // Countdown: the 12 pad segments go out clockwise, then ignition.
+    tl.each(actors('count'), (i) => [
+      {at: 0, opacity: 1},
+      {at: 20 + i * 15, opacity: 1},
+      {at: 20 + i * 15, opacity: 0},
+    ]);
     tl.add(actors('ripple')[0], [
-      {at: 120, opacity: 0, transform: 'scale(0.3)'},
-      {at: 120, opacity: 0.8, transform: 'scale(0.3)', easing: 'cubic-bezier(.1,.6,.3,1)'},
-      {at: 520, opacity: 0, transform: 'scale(1.5)'},
+      {at: SHOCK.from, opacity: 0, transform: 'scale(0.3)'},
+      {at: SHOCK.from, opacity: 0.8, transform: 'scale(0.3)', easing: 'cubic-bezier(.1,.6,.3,1)'},
+      {at: 560, opacity: 0, transform: 'scale(1.5)'},
+    ]);
+    tl.add(actor('shock'), [
+      {at: SHOCK.from, opacity: 0, transform: `scale(${SHOCK.r0 / 60})`},
+      {at: SHOCK.from, opacity: 0.55, transform: `scale(${SHOCK.r0 / 60})`, easing: cssBezier(SHOCK.curve)},
+      {at: SHOCK.to, opacity: 0, transform: `scale(${SHOCK.r1 / 60})`},
     ]);
     // One full turn back to the satellite, then a slow fade onto the real
     // orbit underneath.
@@ -541,7 +559,10 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     // Night peels off in layers while the day clip spreads: labels, pixels,
     // red star, tick ring turning out; orbits and grid stay until covered.
     tl.add(q('[data-night-labels]'), [{at: 0, opacity: 1}, {at: 120, opacity: 0}]);
-    tl.add(q('[data-night-stars]'), [{at: 120, opacity: 1, easing: 'ease-in'}, {at: 360, opacity: 0}]);
+    tl.each(art.querySelectorAll('[data-star-group]'), (k) => [
+      {at: 120 + k * 80, opacity: 1, easing: 'ease-in'},
+      {at: 260 + k * 80, opacity: 0},
+    ]);
     tl.each(art.querySelectorAll('[data-pixel-group]'), (i) => {
       const t = 60 + i * 50;
       return [{at: t, opacity: 1}, {at: t, opacity: 0}];
@@ -563,9 +584,12 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     ]);
     tl.add(layer('d-lines'), [{at: 910, opacity: 0, easing: 'ease-out'}, {at: 1200, opacity: 1}]);
     tl.add(layer('d-guide'), [{at: 910, opacity: 0, easing: 'ease-out'}, {at: 1200, opacity: 1}]);
-    tl.each(tiles(), (i) => {
-      const t = 710 + i * 40;
-      return [{at: t, opacity: 0}, {at: t, opacity: 1}];
+    // Tiles land just behind the opening clip edge, near bands first.
+    tl.each(tiles(), (_i, el) => {
+      const dist = Number((el as HTMLElement).dataset.tileDist ?? 0) * g.s;
+      const t = dist <= rs ? LANDING_CLIP.from : timeAtRadius(Math.min(dist, full), rs, full, LANDING_CLIP);
+      const at = Math.round(Math.min(1150, t + 60));
+      return [{at, opacity: 0}, {at, opacity: 1}];
     });
 
     // White star goes paper-white and hands over to the clip.
@@ -642,6 +666,12 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       {at: 850, opacity: 0, transform: 'scale(1.8)', easing: EASE_POP},
       {at: 970, opacity: 1, transform: 'scale(1)'},
       ...blink(1050).map((k) => ({...k, transform: 'scale(1)'})),
+    ]);
+    // Touchdown confirm: the countdown ring fills back in, blinks out.
+    tl.each(actors('count'), (i) => [
+      {at: 860 + i * 12, opacity: 0},
+      {at: 860 + i * 12, opacity: 1},
+      ...blink(1050),
     ]);
     tl.each(actors('ripple'), (i) => {
       const t = 840 + i * 90;

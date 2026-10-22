@@ -170,6 +170,11 @@ const NIGHT_STARS = (() => {
   }
   return stars;
 })();
+/** Distance band from the launch pad (night satellite), 0 nearest. */
+const starBand = ({x, y}: {x: number; y: number}) => {
+  const d = Math.hypot(x - 611.2, y - 310.8);
+  return d < 300 ? 0 : d < 560 ? 1 : 2;
+};
 const LIMB = {cx: 720, cy: 2300, r: 1720};
 const LIMB_PATH = `M0 ${(LIMB.cy - Math.sqrt(LIMB.r ** 2 - LIMB.cx ** 2)).toFixed(1)}A${LIMB.r} ${LIMB.r} 0 0 1 1440 ${(LIMB.cy - Math.sqrt(LIMB.r ** 2 - LIMB.cx ** 2)).toFixed(1)}`;
 const LIMB_TICKS = (() => {
@@ -386,11 +391,17 @@ function NightMarks(): ReactNode {
     <g>
       {/* Stars sit above the terraces/halo (they were buried in the grid layer). */}
       <g className={styles.nightStars} data-night-stars="">
-        <path className={styles.nightLinks} d={NIGHT_LINKS} />
-        {NIGHT_STARS.map(({x, y, r, o, bright}) => (
-          <g key={`${x}-${y}`}>
-            <circle cx={x} cy={y} r={r} fillOpacity={o} />
-            {bright ? <path d={`M${x - 5} ${y}H${x + 5}M${x} ${y - 5}V${y + 5}`} /> : null}
+        {/* Three distance bands from the pad: stars come on as an outward
+            wave during launch and go out near-first under the day clip. */}
+        {[0, 1, 2].map((band) => (
+          <g data-star-group={band} key={band}>
+            {band === 2 ? <path className={styles.nightLinks} d={NIGHT_LINKS} /> : null}
+            {NIGHT_STARS.filter((star) => starBand(star) === band).map(({x, y, r, o, bright}) => (
+              <g key={`${x}-${y}`}>
+                <circle cx={x} cy={y} r={r} fillOpacity={o} />
+                {bright ? <path d={`M${x - 5} ${y}H${x + 5}M${x} ${y - 5}V${y + 5}`} /> : null}
+              </g>
+            ))}
           </g>
         ))}
       </g>
@@ -498,16 +509,36 @@ const dayTiles = buildDayTiles();
 
 export const DAY_TILE_GROUPS = 7;
 
-/* Deterministic split of the tiles into a few groups (LCG, fixed seed) so the
- * switch can toggle whole groups with steps() instead of animating ~80 tiles. */
-function groupTiles(tiles: DayTile[]): DayTile[][] {
-  const groups: DayTile[][] = Array.from({length: DAY_TILE_GROUPS}, () => []);
-  let seed = 20260816;
-  for (const tile of tiles) {
-    seed = (seed * 1664525 + 1013904223) % 4294967296;
-    groups[Math.floor((seed / 4294967296) * DAY_TILE_GROUPS)].push(tile);
+/* Deterministic split of the tiles into a few groups so the switch can toggle
+ * whole groups with steps() instead of animating ~80 tiles. Groups are bands
+ * of distance from the launch pad (seeded jitter keeps the band edges
+ * ragged), so the steps read as a wave: the ignition shock blows them away
+ * near-first, and they land back behind the opening day clip. */
+const TILE_PAD = {x: 611.2, y: 310.8};
+function tileCentre(d: string): [number, number] {
+  const nums = d.match(/-?\d+(\.\d+)?/g)?.map(Number) ?? [0, 0];
+  let x = 0;
+  let y = 0;
+  for (let i = 0; i < 8; i += 2) {
+    x += nums[i];
+    y += nums[i + 1];
   }
-  return groups;
+  return [x / 4, y / 4];
+}
+function groupTiles(tiles: DayTile[]): {tiles: DayTile[]; dist: number}[] {
+  let seed = 20260816;
+  const keyed = tiles.map((tile) => {
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    const [x, y] = tileCentre(tile.d);
+    return {tile, dist: Math.hypot(x - TILE_PAD.x, y - TILE_PAD.y) + (seed / 4294967296 - 0.5) * 90};
+  });
+  keyed.sort((a, b) => a.dist - b.dist);
+  const per = Math.ceil(keyed.length / DAY_TILE_GROUPS);
+  return Array.from({length: DAY_TILE_GROUPS}, (_v, i) => {
+    const band = keyed.slice(i * per, (i + 1) * per);
+    // The band's leading edge: the wave reaches this distance first.
+    return {tiles: band.map((k) => k.tile), dist: Math.round(band.length ? band[0].dist : 0)};
+  });
 }
 
 const dayTileGroups = groupTiles(dayTiles);
@@ -550,6 +581,14 @@ const PAD_ARC_PATH = (() => {
   return `M${at(-55)}A${PAD.r} ${PAD.r} 0 1 1 ${at(-125)}`;
 })();
 const PAD_CROSS_PATH = 'M-10 0H-4M4 0H10M0 -10V-4M0 4V10';
+/** Countdown segments (actor only): 12 short arcs at r 54, clockwise from 12 o'clock. */
+const COUNT_SEGMENTS = Array.from({length: 12}, (_v, i) => {
+  const at = (deg: number) => {
+    const rad = ((deg - 90) * Math.PI) / 180;
+    return `${(Math.cos(rad) * 54).toFixed(2)} ${(Math.sin(rad) * 54).toFixed(2)}`;
+  };
+  return `M${at(i * 30 + 4)}A54 54 0 0 1 ${at(i * 30 + 26)}`;
+});
 /** Lock-on brackets around the pad (actor only). */
 const RETICLE_PATH = [[-1, -1], [1, -1], [1, 1], [-1, 1]]
   .map(([sx, sy]) => `M${sx * 30} ${sy * 20}V${sy * 30}H${sx * 20}`)
@@ -894,8 +933,8 @@ function DayTiles(): ReactNode {
   return (
     <g className={styles.tileField}>
       {dayTileGroups.map((group, groupIndex) => (
-        <g data-tile-group={groupIndex} key={groupIndex}>
-          {group.map((tile) => (
+        <g data-tile-group={groupIndex} data-tile-dist={group.dist} key={groupIndex}>
+          {group.tiles.map((tile) => (
             <path
               className={styles[`tile${tile.kind.charAt(0).toUpperCase()}${tile.kind.slice(1)}`]}
               d={tile.d}
@@ -1155,6 +1194,12 @@ function HeroActor(): ReactNode {
         <circle data-actor="ripple" className={styles.actorRipple} r="60" />
         <circle data-actor="ripple" className={styles.actorRipple} r="60" />
         <path data-actor="reticle" className={styles.actorReticle} d={RETICLE_PATH} />
+        {/* Ignition shock: one thin ring scaled far out (non-scaling stroke). */}
+        <circle data-actor="shock" className={styles.actorShock} r="60" />
+        {/* Countdown: 12 segments just outside the pad arc. */}
+        {COUNT_SEGMENTS.map((d) => (
+          <path data-actor="count" className={styles.actorCount} d={d} key={d} />
+        ))}
         <path data-actor="ring" className={styles.actorRing} d={PAD_ARC_PATH} />
         {FAINT_LINES.map(({points, tone, phase}, index) => (
           <polyline key={`f${index}`} data-actor="faint" data-tone={tone} data-phase={phase} className={styles.actorFaint} points={pts(points)} pathLength="1" />

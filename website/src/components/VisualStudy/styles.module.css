@@ -121,6 +121,8 @@
 .actorTrace { fill: none; stroke: #e34549; stroke-dasharray: 1 1; stroke-linecap: round; stroke-width: 1.6; }
 .actorReticle { fill: none; stroke: #245dcc; stroke-width: 1.4; }
 .actorRipple { fill: none; stroke: #3474e8; stroke-width: 1.2; }
+.actorLayer .actorShock { fill: none; stroke: #3474e8; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.actorCount { fill: none; stroke: #245dcc; stroke-opacity: 0.7; stroke-width: 2.4; }
 .actorBlue { stroke: #3474e8; stroke-width: 1.2; }
 .actorSquare { fill: #f1f3f2; stroke: #245dcc; stroke-width: 1.4; }
 .actorRed { stroke: #ff5d5d; stroke-width: 1.4; }
