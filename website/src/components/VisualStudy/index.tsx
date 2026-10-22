@@ -201,8 +201,10 @@ function orbitArc(from: number, to: number): string {
   for (let i = 1; i <= steps; i += 1) d += `A${ORBIT.rx} ${ORBIT.ry} 0 0 1 ${orbitPt(from + ((to - from) * i) / steps)}`;
   return d;
 }
-/** Launch trace: the orbit is drawn out of the pad ahead of the night plate. */
-const ORBIT_TRACE_PATH = orbitArc(SAT_T, SAT_T + 240);
+/** Orbit trace: one full turn from the satellite. Launch draws it out of the
+ * pad; landing starts from it (it stands in for the real orbit) and winds it
+ * back into the satellite. */
+const ORBIT_TRACE_PATH = orbitArc(SAT_T, SAT_T + 360);
 /** Stepped trail behind the satellite (static night furniture). */
 const SAT_TRAIL = [
   {d: orbitArc(SAT_T - 10, SAT_T - 3), o: 0.55},
@@ -360,11 +362,11 @@ function NightOrbits(): ReactNode {
   return (
     <g>
       <g className={styles.orbits} transform={`rotate(-16 ${FOCUS.x} ${FOCUS.y})`}>
-        <ellipse cx={FOCUS.x} cy={FOCUS.y} rx="430" ry="112" />
+        <ellipse data-hero-orbit="" cx={FOCUS.x} cy={FOCUS.y} rx="430" ry="112" />
         <ellipse className={styles.orbitSoft} cx={FOCUS.x} cy={FOCUS.y} rx="560" ry="168" />
         <ellipse className={styles.orbitFaint} cx={FOCUS.x} cy={FOCUS.y} rx="300" ry="64" />
         {/* Short bright segments travelling along two orbits. */}
-        <ellipse className={styles.orbitComet} cx={FOCUS.x} cy={FOCUS.y} rx="430" ry="112" pathLength={1000} />
+        <ellipse data-hero-orbit="" className={styles.orbitComet} cx={FOCUS.x} cy={FOCUS.y} rx="430" ry="112" pathLength={1000} />
         <ellipse className={`${styles.orbitComet} ${styles.orbitCometSlow}`} cx={FOCUS.x} cy={FOCUS.y} rx="560" ry="168" pathLength={1000} />
         <g className={styles.satTrail}>
           {SAT_TRAIL.map(({d, o}) => (
