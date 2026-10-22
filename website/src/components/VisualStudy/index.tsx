@@ -853,9 +853,10 @@ export const HERO_ANCHORS = {
   pad: PAD,
 } as const;
 
-/* Actor connectors in pad-local coordinates (origin = white star). Most run
- * straight; a few take one elbow. Blue runs from a survey square in to the
- * pad ring; red runs from the star out to a mark. */
+/* Actor connectors in pad-local coordinates (origin = white star). Bold
+ * lines are straight and sit on a regular 120deg triad: blue on 210/330/90
+ * (survey squares in to the pad ring), red on the opposite triad 270/30/150
+ * (from the star out to a mark). Faint lines carry the elbows instead. */
 type Pt = [number, number];
 type Connector = {points: Pt[]; end?: number};
 /** Point at radius r along the direction of p (from the origin). */
@@ -863,38 +864,39 @@ const onRing = ([x, y]: Pt, r: number): Pt => {
   const k = r / Math.hypot(x, y);
   return [Number((x * k).toFixed(2)), Number((y * k).toFixed(2))];
 };
+/** Point at angle deg (SVG, clockwise from +x) and radius r. */
+const polarPt = (deg: number, r: number): Pt => {
+  const a = (deg * Math.PI) / 180;
+  return [Number((Math.cos(a) * r).toFixed(2)), Number((Math.sin(a) * r).toFixed(2))];
+};
 const inward = (...path: Pt[]): Pt[] => [...path, onRing(path[path.length - 1], PAD.r + 2)];
 const outward = (...path: Pt[]): Pt[] => [onRing(path[0], 8), ...path];
-const BLUE_LINKS: Connector[] = [
-  {points: inward([-190, -90])},
-  {points: inward([170, -80], [95, -80])},
-  {points: inward([205, 40])},
-  {points: inward([24, 150], [24, 85])},
-];
+const BLUE_LINKS: Connector[] = [210, 330, 90].map((deg) => ({points: inward(polarPt(deg, 214))}));
 const RED_LINKS: Connector[] = [
-  {points: outward([-150, -115]), end: 3.5},
-  {points: outward([60, -60], [60, -120]), end: 2.5},
-  {points: outward([236, 10]), end: 4.5},
-  {points: outward([70, 70], [160, 70]), end: 3},
+  {points: outward(polarPt(270, 200)), end: 2.5},
+  {points: outward(polarPt(30, 236)), end: 4.5},
+  {points: outward(polarPt(150, 150)), end: 3.5},
 ];
-/* Faint lines have their own directions and lengths; they are not copies
- * of the bold connectors. One does not pass through the star at all. They
- * run a little longer than the bold set but stop well short of the edges.
- * Tone decides the phase: blue only over day, red only over night, grey
- * spans the hand-over. */
-const FAINT_LINES: Array<{points: Pt[]; tone: 'grey' | 'blue' | 'red'}> = [
-  {points: outward([-290, 60]), tone: 'blue'},
-  {points: outward([-130, -200]), tone: 'grey'},
-  {points: outward([320, -62]), tone: 'blue'},
-  {points: [[-150, 30], [180, -150]], tone: 'grey'},
-  {points: outward([120, 230]), tone: 'red'},
-  {points: outward([250, 160]), tone: 'grey'},
+/* Faint lines have their own directions and lengths (a little longer than
+ * the bold set, well short of the edges); some take one elbow. Each belongs
+ * to a phase and draws together with that phase's bold set: "day" with the
+ * blue links, "night" with the red rays. One does not touch the star. */
+const FAINT_LINES: Array<{points: Pt[]; tone: 'grey' | 'blue' | 'red'; phase: 'day' | 'night'}> = [
+  {points: outward([-285, 50]), tone: 'blue', phase: 'day'},
+  {points: outward([-60, -150], [-60, -270]), tone: 'grey', phase: 'day'},
+  {points: outward([150, 110], [300, 110]), tone: 'blue', phase: 'day'},
+  {points: outward([-106, 227]), tone: 'red', phase: 'night'},
+  {points: [[-150, 30], [180, -150]], tone: 'grey', phase: 'night'},
+  {points: outward([-170, -40], [-290, -40]), tone: 'red', phase: 'night'},
+  {points: outward([250, -60], [250, -200]), tone: 'grey', phase: 'night'},
 ];
-/* Leader lines with a caption, one per direction, hung off an elbow end.
- * Short jog + modest run so they read as annotation, not as connectors. */
+/* Leader lines with a caption, one per direction: red hangs off the top
+ * ray's mark, blue off the upper-right survey square. */
+const RED_TOP = polarPt(270, 200);
+const BLUE_UR = polarPt(330, 214);
 const LEADERS = {
-  red: {points: [[60, -120], [78, -138], [242, -138]] as Pt[], text: 'ORBIT INSERTION / 799,000 KM'},
-  blue: {points: [[170, -80], [188, -98], [342, -98]] as Pt[], text: 'TOUCHDOWN / PAD-01 · 325 M'},
+  red: {points: [RED_TOP, [RED_TOP[0] + 18, RED_TOP[1] - 18], [RED_TOP[0] + 182, RED_TOP[1] - 18]] as Pt[], text: 'ORBIT INSERTION / 799,000 KM'},
+  blue: {points: [BLUE_UR, [BLUE_UR[0] + 18, BLUE_UR[1] - 18], [BLUE_UR[0] + 172, BLUE_UR[1] - 18]] as Pt[], text: 'TOUCHDOWN / PAD-01 · 325 M'},
 };
 const pts = (list: Pt[]) => list.map(([x, y]) => `${x},${y}`).join(' ');
 
@@ -990,8 +992,8 @@ function HeroActor(): ReactNode {
       {/* Fixed on the pad / white star: nothing travels, so the rig is static. */}
       <g data-actor="rig" transform={`translate(${PAD.x} ${PAD.y})`}>
         <path data-actor="ring" className={styles.actorRing} d={PAD_ARC_PATH} />
-        {FAINT_LINES.map(({points, tone}, index) => (
-          <polyline key={`f${index}`} data-actor="faint" data-tone={tone} className={styles.actorFaint} points={pts(points)} pathLength="1" />
+        {FAINT_LINES.map(({points, tone, phase}, index) => (
+          <polyline key={`f${index}`} data-actor="faint" data-tone={tone} data-phase={phase} className={styles.actorFaint} points={pts(points)} pathLength="1" />
         ))}
         {BLUE_LINKS.map(({points}, index) => (
           <g key={`b${index}`}>

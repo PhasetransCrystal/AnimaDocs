@@ -363,11 +363,11 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
   };
 
   /* Faint connectors grouped by tone; k is the index within that tone. */
-  const eachFaint = (tl: Timeline, keys: Record<'blue' | 'grey' | 'red', (k: number) => Key[]>) => {
-    const seen = {blue: 0, grey: 0, red: 0};
+  const eachFaint = (tl: Timeline, keys: Record<'day' | 'night', (k: number) => Key[]>) => {
+    const seen = {day: 0, night: 0};
     actors('faint').forEach((el) => {
-      const tone = ((el as SVGElement).dataset.tone ?? 'grey') as keyof typeof seen;
-      tl.add(el, keys[tone](seen[tone]++));
+      const phase = ((el as SVGElement).dataset.phase ?? 'day') as keyof typeof seen;
+      tl.add(el, keys[phase](seen[phase]++));
     });
   };
 
@@ -449,12 +449,11 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       [440, 0, 'ease-in'],
       [600, -1],
     ]));
-    // Faint lines: own rhythm, phased by tone so blue never shows over the
-    // night and red never over the day; grey spans the hand-over.
+    // Faint lines draw with their phase's bold set: day ones with the blue
+    // links (gone before the night shows), night ones with the red rays.
     eachFaint(tl, {
-      blue: (k) => strokeKeys([[40 + k * 50, 1, 'ease-out'], [300 + k * 50, 0]], 400 + k * 30),
-      grey: (k) => strokeKeys([[80 + k * 50, 1, 'ease-out'], [440 + k * 50, 0]], 760 + k * 40),
-      red: (k) => strokeKeys([[700 + k * 40, 1, 'ease-out'], [960 + k * 40, 0]], 1120),
+      day: (k) => strokeKeys([[30 + k * 45, 1, 'ease-out'], [260 + k * 45, 0]], 420 + k * 30),
+      night: (k) => strokeKeys([[560 + k * 40, 1, 'ease-out'], [900 + k * 40, 0]], 1120 + k * 20),
     });
 
     // Red rays: elbows out from the star, decelerate to their marks.
@@ -577,12 +576,11 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       {at: 240 + i * 15, opacity: 1},
       {at: 260 + i * 15, opacity: 0},
     ]);
-    // Faint lines phased by tone: red only while the night is up, blue only
-    // once the day is spreading, grey in between.
+    // Faint lines draw with their phase's bold set: night ones converge with
+    // the red rays, day ones grow out with the blue links.
     eachFaint(tl, {
-      red: (k) => strokeKeys([[k * 30, -1, 'ease-out'], [180 + k * 30, 0]], 240),
-      grey: (k) => strokeKeys([[80 + k * 40, 1, 'ease-out'], [400 + k * 40, 0]], 700 + k * 30),
-      blue: (k) => strokeKeys([[420 + k * 50, 1, 'ease-out'], [640 + k * 50, 0]], 860 + k * 30),
+      night: (k) => strokeKeys([[k * 25, -1, 'ease-out'], [200 + k * 25, 0]], 260 + k * 15),
+      day: (k) => strokeKeys([[300 + k * 40, 1, 'ease-out'], [520 + k * 40, 0]], 760 + k * 30),
     });
     tl.each(actors('blue-line'), (i) => [
       ...strokeKeys([[280 + i * 30, -1, 'ease-out'], [500 + i * 30, 0]]).slice(0, -1),
