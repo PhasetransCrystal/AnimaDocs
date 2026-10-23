@@ -252,39 +252,34 @@ const NIGHT_LINKS = (() => {
 })();
 
 /* free-v3 night furniture (static, low opacity, no filters):
- *  - NIGHT_SCATTER: connected grey cells in the empty field below the satellite.
+ *  - CRAFT_LINK: a craft marker tied to a limb ground station by a dashed line.
  *  - RANGE_ARC: a graduated ranging arc outside the tick ring (upper right).
  *  - TELEMETRY: hatched plate + bar ticks under the FIG.01 caption.
  *  - MOSAIC: a few dark/light pixel blocks above the caption. */
-/* Connected scatter of grey cells in the empty field below the satellite:
- * a seeded 4-neighbour random walk on a 16px grid, so the blocks always
- * touch edge to edge, echoing the pixel mosaic above FIG.01. */
-const SCATTER = {x: 672, y: 392, cols: 12, rows: 8, cell: 16, steps: 26};
-const NIGHT_SCATTER = (() => {
-  let seed = 20261024;
-  const rand = () => {
-    seed = (seed * 1664525 + 1013904223) % 4294967296;
-    return seed / 4294967296;
+/* A craft marker in the empty field below the satellite, tied back to a
+ * ground station on the limb by a dashed slant-range line (the night twin
+ * of the day survey line). One link only: it reads as position telemetry,
+ * not as another network. */
+const CRAFT = {x: 820, y: 440};
+const CRAFT_LINK = (() => {
+  const a = (-92 * Math.PI) / 180;
+  const station = {x: LIMB.cx + LIMB.r * Math.cos(a), y: LIMB.cy + LIMB.r * Math.sin(a)};
+  const dx = CRAFT.x - station.x;
+  const dy = CRAFT.y - station.y;
+  const len = Math.hypot(dx, dy);
+  const ux = dx / len;
+  const uy = dy / len;
+  const from = [station.x + ux * 6, station.y + uy * 6];
+  const to = [CRAFT.x - ux * 10, CRAFT.y - uy * 10];
+  const mid = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
+  return {
+    station,
+    d: `M${from[0].toFixed(1)} ${from[1].toFixed(1)}L${to[0].toFixed(1)} ${to[1].toFixed(1)}`,
+    // Label rides above the line, reading uphill toward the craft.
+    label: {x: mid[0] + uy * 9, y: mid[1] - ux * 9, angle: (Math.atan2(dy, dx) * 180) / Math.PI},
   };
-  const seen = new Set<string>();
-  const cells: Array<{x: number; y: number; tone: number}> = [];
-  let c = 2;
-  let r = 5;
-  // Right-biased 4-neighbour steps keep the walk drifting across the field.
-  const dirs = [[1, 0], [0, -1], [1, 0], [0, 1], [-1, 0]];
-  for (let i = 0; i < SCATTER.steps; i += 1) {
-    const key = `${c},${r}`;
-    if (!seen.has(key)) {
-      seen.add(key);
-      const v = rand();
-      cells.push({x: SCATTER.x + c * SCATTER.cell, y: SCATTER.y + r * SCATTER.cell, tone: v < 0.5 ? 0 : v < 0.82 ? 1 : 2});
-    }
-    const [dc, dr] = dirs[Math.floor(rand() * dirs.length)];
-    c = Math.min(SCATTER.cols - 1, Math.max(0, c + dc));
-    r = Math.min(SCATTER.rows - 1, Math.max(0, r + dr));
-  }
-  return cells;
-})();const RANGE = {r: 292, from: -64, to: -6};
+})();
+const RANGE = {r: 292, from: -64, to: -6};
 const RANGE_ARC = (() => {
   const at = (deg: number, r: number) => {
     const a = (deg * Math.PI) / 180;
@@ -335,10 +330,30 @@ function NightGrid(): ReactNode {
           <path d="M0 0V6" className={styles.nightHatchLine} />
         </pattern>
       </defs>
-      <g className={styles.nightScatter}>
-        {NIGHT_SCATTER.map((cell) => (
-          <rect className={styles[`scatter${cell.tone}`]} height="16" key={`${cell.x}-${cell.y}`} width="16" x={cell.x} y={cell.y} />
-        ))}
+      <g className={styles.craftLink}>
+        <path className={styles.craftLine} d={CRAFT_LINK.d} />
+        <path
+          className={styles.craftStation}
+          d={`M${(CRAFT_LINK.station.x - 4).toFixed(1)} ${CRAFT_LINK.station.y.toFixed(1)}h8`}
+        />
+        {/* Craft marker: a small diamond inside open corner brackets. */}
+        <path
+          className={styles.craftMark}
+          d={`M${CRAFT.x} ${CRAFT.y - 3.5}L${CRAFT.x + 3.5} ${CRAFT.y}L${CRAFT.x} ${CRAFT.y + 3.5}L${CRAFT.x - 3.5} ${CRAFT.y}Z`}
+        />
+        <path
+          className={styles.craftFrame}
+          d={`M${CRAFT.x - 8} ${CRAFT.y - 4}V${CRAFT.y - 8}H${CRAFT.x - 4}M${CRAFT.x + 4} ${CRAFT.y - 8}H${CRAFT.x + 8}V${CRAFT.y - 4}M${CRAFT.x + 8} ${CRAFT.y + 4}V${CRAFT.y + 8}H${CRAFT.x + 4}M${CRAFT.x - 4} ${CRAFT.y + 8}H${CRAFT.x - 8}V${CRAFT.y + 4}`}
+        />
+        <g className={styles.nightLabel}>
+          <text
+            textAnchor="middle"
+            transform={`translate(${CRAFT_LINK.label.x.toFixed(1)} ${CRAFT_LINK.label.y.toFixed(1)}) rotate(${CRAFT_LINK.label.angle.toFixed(1)})`}
+          >
+            SLANT 1,240 KM · 41°
+          </text>
+          <text x={CRAFT.x + 14} y={CRAFT.y - 6}>AN-02</text>
+        </g>
       </g>
     </g>
   );
