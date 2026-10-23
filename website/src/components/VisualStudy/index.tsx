@@ -252,39 +252,39 @@ const NIGHT_LINKS = (() => {
 })();
 
 /* free-v3 night furniture (static, low opacity, no filters):
- *  - GROUND_TRACK: a small ground-track inset in the empty field below the
- *    satellite: corner brackets, latitude ticks, the current pass (solid)
- *    and the previous one (dashed), with a red marker on the current pass.
+ *  - NIGHT_SCATTER: connected grey cells in the empty field below the satellite.
  *  - RANGE_ARC: a graduated ranging arc outside the tick ring (upper right).
  *  - TELEMETRY: hatched plate + bar ticks under the FIG.01 caption.
  *  - MOSAIC: a few dark/light pixel blocks above the caption. */
-const TRACK = {x: 664, y: 392, w: 200, h: 128};
-const GROUND_TRACK = (() => {
-  const {x, y, w, h} = TRACK;
-  const cy = y + h / 2;
-  const wave = (phase: number) => {
-    let d = '';
-    for (let i = 0; i <= 40; i += 1) {
-      const px = x + (w * i) / 40;
-      const py = cy - Math.sin((i / 40) * Math.PI * 2 + phase) * h * 0.34;
-      d += `${i ? 'L' : 'M'}${px.toFixed(1)} ${py.toFixed(1)}`;
-    }
-    return d;
+/* Connected scatter of grey cells in the empty field below the satellite:
+ * a seeded 4-neighbour random walk on a 16px grid, so the blocks always
+ * touch edge to edge, echoing the pixel mosaic above FIG.01. */
+const SCATTER = {x: 672, y: 392, cols: 12, rows: 8, cell: 16, steps: 26};
+const NIGHT_SCATTER = (() => {
+  let seed = 20261024;
+  const rand = () => {
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    return seed / 4294967296;
   };
-  const c = 10;
-  const frame = `M${x} ${y + c}V${y}H${x + c}M${x + w - c} ${y}H${x + w}V${y + c}`
-    + `M${x + w} ${y + h - c}V${y + h}H${x + w - c}M${x + c} ${y + h}H${x}V${y + h - c}`;
-  let ticks = '';
-  for (let k = -3; k <= 3; k += 1) {
-    const ty = cy + (k * h) / 7;
-    ticks += `M${x} ${ty.toFixed(1)}H${x + (k === 0 ? 8 : 4)}`;
+  const seen = new Set<string>();
+  const cells: Array<{x: number; y: number; tone: number}> = [];
+  let c = 2;
+  let r = 5;
+  // Right-biased 4-neighbour steps keep the walk drifting across the field.
+  const dirs = [[1, 0], [0, -1], [1, 0], [0, 1], [-1, 0]];
+  for (let i = 0; i < SCATTER.steps; i += 1) {
+    const key = `${c},${r}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      const v = rand();
+      cells.push({x: SCATTER.x + c * SCATTER.cell, y: SCATTER.y + r * SCATTER.cell, tone: v < 0.5 ? 0 : v < 0.82 ? 1 : 2});
+    }
+    const [dc, dr] = dirs[Math.floor(rand() * dirs.length)];
+    c = Math.min(SCATTER.cols - 1, Math.max(0, c + dc));
+    r = Math.min(SCATTER.rows - 1, Math.max(0, r + dr));
   }
-  const equator = `M${x + 12} ${cy}H${x + w}`;
-  const markT = 0.62;
-  const mark = {x: x + w * markT, y: cy - Math.sin(markT * Math.PI * 2 + 0.4) * h * 0.34};
-  return {frame, ticks, equator, current: wave(0.4), previous: wave(1.55), mark};
-})();
-const RANGE = {r: 292, from: -64, to: -6};
+  return cells;
+})();const RANGE = {r: 292, from: -64, to: -6};
 const RANGE_ARC = (() => {
   const at = (deg: number, r: number) => {
     const a = (deg * Math.PI) / 180;
@@ -335,15 +335,10 @@ function NightGrid(): ReactNode {
           <path d="M0 0V6" className={styles.nightHatchLine} />
         </pattern>
       </defs>
-      <g className={styles.groundTrack}>
-        <path d={GROUND_TRACK.frame} />
-        <path className={styles.trackTicks} d={`${GROUND_TRACK.ticks}${GROUND_TRACK.equator}`} />
-        <path className={styles.trackPrev} d={GROUND_TRACK.previous} />
-        <path className={styles.trackPass} d={GROUND_TRACK.current} />
-        <rect className={styles.trackMark} height="5" width="5" x={(GROUND_TRACK.mark.x - 2.5).toFixed(1)} y={(GROUND_TRACK.mark.y - 2.5).toFixed(1)} />
-        <g className={styles.nightLabel}>
-          <text x={TRACK.x} y={TRACK.y - 8}>GROUND TRACK / REV 03</text>
-        </g>
+      <g className={styles.nightScatter}>
+        {NIGHT_SCATTER.map((cell) => (
+          <rect className={styles[`scatter${cell.tone}`]} height="16" key={`${cell.x}-${cell.y}`} width="16" x={cell.x} y={cell.y} />
+        ))}
       </g>
     </g>
   );

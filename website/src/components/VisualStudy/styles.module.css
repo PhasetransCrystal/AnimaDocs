@@ -342,12 +342,9 @@
 .nightLimb .nightLabel text { fill-opacity: 0.28; }
 /* free-v3 night furniture */
 .nightHatchLine { stroke: var(--anima-ink); stroke-opacity: 0.22; stroke-width: 1; }
-.groundTrack path { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.28; stroke-width: 0.9; }
-.groundTrack .trackTicks { stroke-opacity: 0.18; }
-.groundTrack .trackPrev { stroke-dasharray: 2 5; stroke-opacity: 0.2; }
-.groundTrack .trackPass { stroke: var(--anima-red-bright); stroke-opacity: 0.42; stroke-width: 1.1; }
-.groundTrack .trackMark { fill: var(--anima-red-bright); }
-.groundTrack .nightLabel text { fill-opacity: 0.4; }
+.nightScatter .scatter0 { fill: var(--anima-ink); fill-opacity: 0.05; }
+.nightScatter .scatter1 { fill: var(--anima-ink); fill-opacity: 0.09; }
+.nightScatter .scatter2 { fill: var(--anima-ink); fill-opacity: 0.14; }
 .rangeArc path { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.2; stroke-width: 0.8; }
 .rangeArc .rangeTicks { stroke-opacity: 0.3; }
 .rangeArc .nightLabel text { fill-opacity: 0.38; }
