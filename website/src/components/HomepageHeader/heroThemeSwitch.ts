@@ -510,12 +510,6 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       {at: 360, opacity: 1, transform: 'scale(1)', easing: 'ease-in'},
       {at: 460, opacity: 0, transform: 'scale(0.5)'},
     ]);
-    // Countdown: the 12 pad segments go out clockwise, then ignition.
-    tl.each(actors('count'), (i) => [
-      {at: 0, opacity: 1},
-      {at: 20 + i * 15, opacity: 1},
-      {at: 20 + i * 15, opacity: 0},
-    ]);
     tl.add(actors('ripple')[0], [
       {at: SHOCK.from, opacity: 0, transform: 'scale(0.3)'},
       {at: SHOCK.from, opacity: 0.8, transform: 'scale(0.3)', easing: 'cubic-bezier(.1,.6,.3,1)'},
@@ -666,12 +660,6 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       {at: 850, opacity: 0, transform: 'scale(1.8)', easing: EASE_POP},
       {at: 970, opacity: 1, transform: 'scale(1)'},
       ...blink(1050).map((k) => ({...k, transform: 'scale(1)'})),
-    ]);
-    // Touchdown confirm: the countdown ring fills back in, blinks out.
-    tl.each(actors('count'), (i) => [
-      {at: 860 + i * 12, opacity: 0},
-      {at: 860 + i * 12, opacity: 1},
-      ...blink(1050),
     ]);
     tl.each(actors('ripple'), (i) => {
       const t = 840 + i * 90;

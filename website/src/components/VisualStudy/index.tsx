@@ -252,41 +252,38 @@ const NIGHT_LINKS = (() => {
 })();
 
 /* free-v3 night furniture (static, low opacity, no filters):
- *  - HEX_CHAIN: a broken chain of pointy hex outlines in the empty field
- *    below the satellite; some cells drop edges, two carry a hatched fill.
+ *  - GROUND_TRACK: a small ground-track inset in the empty field below the
+ *    satellite: corner brackets, latitude ticks, the current pass (solid)
+ *    and the previous one (dashed), with a red marker on the current pass.
  *  - RANGE_ARC: a graduated ranging arc outside the tick ring (upper right).
  *  - TELEMETRY: hatched plate + bar ticks under the FIG.01 caption.
  *  - MOSAIC: a few dark/light pixel blocks above the caption. */
-const HEX_R = 30;
-const HEX_W = HEX_R * Math.sqrt(3);
-const HEX_CELLS: Array<{c: number; r: number; open?: number[]; fill?: boolean}> = [
-  {c: 0, r: 0, open: [4]},
-  {c: 1, r: 0, fill: true},
-  {c: 1, r: 1, open: [0, 1]},
-  {c: 2, r: 1},
-  {c: 3, r: 1, open: [2, 3, 4]},
-  {c: 2, r: 2, fill: true, open: [5]},
-  {c: 3, r: 2, open: [0, 1, 5]},
-];
-const HEX_ORIGIN = {x: 690, y: 404};
-const hexCorner = (cx: number, cy: number, k: number): [number, number] => {
-  const a = ((60 * k - 90) * Math.PI) / 180;
-  return [cx + HEX_R * Math.cos(a), cy + HEX_R * Math.sin(a)];
-};
-const HEX_CHAIN = HEX_CELLS.map(({c, r, open = [], fill = false}) => {
-  const cx = HEX_ORIGIN.x + c * HEX_W + (r % 2) * (HEX_W / 2);
-  const cy = HEX_ORIGIN.y + r * HEX_R * 1.5;
-  let edges = '';
-  for (let k = 0; k < 6; k += 1) {
-    if (open.includes(k)) continue;
-    const [ax, ay] = hexCorner(cx, cy, k);
-    const [bx, by] = hexCorner(cx, cy, k + 1);
-    edges += `M${ax.toFixed(1)} ${ay.toFixed(1)}L${bx.toFixed(1)} ${by.toFixed(1)}`;
+const TRACK = {x: 664, y: 392, w: 200, h: 128};
+const GROUND_TRACK = (() => {
+  const {x, y, w, h} = TRACK;
+  const cy = y + h / 2;
+  const wave = (phase: number) => {
+    let d = '';
+    for (let i = 0; i <= 40; i += 1) {
+      const px = x + (w * i) / 40;
+      const py = cy - Math.sin((i / 40) * Math.PI * 2 + phase) * h * 0.34;
+      d += `${i ? 'L' : 'M'}${px.toFixed(1)} ${py.toFixed(1)}`;
+    }
+    return d;
+  };
+  const c = 10;
+  const frame = `M${x} ${y + c}V${y}H${x + c}M${x + w - c} ${y}H${x + w}V${y + c}`
+    + `M${x + w} ${y + h - c}V${y + h}H${x + w - c}M${x + c} ${y + h}H${x}V${y + h - c}`;
+  let ticks = '';
+  for (let k = -3; k <= 3; k += 1) {
+    const ty = cy + (k * h) / 7;
+    ticks += `M${x} ${ty.toFixed(1)}H${x + (k === 0 ? 8 : 4)}`;
   }
-  const shape = Array.from({length: 6}, (_v, k) => hexCorner(cx, cy, k).map((n) => n.toFixed(1)).join(' ')).join(' ');
-  return {edges, shape, fill, key: `${c}-${r}`};
-});
-
+  const equator = `M${x + 12} ${cy}H${x + w}`;
+  const markT = 0.62;
+  const mark = {x: x + w * markT, y: cy - Math.sin(markT * Math.PI * 2 + 0.4) * h * 0.34};
+  return {frame, ticks, equator, current: wave(0.4), previous: wave(1.55), mark};
+})();
 const RANGE = {r: 292, from: -64, to: -6};
 const RANGE_ARC = (() => {
   const at = (deg: number, r: number) => {
@@ -338,15 +335,14 @@ function NightGrid(): ReactNode {
           <path d="M0 0V6" className={styles.nightHatchLine} />
         </pattern>
       </defs>
-      <g className={styles.hexChain}>
-        {HEX_CHAIN.map(({edges, shape, fill, key}) => (
-          <g key={key}>
-            {fill ? <polygon className={styles.hexFill} points={shape} fill="url(#vs-night-hatch)" /> : null}
-            <path d={edges} />
-          </g>
-        ))}
+      <g className={styles.groundTrack}>
+        <path d={GROUND_TRACK.frame} />
+        <path className={styles.trackTicks} d={`${GROUND_TRACK.ticks}${GROUND_TRACK.equator}`} />
+        <path className={styles.trackPrev} d={GROUND_TRACK.previous} />
+        <path className={styles.trackPass} d={GROUND_TRACK.current} />
+        <rect className={styles.trackMark} height="5" width="5" x={(GROUND_TRACK.mark.x - 2.5).toFixed(1)} y={(GROUND_TRACK.mark.y - 2.5).toFixed(1)} />
         <g className={styles.nightLabel}>
-          <text x="700" y="364">SECTOR / N-07</text>
+          <text x={TRACK.x} y={TRACK.y - 8}>GROUND TRACK / REV 03</text>
         </g>
       </g>
     </g>
@@ -666,14 +662,6 @@ const PAD_ARC_PATH = (() => {
   return `M${at(-55)}A${PAD.r} ${PAD.r} 0 1 1 ${at(-125)}`;
 })();
 const PAD_CROSS_PATH = 'M-10 0H-4M4 0H10M0 -10V-4M0 4V10';
-/** Countdown segments (actor only): 12 short arcs at r 54, clockwise from 12 o'clock. */
-const COUNT_SEGMENTS = Array.from({length: 12}, (_v, i) => {
-  const at = (deg: number) => {
-    const rad = ((deg - 90) * Math.PI) / 180;
-    return `${(Math.cos(rad) * 54).toFixed(2)} ${(Math.sin(rad) * 54).toFixed(2)}`;
-  };
-  return `M${at(i * 30 + 4)}A54 54 0 0 1 ${at(i * 30 + 26)}`;
-});
 /** Lock-on brackets around the pad (actor only). */
 const RETICLE_PATH = [[-1, -1], [1, -1], [1, 1], [-1, 1]]
   .map(([sx, sy]) => `M${sx * 30} ${sy * 20}V${sy * 30}H${sx * 20}`)
@@ -712,7 +700,7 @@ const DAY_CONTOURS = (() => {
 
 /* Survey furniture for the open field (static, part of the ocean layer):
  * contour heights knocked out of their lines, a ranging line from the pad
- * to the summit, a stepped block mosaic off the paper plate's corner, a
+ * to the summit, a stepped wireframe cell trail off the paper plate's corner, a
  * halftone shading patch, a hatched sector plate and two large crosses. */
 const CONTOUR_HEIGHTS = [1, 3, 5].map((level) => {
   const [x, y] = contourPoint(level, Math.PI - 0.22);
@@ -1161,13 +1149,13 @@ const RED_LINKS: Connector[] = [
 /* Faint lines have their own directions and lengths (a little longer than
  * the bold set, well short of the edges); some take one elbow. Each belongs
  * to a phase and draws together with that phase's bold set: "day" with the
- * blue links, "night" with the red rays. One does not touch the star. */
+ * blue links, "night" with the red rays. All of them start at the pad. */
 const FAINT_LINES: Array<{points: Pt[]; tone: 'grey' | 'blue' | 'red'; phase: 'day' | 'night'}> = [
   {points: outward([-285, 50]), tone: 'blue', phase: 'day'},
   {points: outward([-60, -150], [-60, -270]), tone: 'grey', phase: 'day'},
   {points: outward([150, 110], [300, 110]), tone: 'blue', phase: 'day'},
   {points: outward([-106, 227]), tone: 'red', phase: 'night'},
-  {points: [[-150, 30], [180, -150]], tone: 'grey', phase: 'night'},
+  {points: outward([60, 200], [60, 300]), tone: 'grey', phase: 'night'},
   {points: outward([-170, -40], [-290, -40]), tone: 'red', phase: 'night'},
   {points: outward([250, -60], [250, -200]), tone: 'grey', phase: 'night'},
 ];
@@ -1281,10 +1269,7 @@ function HeroActor(): ReactNode {
         <path data-actor="reticle" className={styles.actorReticle} d={RETICLE_PATH} />
         {/* Ignition shock: one thin ring scaled far out (non-scaling stroke). */}
         <circle data-actor="shock" className={styles.actorShock} r="60" />
-        {/* Countdown: 12 segments just outside the pad arc. */}
-        {COUNT_SEGMENTS.map((d) => (
-          <path data-actor="count" className={styles.actorCount} d={d} key={d} />
-        ))}
+
         <path data-actor="ring" className={styles.actorRing} d={PAD_ARC_PATH} />
         {FAINT_LINES.map(({points, tone, phase}, index) => (
           <polyline key={`f${index}`} data-actor="faint" data-tone={tone} data-phase={phase} className={styles.actorFaint} points={pts(points)} pathLength="1" />

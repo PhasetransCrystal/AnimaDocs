@@ -122,7 +122,6 @@
 .actorReticle { fill: none; stroke: #245dcc; stroke-width: 1.4; }
 .actorRipple { fill: none; stroke: #3474e8; stroke-width: 1.2; }
 .actorLayer .actorShock { fill: none; stroke: #3474e8; stroke-width: 1; vector-effect: non-scaling-stroke; }
-.actorCount { fill: none; stroke: #245dcc; stroke-opacity: 0.7; stroke-width: 2.4; }
 .actorBlue { stroke: #3474e8; stroke-width: 1.2; }
 .actorSquare { fill: #f1f3f2; stroke: #245dcc; stroke-width: 1.4; }
 .actorRed { stroke: #ff5d5d; stroke-width: 1.4; }
@@ -184,8 +183,8 @@
 .surveyDot { fill: var(--anima-line-strong); fill-opacity: 0.6; }
 .surveyHatchLine { stroke: var(--anima-blue); stroke-opacity: 0.45; stroke-width: 1.4; }
 .survey .surveyPlate { stroke: var(--anima-blue); stroke-opacity: 0.4; stroke-width: 0.8; }
-.survey .mosaicPaper { fill: var(--anima-surface); stroke: var(--anima-line); stroke-width: 0.8; }
-.survey .mosaicPale { fill: #e4ecf8; stroke: #b9cbe8; stroke-width: 0.8; }
+.survey .mosaicPaper { fill: none; stroke: var(--anima-line-strong); stroke-opacity: 0.3; stroke-width: 0.7; }
+.survey .mosaicPale { fill: none; stroke: var(--anima-blue); stroke-opacity: 0.28; stroke-width: 0.7; stroke-dasharray: 2 3; }
 .survey .surveyLine { fill: none; stroke: var(--anima-ink-soft); stroke-dasharray: 2 4; stroke-opacity: 0.45; stroke-width: 0.8; }
 .survey .summit { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.55; stroke-width: 1; }
 .survey .surveyCross { fill: none; stroke: var(--anima-line-strong); stroke-opacity: 0.5; stroke-width: 1; }
@@ -343,9 +342,12 @@
 .nightLimb .nightLabel text { fill-opacity: 0.28; }
 /* free-v3 night furniture */
 .nightHatchLine { stroke: var(--anima-ink); stroke-opacity: 0.22; stroke-width: 1; }
-.hexChain path { fill: none; stroke: var(--anima-red-bright); stroke-opacity: 0.34; stroke-width: 1; }
-.hexChain .hexFill { opacity: 0.5; }
-.hexChain .nightLabel text { fill: var(--anima-red-bright); fill-opacity: 0.5; }
+.groundTrack path { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.28; stroke-width: 0.9; }
+.groundTrack .trackTicks { stroke-opacity: 0.18; }
+.groundTrack .trackPrev { stroke-dasharray: 2 5; stroke-opacity: 0.2; }
+.groundTrack .trackPass { stroke: var(--anima-red-bright); stroke-opacity: 0.42; stroke-width: 1.1; }
+.groundTrack .trackMark { fill: var(--anima-red-bright); }
+.groundTrack .nightLabel text { fill-opacity: 0.4; }
 .rangeArc path { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.2; stroke-width: 0.8; }
 .rangeArc .rangeTicks { stroke-opacity: 0.3; }
 .rangeArc .nightLabel text { fill-opacity: 0.38; }
