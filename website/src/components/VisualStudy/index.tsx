@@ -252,28 +252,28 @@ const NIGHT_LINKS = (() => {
 })();
 
 /* free-v3 night furniture (static, low opacity, no filters):
- *  - CRAFT_LINK: a craft marker tied to a limb ground station by a dashed line.
+ *  - CRAFT_LINK: a craft marker tied to the white star by a dashed line.
  *  - RANGE_ARC: a graduated ranging arc outside the tick ring (upper right).
  *  - TELEMETRY: hatched plate + bar ticks under the FIG.01 caption.
  *  - MOSAIC: a few dark/light pixel blocks above the caption. */
-/* A craft marker in the empty field below the satellite, tied back to a
- * ground station on the limb by a dashed slant-range line (the night twin
- * of the day survey line). One link only: it reads as position telemetry,
- * not as another network. */
-const CRAFT = {x: 820, y: 440};
+/* A craft marker in the empty field below the satellite, tied back to the
+ * white star (the switch anchor, same point as PAD / HERO_ANCHORS.star) by a
+ * dashed slant-range line (the night twin of the day survey line). One link
+ * only: it reads as position telemetry, not as another network.
+ * The anchor is a literal because PAD is declared further down the module. */
+const CRAFT_ANCHOR = {x: 611.2, y: 310.8};
+const CRAFT = {x: 796, y: 500};
 const CRAFT_LINK = (() => {
-  const a = (-92 * Math.PI) / 180;
-  const station = {x: LIMB.cx + LIMB.r * Math.cos(a), y: LIMB.cy + LIMB.r * Math.sin(a)};
-  const dx = CRAFT.x - station.x;
-  const dy = CRAFT.y - station.y;
+  const dx = CRAFT.x - CRAFT_ANCHOR.x;
+  const dy = CRAFT.y - CRAFT_ANCHOR.y;
   const len = Math.hypot(dx, dy);
   const ux = dx / len;
   const uy = dy / len;
-  const from = [station.x + ux * 6, station.y + uy * 6];
-  const to = [CRAFT.x - ux * 10, CRAFT.y - uy * 10];
+  // Start outside the satellite's pulse ring (r13), stop at the brackets.
+  const from = [CRAFT_ANCHOR.x + ux * 20, CRAFT_ANCHOR.y + uy * 20];
+  const to = [CRAFT.x - ux * 12, CRAFT.y - uy * 12];
   const mid = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
   return {
-    station,
     d: `M${from[0].toFixed(1)} ${from[1].toFixed(1)}L${to[0].toFixed(1)} ${to[1].toFixed(1)}`,
     // Label rides above the line, reading uphill toward the craft.
     label: {x: mid[0] + uy * 9, y: mid[1] - ux * 9, angle: (Math.atan2(dy, dx) * 180) / Math.PI},
@@ -332,10 +332,6 @@ function NightGrid(): ReactNode {
       </defs>
       <g className={styles.craftLink}>
         <path className={styles.craftLine} d={CRAFT_LINK.d} />
-        <path
-          className={styles.craftStation}
-          d={`M${(CRAFT_LINK.station.x - 4).toFixed(1)} ${CRAFT_LINK.station.y.toFixed(1)}h8`}
-        />
         {/* Craft marker: a small diamond inside open corner brackets. */}
         <path
           className={styles.craftMark}
@@ -350,7 +346,7 @@ function NightGrid(): ReactNode {
             textAnchor="middle"
             transform={`translate(${CRAFT_LINK.label.x.toFixed(1)} ${CRAFT_LINK.label.y.toFixed(1)}) rotate(${CRAFT_LINK.label.angle.toFixed(1)})`}
           >
-            SLANT 1,240 KM · 41°
+            SLANT 1,240 KM · 46°
           </text>
           <text x={CRAFT.x + 14} y={CRAFT.y - 6}>AN-02</text>
         </g>

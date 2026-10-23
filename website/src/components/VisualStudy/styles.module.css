@@ -343,7 +343,6 @@
 /* free-v3 night furniture */
 .nightHatchLine { stroke: var(--anima-ink); stroke-opacity: 0.22; stroke-width: 1; }
 .craftLink .craftLine { fill: none; stroke: var(--anima-ink); stroke-dasharray: 2 4; stroke-opacity: 0.3; stroke-width: 0.8; }
-.craftLink .craftStation { stroke: var(--anima-ink); stroke-opacity: 0.35; stroke-width: 1; }
 .craftLink .craftMark { fill: var(--anima-red-bright); fill-opacity: 0.55; stroke: none; }
 .craftLink .craftFrame { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.4; stroke-width: 0.8; }
 .craftLink .nightLabel text { fill-opacity: 0.34; }
