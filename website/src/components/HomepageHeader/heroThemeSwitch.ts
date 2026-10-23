@@ -3,7 +3,7 @@
  * Mobile (≤640px): View Transition circle reveal from the top centre.
  * Every animation is cancelled at the end, so the static plate is the end
  * state and nothing has to be swapped back by hand. */
-import {AXIS_DECADE, HERO_ANCHORS} from '@site/src/components/VisualStudy';
+import {AXIS_DECADE, CRAFT, HERO_ANCHORS} from '@site/src/components/VisualStudy';
 import {heroSwitchState, setHeroSwitchHandler} from '@site/src/utils/heroSwitchHook';
 
 import {ALT_EASE, bezier, driveAltimeter} from './altimeterDriver';
@@ -38,6 +38,11 @@ const TOGGLE_SELECTOR = '[class*="colorModeToggle"] button';
 const EASE_IO = 'cubic-bezier(.65,0,.35,1)';
 const EASE_POP = 'cubic-bezier(.2,.8,.2,1)';
 const EASE_ACCEL = 'cubic-bezier(.55,0,1,.45)';
+
+/** Craft link pivots (viewBox units; night SVG elements use transform-box: view-box).
+ * The slant line scales about the white star, the marker about itself. */
+const CRAFT_ORIGIN = `${HERO_ANCHORS.star.x}px ${HERO_ANCHORS.star.y}px`;
+const CRAFT_MARK_ORIGIN = `${CRAFT.x}px ${CRAFT.y}px`;
 
 /** Shared clock: every animation spans the whole switch so offsets line up. */
 class Timeline {
@@ -429,6 +434,16 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       return [{at: t, opacity: 0}, {at: t, opacity: 1}];
     });
     tl.add(q('[data-night-labels]'), [{at: 900, opacity: 0}, {at: 1100, opacity: 1}]);
+    // Craft link: once the white star has settled, the dashed slant line
+    // grows out of it toward the craft, then the marker locks on.
+    tl.add(q('[data-craft-line]'), [
+      {at: 880, opacity: 0, transform: 'scale(0)', transformOrigin: CRAFT_ORIGIN, easing: 'cubic-bezier(.2,.7,.3,1)'},
+      {at: 1100, opacity: 1, transform: 'scale(1)', transformOrigin: CRAFT_ORIGIN},
+    ]);
+    tl.add(q('[data-craft-mark]'), [
+      {at: 1060, opacity: 0, transform: 'scale(1.6)', transformOrigin: CRAFT_MARK_ORIGIN, easing: EASE_POP},
+      {at: 1160, opacity: 1, transform: 'scale(1)', transformOrigin: CRAFT_MARK_ORIGIN},
+    ]);
     tl.each(art.querySelectorAll('[data-star-group]'), (k) => [
       {at: 440 + k * 110, opacity: 0, easing: 'ease-out'},
       {at: 600 + k * 110, opacity: 1},
@@ -553,6 +568,16 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     // Night peels off in layers while the day clip spreads: labels, pixels,
     // red star, tick ring turning out; orbits and grid stay until covered.
     tl.add(q('[data-night-labels]'), [{at: 0, opacity: 1}, {at: 120, opacity: 0}]);
+    // Craft link reels back into the white star before the orbit rewinds.
+    tl.add(q('[data-craft-mark]'), [
+      {at: 0, opacity: 1, transform: 'scale(1)', transformOrigin: CRAFT_MARK_ORIGIN, easing: 'ease-in'},
+      {at: 100, opacity: 0, transform: 'scale(.6)', transformOrigin: CRAFT_MARK_ORIGIN},
+    ]);
+    tl.add(q('[data-craft-line]'), [
+      {at: 40, opacity: 1, transform: 'scale(1)', transformOrigin: CRAFT_ORIGIN, easing: 'cubic-bezier(.55,0,.75,.4)'},
+      {at: 300, opacity: 0.6, transform: 'scale(0)', transformOrigin: CRAFT_ORIGIN},
+      {at: 300, opacity: 0},
+    ]);
     tl.each(art.querySelectorAll('[data-star-group]'), (k) => [
       {at: 120 + k * 80, opacity: 1, easing: 'ease-in'},
       {at: 260 + k * 80, opacity: 0},

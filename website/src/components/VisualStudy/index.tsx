@@ -262,7 +262,7 @@ const NIGHT_LINKS = (() => {
  * only: it reads as position telemetry, not as another network.
  * The anchor is a literal because PAD is declared further down the module. */
 const CRAFT_ANCHOR = {x: 611.2, y: 310.8};
-const CRAFT = {x: 796, y: 500};
+export const CRAFT = {x: 796, y: 500};
 const CRAFT_LINK = (() => {
   const dx = CRAFT.x - CRAFT_ANCHOR.x;
   const dy = CRAFT.y - CRAFT_ANCHOR.y;
@@ -331,7 +331,8 @@ function NightGrid(): ReactNode {
         </pattern>
       </defs>
       <g className={styles.craftLink}>
-        <path className={styles.craftLine} d={CRAFT_LINK.d} />
+        <path className={styles.craftLine} d={CRAFT_LINK.d} data-craft-line="" />
+        <g data-craft-mark="">
         {/* Craft marker: a small diamond inside open corner brackets. */}
         <path
           className={styles.craftMark}
@@ -349,6 +350,7 @@ function NightGrid(): ReactNode {
             SLANT 1,240 KM · 46°
           </text>
           <text x={CRAFT.x + 14} y={CRAFT.y - 6}>AN-02</text>
+        </g>
         </g>
       </g>
     </g>
