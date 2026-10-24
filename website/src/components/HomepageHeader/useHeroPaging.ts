@@ -1,4 +1,5 @@
 import {useEffect, useRef} from 'react';
+import watchHeroArtLoad from './heroArtLite';
 
 export default function useHeroPaging() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -289,6 +290,8 @@ export default function useHeroPaging() {
       attributeFilter: ['data-theme', 'data-hero-switching'],
     });
     measure();
+    // Low-end GPUs get quantised art loops; see heroArtLite.ts.
+    const stopLiteProbe = watchHeroArtLoad(art, () => art.dataset.artPaused === undefined && !switching());
     window.addEventListener('resize', cancelMotion);
     window.addEventListener('scroll', onScroll, {passive: true});
     window.addEventListener('scrollend', onScrollEnd);
@@ -301,6 +304,7 @@ export default function useHeroPaging() {
     desktop.addEventListener('change', cancelMotion);
 
     return () => {
+      stopLiteProbe();
       observer.disconnect();
       window.cancelAnimationFrame(frame);
       window.cancelAnimationFrame(measureFrame);

@@ -507,6 +507,48 @@
   animation-play-state: paused !important;
 }
 
+/* Low-end tier: [data-art-lite] is set on the hero wrapper by
+ * HomepageHeader/heroArtLite.ts only when the idle hero measurably misses its
+ * frame rate. Each loop below re-rasters a full-viewport SVG layer per frame
+ * (SVG children cannot be composited), so the slow loops step at ~12 updates
+ * per second (comets ~20) instead of every frame. Path, amplitude and period
+ * are unchanged; the eased drifts keep their ease-in-out through sampled
+ * keyframes. pulse / flicker / nodeBlink are cheap and stay continuous. */
+@media (prefers-reduced-motion: no-preference) {
+  :global([data-art-lite]) .guideCircle { animation-timing-function: steps(1920); }
+  :global([data-art-lite]) .routeCrawl { animation-timing-function: steps(432); }
+  :global([data-art-lite]) .terraceDrift { animation-name: terraceDriftLite; animation-timing-function: steps(57); }
+  :global([data-art-lite]) .lensDrift { animation-name: lensDriftLite; animation-timing-function: steps(36); }
+  :global([data-art-lite]) .tickSpin { animation-timing-function: steps(2880); }
+  :global([data-art-lite]) .orbitComet { animation-timing-function: steps(440); }
+  :global([data-art-lite]) .orbitComet.orbitCometSlow { animation-timing-function: steps(680); }
+}
+
+/* terraceDrift / lensDrift with cubic-bezier(.42, 0, .58, 1) sampled into 8
+ * segments, so the stepped version keeps the ease-in-out pace. */
+@keyframes terraceDriftLite {
+  0% { transform: translate(0, 0); }
+  12.5% { transform: translate(-0.44px, 0.31px); }
+  25% { transform: translate(-1.81px, 1.29px); }
+  37.5% { transform: translate(-4.1px, 2.93px); }
+  50% { transform: translate(-7px, 5px); }
+  62.5% { transform: translate(-9.9px, 7.07px); }
+  75% { transform: translate(-12.19px, 8.71px); }
+  87.5% { transform: translate(-13.56px, 9.69px); }
+  100% { transform: translate(-14px, 10px); }
+}
+@keyframes lensDriftLite {
+  0% { transform: translate(0, 0); }
+  12.5% { transform: translate(-1.12px, 0.56px); }
+  25% { transform: translate(-4.65px, 2.32px); }
+  37.5% { transform: translate(-10.54px, 5.27px); }
+  50% { transform: translate(-18px, 9px); }
+  62.5% { transform: translate(-25.46px, 12.73px); }
+  75% { transform: translate(-31.35px, 15.68px); }
+  87.5% { transform: translate(-34.88px, 17.44px); }
+  100% { transform: translate(-36px, 18px); }
+}
+
 /* Fallbacks ---------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
