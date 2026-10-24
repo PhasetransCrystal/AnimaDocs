@@ -223,12 +223,21 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
   syncPlates();
 
   /** Swap a source SVG plate for its cached bitmap for this run. */
-  const usePlate = (run: Run, name: PlateName): HTMLElement | null => {
+  const usePlate = (run: Run, name: PlateName, incoming = true): HTMLElement | null => {
     const canvas = plates?.get(name) ?? null;
     const source = layer(name) as HTMLElement | null;
     if (!canvas || !source) return null;
     canvas.dataset.live = '';
     source.dataset.plated = '';
+    // The bitmap is baked at loop phase 0. CSS holds the hidden source's
+    // loops paused while plated; rewinding them here (priming may have run
+    // them) makes the live SVG resume exactly where the bitmap stands.
+    // Outgoing plates are only used for static layers, so they skip this.
+    if (incoming) {
+      for (const animation of source.getAnimations({subtree: true})) {
+        if (animation instanceof CSSAnimation) animation.currentTime = 0;
+      }
+    }
     run.stops.push(() => {
       delete canvas.dataset.live;
       delete source.dataset.plated;
@@ -237,8 +246,12 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
   };
 
   /* Day reveal circle. Full tier: clip-path on the day scene (unchanged).
-   * Lite: a rounded box tracks the same circle and the scene is
-   * counter-translated inside it; same geometry, timing and easing. */
+   * Lite: a rounded box tracks the same circle and the scene is offset
+   * inside it by the inverse amount; same geometry, timing and easing.
+   * Box and offset both animate left/top, so they are sampled on the same
+   * (main) thread every frame. A compositor transform on the scene would
+   * run ahead of the box during main-thread jank and slide the scene
+   * inside the circle. */
   type ClipKey = {at: number; r: number; easing?: string};
   const dayClip = (run: Run, lite: boolean, g: Geometry, [x, y]: Point, keys: ClipKey[]) => {
     const tl = run.timeline;
@@ -260,7 +273,7 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       at, easing,
       left: `${n(x - r)}px`, top: `${n(y - r)}px`, width: `${n(2 * r)}px`, height: `${n(2 * r)}px`,
     })));
-    tl.add(day, keys.map(({at, r, easing}) => ({at, easing, transform: `translate(${n(r - x)}px, ${n(r - y)}px)`})));
+    tl.add(day, keys.map(({at, r, easing}) => ({at, easing, left: `${n(r - x)}px`, top: `${n(r - y)}px`})));
   };
 
   /* Colour disc. Full tier: background-color tween (unchanged). Lite: the
@@ -510,7 +523,9 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     const focusOrigin = `${n(F[0])}px ${n(F[1])}px`;
 
     // Day scenery peels off as whole layers.
-    tl.add(layer('d-ocean'), [{at: 0, opacity: 1, easing: 'ease-out'}, {at: 200, opacity: 0}]);
+    // Lite: the static ocean leaves as its bitmap (no loops, so no phase jump).
+    const oceanOut = lite ? usePlate(run, 'd-ocean', false) : null;
+    tl.add(oceanOut ?? layer('d-ocean'), [{at: 0, opacity: 1, easing: 'ease-out'}, {at: 200, opacity: 0}]);
     tl.add(layer('d-guide'), [{at: 0, opacity: 1, easing: 'ease-out'}, {at: 180, opacity: 0}]);
     tl.add(layer('d-lines'), [
       {at: 150, opacity: 1, transform: 'scale(1)', transformOrigin: starOrigin, easing: 'ease-in'},
@@ -542,15 +557,17 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     const gridPlate = lite ? usePlate(run, 'n-grid') : null;
     const corePlate = lite ? usePlate(run, 'n-core') : null;
     const marksPlate = lite ? usePlate(run, 'n-marks') : null;
+    const ticksPlate = lite ? usePlate(run, 'n-ticks') : null;
+    const orbitsPlate = lite ? usePlate(run, 'n-orbits') : null;
 
     // Night builds up under the shrinking clip: grid, tick ring turning in,
     // orbits settling, pixels stepping on, labels, then the red star last.
     tl.add(gridPlate ?? layer('n-grid'), [{at: 440, opacity: 0}, {at: 700, opacity: 1}]);
-    tl.add(layer('n-ticks'), [
+    tl.add(ticksPlate ?? layer('n-ticks'), [
       {at: 520, opacity: 0, transform: 'rotate(-10deg)', transformOrigin: focusOrigin, easing: 'cubic-bezier(.2,.7,.3,1)'},
       {at: 920, opacity: 1, transform: 'rotate(0deg)', transformOrigin: focusOrigin},
     ]);
-    tl.add(layer('n-orbits'), [
+    tl.add(orbitsPlate ?? layer('n-orbits'), [
       {at: 600, opacity: 0, transform: 'scale(1.08)', transformOrigin: focusOrigin, easing: 'cubic-bezier(.2,.7,.3,1)'},
       {at: 980, opacity: 1, transform: 'scale(1)', transformOrigin: focusOrigin},
     ]);
@@ -695,6 +712,11 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     // Lite: incoming day background plates as cached bitmaps.
     const oceanPlate = lite ? usePlate(run, 'd-ocean') : null;
     const tilesPlate = lite ? usePlate(run, 'd-tiles') : null;
+    const linesPlate = lite ? usePlate(run, 'd-lines') : null;
+    const guidePlate = lite ? usePlate(run, 'd-guide') : null;
+    // Lite: the static outgoing grid holds as its bitmap until covered; its
+    // craft link stays live (plate-skip) for its own exit.
+    if (lite) usePlate(run, 'n-grid', false);
     colourDisc(run, lite, [
       {at: 350, opacity: 1, transform: disc(rs, S), backgroundColor: '#245dcc', easing: 'cubic-bezier(.4,0,.8,.5)'},
       {at: 750, opacity: 1, transform: disc(full, S), backgroundColor: '#e4ecf8'},
@@ -737,8 +759,8 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       {at: 910, opacity: 0, transform: 'translateY(4px)', easing: 'ease-out'},
       {at: 1200, opacity: 1, transform: 'translateY(0px)'},
     ]);
-    tl.add(layer('d-lines'), [{at: 910, opacity: 0, easing: 'ease-out'}, {at: 1200, opacity: 1}]);
-    tl.add(layer('d-guide'), [{at: 910, opacity: 0, easing: 'ease-out'}, {at: 1200, opacity: 1}]);
+    tl.add(linesPlate ?? layer('d-lines'), [{at: 910, opacity: 0, easing: 'ease-out'}, {at: 1200, opacity: 1}]);
+    tl.add(guidePlate ?? layer('d-guide'), [{at: 910, opacity: 0, easing: 'ease-out'}, {at: 1200, opacity: 1}]);
     // Tiles land just behind the opening clip edge, near bands first. The
     // lite bitmap is simply uncovered by the clip (no per-band steps).
     if (!tilesPlate) tl.each(tiles(), (_i, el) => {

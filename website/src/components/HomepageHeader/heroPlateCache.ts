@@ -1,5 +1,7 @@
 /** Switch-only raster plates. The caller owns lite-tier selection and visibility. */
-export type PlateName = 'd-ocean' | 'd-tiles' | 'n-grid' | 'n-core' | 'n-marks';
+export type PlateName =
+  | 'd-ocean' | 'd-tiles' | 'd-lines' | 'd-guide'
+  | 'n-grid' | 'n-core' | 'n-ticks' | 'n-orbits' | 'n-marks';
 
 export interface PlateCache {
   /** Rendered canvas for the current art size, or null if not ready / stale. */
@@ -11,8 +13,8 @@ export interface PlateCache {
 }
 
 const SCENES: Record<'day' | 'night', PlateName[]> = {
-  day: ['d-ocean', 'd-tiles'],
-  night: ['n-grid', 'n-core', 'n-marks'],
+  day: ['d-ocean', 'd-tiles', 'd-lines', 'd-guide'],
+  night: ['n-grid', 'n-core', 'n-ticks', 'n-orbits', 'n-marks'],
 };
 const SVG_NS = 'http://www.w3.org/2000/svg';
 // Apply the mask shorthand before its longhands: otherwise it resets mask-image.
@@ -216,8 +218,10 @@ export function createPlateCache(art: HTMLElement, options: {scale?: number; bus
       if (sourceAnimating(job.plate.source)) { schedule(200); return; }
       const {plate, image} = job;
       try {
-        plate.canvas.width = Math.max(1, Math.round(width * Math.min(dpr, 2) * scale));
-        plate.canvas.height = Math.max(1, Math.round(height * Math.min(dpr, 2) * scale));
+        // Never below one device pixel per CSS pixel on DPR-1 screens.
+        const ratio = Math.max(1, Math.min(dpr, 2) * scale);
+        plate.canvas.width = Math.max(1, Math.round(width * ratio));
+        plate.canvas.height = Math.max(1, Math.round(height * ratio));
         const context = plate.canvas.getContext('2d');
         if (!context) throw new Error('Canvas 2D context unavailable');
         context.drawImage(image, 0, 0, plate.canvas.width, plate.canvas.height);

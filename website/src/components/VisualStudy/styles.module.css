@@ -126,9 +126,11 @@
 [data-hero-primed] .nightScene [data-hero-layer] { will-change: opacity, transform; }
 
 /* Lite switch (low-end devices only, heroThemeSwitch.ts). The day reveal
- * uses a rounded box + counter-translated scene instead of an animated
- * clip-path, which Chrome re-rasterises as a viewport-sized mask each frame.
- * At rest the wrapper has no box, so the full path is untouched. */
+ * uses a rounded box + inversely offset scene (both left/top, same thread)
+ * instead of an animated clip-path, which Chrome re-rasterises as a
+ * viewport-sized mask each frame. will-change keeps the scene its own layer
+ * so the offset only moves it. At rest the wrapper has no box, so the full
+ * path is untouched. */
 .dayClip { display: contents; }
 [data-lite-clip] .dayClip {
   border-radius: 50%;
@@ -160,6 +162,11 @@
 .backgroundArt [data-hero-plate][data-live] { display: block; will-change: opacity, transform; }
 .backgroundArt [data-plated] { visibility: hidden; }
 .backgroundArt [data-plated] [data-plate-skip] { visibility: visible; }
+/* The bitmap is the loop at phase 0; hold the hidden source there so the
+ * live SVG picks up exactly where the bitmap stands when the switch ends. */
+.backgroundArt [data-plated] :is(.guideCircle, .routeCrawl, .nodeBlink, .terraceDrift, .lensDrift, .tickSpin, .orbitComet, .pulse, .flicker) {
+  animation-play-state: paused !important;
+}
 
 /* Actor overlay: flat stand-ins, fixed colours (lives across the flip). */
 .actorLayer :is(path, circle, ellipse, line, rect) { vector-effect: none; }
