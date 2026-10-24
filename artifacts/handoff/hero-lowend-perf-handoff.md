@@ -75,6 +75,33 @@
 4. 静置 lite 档把 d-lines 等常驻 SVG 提升为独立合成层，或停掉 nodeBlink，消除父层持续重光栅化。注意：给日间图层加 will-change 会改变静止画面的抗锯齿，所以只放在 lite 档。
 5. 实在不够的话，再砍或简化 actors 里的 shock、trace、ripple，需先征得用户同意（保护圆和坐标系）。
 
+## 降分辨率：为什么 CSS 不行、位图为什么可行
+
+- Chrome 按图层最终显示尺寸光栅化。CSS `scale` 降采样只会画出缩小的画面，不会低分辨率画完再放大；先缩小再还原会触发按新尺度的全量重画。CDP 模拟 DPR 1 也不改变光栅尺寸。SVG/DOM 没有"低分辨率渲染"的开关。
+- 唯一可行路径是 canvas：backing store 低分辨率，CSS 尺寸铺满，由合成器放大。现在 0.5x 底板实测只比直接隐藏慢约 2 帧，截图看不出发虚。效果有限，是因为只覆盖了进场底板，其他活体 SVG 仍在逐帧重绘。
+- 上限参考：切换状态挂载但不播动画时 60fps；场景、actors、轴、色盘全部去掉约 81 帧。也就是说，切换期间屏幕上只剩位图做 opacity/transform 合成时，可以接近 60fps。
+- **待修 bug**：`heroPlateCache.ts` 的分辨率是 `clientWidth × min(dpr,2) × 0.5`。DPR 2 的测试机上正好等于 1x CSS 像素，但 DPR 1 的低配屏会变成 0.5x CSS 像素，会明显发糊。应改为按 CSS 像素定，例如 `max(1, dpr × 0.5)`，或按设备单独定。DPR 1 的效果还没验证过。
+
+## 用户补充的方案方向（2026-10-24，下一会话优先考虑）
+
+1. **lite 档完全去掉底板部分的动画**，只保留基于缩放点的切换动画：clip 圆、色盘、轴、卫星、缩放点相关的 actors。底板（d-ocean、d-tiles、d-lines、d-guide、n-grid、n-core、n-marks、n-ticks、n-orbits 的淡入淡出、缩放、旋转、逐组步进，以及 star/pixel/craft）在切换期间不做任何动画。
+2. **日夜两套底板都持久化位图缓存**：切换过程中就是"位图 + 遮罩"。退场场景显示自己的整张位图，进场场景是另一张整张位图，由圆形遮罩（圆角盒或 canvas `arc`）显露；切换期间隐藏全部底板 SVG，结束后换回。
+   - 现有缓存逐层生成，可以改成每个场景合成一张整图。
+   - 要处理 idle 动画的相位：烘焙时 currentTime 对齐 0，或者在点击瞬间同步重烘退场场景。
+   - n-ticks 和 n-orbits 里有刻度环和卫星。要先确认它们静止烘进位图是否可以接受，卫星和环可以保留为活体小 SVG。
+3. **坐标轴合批 / 缓存**。现状（`VisualStudy/index.tsx` 中的 `HeroAxis`，`heroThemeSwitch.ts` 中的 `animateAxis`）：
+   - 刻度已经合批，每个方向一条 `path`（`H_TICKS` / `V_TICKS`）。
+   - 每个方向的数字和名称是独立的 `<text>`。
+   - 4 条 arm 各自做 dashoffset 动画。
+   - ladder 是 SVG `<g>` 做 translate。这是 SVG 内部 transform，会让整张 axis svg 逐帧重画。
+   - 日夜各有一份 HeroAxis 副本，两份同时在动。
+
+   可以做：把 ladder（刻度加文字）烘成小 canvas 或 img，改成对 HTML 元素做 transform，这样是纯合成；arm 改成 HTML 细条做 `scaleX` / `scaleY`，替代 dashoffset。外观要和原来一致。
+4. **还不够再引入第三方渲染库**，优先保证渲染效果。例如 PixiJS（WebGL）：把缓存位图做纹理、用遮罩，轴和 actors 用 Graphics 逐帧画，切换期间整个 hero 只有一张 WebGL canvas。注意事项：
+   - 测试机瓶颈是 Iris Xe 的 Skia SVG 光栅化，少量贴图四边形的 WebGL 绘制要便宜得多。
+   - 要评估包体积（只在 lite 档动态 import）、WebGL 上下文丢失的回退、文字渲染一致性。
+   - 依赖要锁定精确版本。
+
 ## 测量工具
 
 脚本都在 `%TEMP%\opencode`，不在仓库里，可能被清理。依赖 playwright-core，CDP 地址从命令行参数传入。
