@@ -51,7 +51,7 @@ class Timeline {
 
   constructor(readonly total: number) {}
 
-  add(el: Target, keys: Key[]): void {
+  add(el: Target, keys: Key[], pseudoElement?: string): void {
     if (!el || keys.length === 0) return;
     // Offsets are clamped to be non-decreasing: a staggered key that runs
     // past a later fixed key would otherwise make animate() throw.
@@ -64,7 +64,7 @@ class Timeline {
     if (frames[0].offset !== 0) frames.unshift({...frames[0], offset: 0, easing: 'linear'});
     const last = frames[frames.length - 1];
     if (last.offset !== 1) frames.push({...last, offset: 1});
-    this.anims.push(el.animate(frames, {duration: this.total, fill: 'both'}));
+    this.anims.push(el.animate(frames, {duration: this.total, fill: 'both', ...(pseudoElement ? {pseudoElement} : {})}));
   }
 
   each(list: ArrayLike<Element>, keys: (index: number, el: Element) => Key[]): void {
@@ -261,6 +261,36 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       left: `${n(x - r)}px`, top: `${n(y - r)}px`, width: `${n(2 * r)}px`, height: `${n(2 * r)}px`,
     })));
     tl.add(day, keys.map(({at, r, easing}) => ({at, easing, transform: `translate(${n(r - x)}px, ${n(r - y)}px)`})));
+  };
+
+  /* Colour disc. Full tier: background-color tween (unchanged). Lite: the
+   * disc holds the end colour and an ::after carrying the start colour fades
+   * out on the same easing. The blend start*(1-e) + end*e is the same sRGB
+   * mix the tween produces, but opacity runs on the compositor instead of
+   * repainting the disc every frame. Keys carry exactly two colours. */
+  const colourDisc = (run: Run, lite: boolean, keys: Key[]) => {
+    const tl = run.timeline;
+    const el = q('[data-hero-colour]') as HTMLElement | null;
+    if (!lite || !el) {
+      tl.add(el, keys);
+      return;
+    }
+    const from = String(keys[0].backgroundColor);
+    const to = String(keys[keys.length - 1].backgroundColor);
+    el.style.backgroundColor = to;
+    el.style.setProperty('--colour-from', from);
+    el.dataset.liteColour = '';
+    run.stops.push(() => {
+      delete el.dataset.liteColour;
+      el.style.removeProperty('background-color');
+      el.style.removeProperty('--colour-from');
+    });
+    tl.add(el, keys.map((k) => {
+      const rest = {...k};
+      delete rest.backgroundColor;
+      return rest;
+    }));
+    tl.add(el, keys.map(({at, easing, backgroundColor}) => ({at, easing, opacity: backgroundColor === from ? 1 : 0})), '::after');
   };
 
   const primeEvents = ['pointerover', 'pointerdown', 'focusin'] as const;
@@ -495,7 +525,7 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
 
     // Colour layer and the day clip, both centred on the white star. The
     // clip ends 40ms before the colour disc, so red shows ~790-880ms.
-    tl.add(q('[data-hero-colour]'), [
+    colourDisc(run, lite, [
       {at: 360, opacity: 1, transform: disc(full, S), backgroundColor: '#c6383d', easing: 'cubic-bezier(.5,0,.75,.4)'},
       {at: 880, opacity: 1, transform: disc(rs, S), backgroundColor: '#e34549'},
       {at: 920, opacity: 0, transform: disc(rs, S), backgroundColor: '#e34549'},
@@ -665,7 +695,7 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     // Lite: incoming day background plates as cached bitmaps.
     const oceanPlate = lite ? usePlate(run, 'd-ocean') : null;
     const tilesPlate = lite ? usePlate(run, 'd-tiles') : null;
-    tl.add(q('[data-hero-colour]'), [
+    colourDisc(run, lite, [
       {at: 350, opacity: 1, transform: disc(rs, S), backgroundColor: '#245dcc', easing: 'cubic-bezier(.4,0,.8,.5)'},
       {at: 750, opacity: 1, transform: disc(full, S), backgroundColor: '#e4ecf8'},
       {at: 870, opacity: 0, transform: disc(full, S), backgroundColor: '#e4ecf8'},

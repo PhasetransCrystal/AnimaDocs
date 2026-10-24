@@ -103,6 +103,16 @@
   width: 200px;
 }
 
+/* Lite switch: start colour rides on a fading overlay (see colourDisc). */
+.colourLayer[data-lite-colour]::after {
+  background: var(--colour-from);
+  border-radius: inherit;
+  content: '';
+  inset: 0;
+  position: absolute;
+  will-change: opacity;
+}
+
 /* Desktop switch mounts both scenes + overlays; mobile only fades the
  * current scene and lets the View Transition reveal the other. */
 :global(html[data-hero-switching='desktop']) :is(.scene, .colourLayer, .actorLayer, .axisLayer) { display: block; }
