@@ -356,7 +356,8 @@ function NightGrid(): ReactNode {
           <path d="M0 0V6" className={styles.nightHatchLine} />
         </pattern>
       </defs>
-      <g className={styles.craftLink}>
+      {/* Stays live SVG when the lite switch swaps n-grid for a raster plate. */}
+      <g className={styles.craftLink} data-plate-skip="">
         <path className={styles.craftLine} d={CRAFT_LINK.d} data-craft-line="" />
         <g data-craft-mark="">
         {/* Craft marker: a small diamond inside open corner brackets. */}
@@ -1397,6 +1398,9 @@ export default function VisualStudy({variant = 'field'}: VisualStudyProps): Reac
         <HeroAxis scene="night" />
       </div>
       <div className={styles.colourLayer} data-hero-colour="" />
+      {/* display: contents at rest; the lite switch turns it into a rounded
+          clip box (cheaper than an animated clip-path on the whole scene). */}
+      <div className={styles.dayClip} data-hero-clip="">
       <div className={`${styles.scene} ${styles.dayScene}`} data-art-mode="day" data-hero-scene="day">
         <svg className={styles.diagramArt} data-hero-layer="d-ocean" {...SVG_PROPS}>
           <DayAtlas />
@@ -1411,6 +1415,7 @@ export default function VisualStudy({variant = 'field'}: VisualStudyProps): Reac
           <DayGuide />
         </svg>
         <HeroAxis scene="day" />
+      </div>
       </div>
       <HeroActor />
       <div className={styles.noiseLayer} />

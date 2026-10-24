@@ -7,6 +7,7 @@ import {AXIS_DECADE, CRAFT, HERO_ANCHORS} from '@site/src/components/VisualStudy
 import {heroSwitchState, setHeroSwitchHandler} from '@site/src/utils/heroSwitchHook';
 
 import {ALT_EASE, bezier, driveAltimeter} from './altimeterDriver';
+import {createPlateCache, type PlateCache, type PlateName} from './heroPlateCache';
 
 type Direction = 'launch' | 'landing';
 type Mode = 'desktop' | 'mobile';
@@ -205,6 +206,63 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       if (!current) unprime();
     }, PRIME_RELEASE_MS);
   };
+  /* Lite tier (heroArtLite.ts flags the art host on low-end devices). Only
+   * then are background plates pre-rendered to half-resolution bitmaps in
+   * idle time, so the switch fades bitmaps instead of re-rasterising the
+   * SVG plates. Full-tier devices never build the cache. */
+  const isLite = () => art.closest('[data-art-lite]') !== null;
+  let plates: PlateCache | null = null;
+  const syncPlates = () => {
+    if (plates || !isLite() || reducedMotion.matches) return;
+    plates = createPlateCache(art, {
+      busy: () => current !== null || art.dataset.heroPrimed !== undefined || art.closest('[data-art-paused]') !== null,
+    });
+  };
+  const liteObserver = new MutationObserver(syncPlates);
+  if (art.parentElement) liteObserver.observe(art.parentElement, {attributes: true, attributeFilter: ['data-art-lite']});
+  syncPlates();
+
+  /** Swap a source SVG plate for its cached bitmap for this run. */
+  const usePlate = (run: Run, name: PlateName): HTMLElement | null => {
+    const canvas = plates?.get(name) ?? null;
+    const source = layer(name) as HTMLElement | null;
+    if (!canvas || !source) return null;
+    canvas.dataset.live = '';
+    source.dataset.plated = '';
+    run.stops.push(() => {
+      delete canvas.dataset.live;
+      delete source.dataset.plated;
+    });
+    return canvas;
+  };
+
+  /* Day reveal circle. Full tier: clip-path on the day scene (unchanged).
+   * Lite: a rounded box tracks the same circle and the scene is
+   * counter-translated inside it; same geometry, timing and easing. */
+  type ClipKey = {at: number; r: number; easing?: string};
+  const dayClip = (run: Run, lite: boolean, g: Geometry, [x, y]: Point, keys: ClipKey[]) => {
+    const tl = run.timeline;
+    const day = scene('day');
+    const box = q('[data-hero-clip]') as HTMLElement | null;
+    if (!lite || !box || !day) {
+      tl.add(day, keys.map(({at, r, easing}) => ({at, clipPath: clip(r, [x, y]), easing})));
+      return;
+    }
+    art.style.setProperty('--hero-w', `${g.w}px`);
+    art.style.setProperty('--hero-h', `${g.h}px`);
+    art.dataset.liteClip = '';
+    run.stops.push(() => {
+      delete art.dataset.liteClip;
+      art.style.removeProperty('--hero-w');
+      art.style.removeProperty('--hero-h');
+    });
+    tl.add(box, keys.map(({at, r, easing}) => ({
+      at, easing,
+      left: `${n(x - r)}px`, top: `${n(y - r)}px`, width: `${n(2 * r)}px`, height: `${n(2 * r)}px`,
+    })));
+    tl.add(day, keys.map(({at, r, easing}) => ({at, easing, transform: `translate(${n(r - x)}px, ${n(r - y)}px)`})));
+  };
+
   const primeEvents = ['pointerover', 'pointerdown', 'focusin'] as const;
   const releaseEvents = ['pointerout', 'focusout'] as const;
 
@@ -411,7 +469,8 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
 
   /* Day -> night: launch into orbit (1200ms). Nothing travels: the actor
    * rig sits on the pad arc, which is the white star's position. */
-  const buildLaunch = (tl: Timeline, g: Geometry) => {
+  const buildLaunch = (run: Run, g: Geometry, lite: boolean) => {
+    const tl = run.timeline;
     const {star, disc: red, pad} = HERO_ANCHORS;
     const S = toPx(g, star.x, star.y);
     const F = toPx(g, red.x, red.y);
@@ -441,15 +500,22 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       {at: 880, opacity: 1, transform: disc(rs, S), backgroundColor: '#e34549'},
       {at: 920, opacity: 0, transform: disc(rs, S), backgroundColor: '#e34549'},
     ]);
-    tl.add(scene('day'), [
-      {at: LAUNCH_CLIP.from, clipPath: clip(full, S), easing: cssBezier(LAUNCH_CLIP.curve)},
-      {at: LAUNCH_CLIP.to, clipPath: clip(rs, S)},
-      {at: 920, clipPath: clip(0, S)},
+    dayClip(run, lite, g, S, [
+      {at: LAUNCH_CLIP.from, r: full, easing: cssBezier(LAUNCH_CLIP.curve)},
+      {at: LAUNCH_CLIP.to, r: rs},
+      {at: 920, r: 0},
     ]);
+
+    // Lite: the incoming night background plates are cached bitmaps (each
+    // falls back to its live SVG if its bitmap is not ready). The craft link
+    // stays live inside the hidden n-grid SVG.
+    const gridPlate = lite ? usePlate(run, 'n-grid') : null;
+    const corePlate = lite ? usePlate(run, 'n-core') : null;
+    const marksPlate = lite ? usePlate(run, 'n-marks') : null;
 
     // Night builds up under the shrinking clip: grid, tick ring turning in,
     // orbits settling, pixels stepping on, labels, then the red star last.
-    tl.add(layer('n-grid'), [{at: 440, opacity: 0}, {at: 700, opacity: 1}]);
+    tl.add(gridPlate ?? layer('n-grid'), [{at: 440, opacity: 0}, {at: 700, opacity: 1}]);
     tl.add(layer('n-ticks'), [
       {at: 520, opacity: 0, transform: 'rotate(-10deg)', transformOrigin: focusOrigin, easing: 'cubic-bezier(.2,.7,.3,1)'},
       {at: 920, opacity: 1, transform: 'rotate(0deg)', transformOrigin: focusOrigin},
@@ -458,11 +524,16 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       {at: 600, opacity: 0, transform: 'scale(1.08)', transformOrigin: focusOrigin, easing: 'cubic-bezier(.2,.7,.3,1)'},
       {at: 980, opacity: 1, transform: 'scale(1)', transformOrigin: focusOrigin},
     ]);
-    tl.each(art.querySelectorAll('[data-pixel-group]'), (i) => {
-      const t = 760 + i * 70;
-      return [{at: t, opacity: 0}, {at: t, opacity: 1}];
-    });
-    tl.add(q('[data-night-labels]'), [{at: 900, opacity: 0}, {at: 1100, opacity: 1}]);
+    if (marksPlate) {
+      // One bitmap fade spans the star wave (440) to the labels (1100).
+      tl.add(marksPlate, [{at: 440, opacity: 0, easing: 'ease-out'}, {at: 1100, opacity: 1}]);
+    } else {
+      tl.each(art.querySelectorAll('[data-pixel-group]'), (i) => {
+        const t = 760 + i * 70;
+        return [{at: t, opacity: 0}, {at: t, opacity: 1}];
+      });
+      tl.add(q('[data-night-labels]'), [{at: 900, opacity: 0}, {at: 1100, opacity: 1}]);
+    }
     // Craft link: once the white star has settled, the dashed slant line
     // grows out of it toward the craft, then the marker locks on.
     tl.add(q('[data-craft-line]'), [
@@ -473,11 +544,13 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       {at: 1060, opacity: 0, transform: 'scale(1.6)', transformOrigin: CRAFT_MARK_ORIGIN, easing: EASE_POP},
       {at: 1160, opacity: 1, transform: 'scale(1)', transformOrigin: CRAFT_MARK_ORIGIN},
     ]);
-    tl.each(art.querySelectorAll('[data-star-group]'), (k) => [
-      {at: 440 + k * 110, opacity: 0, easing: 'ease-out'},
-      {at: 600 + k * 110, opacity: 1},
-    ]);
-    tl.add(layer('n-core'), [{at: 950, opacity: 0}, {at: 1180, opacity: 1}]);
+    if (!marksPlate) {
+      tl.each(art.querySelectorAll('[data-star-group]'), (k) => [
+        {at: 440 + k * 110, opacity: 0, easing: 'ease-out'},
+        {at: 600 + k * 110, opacity: 1},
+      ]);
+    }
+    tl.add(corePlate ?? layer('n-core'), [{at: 950, opacity: 0}, {at: 1180, opacity: 1}]);
 
     // Pad arc stand-in: holds until the clip edge reaches it, then shrinks
     // with the clip onto the star.
@@ -574,7 +647,8 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
 
   /* Night -> day: landing (1200ms). The orbit winds back into the satellite
    * first (0-400ms), then the day disc opens from it. */
-  const buildLanding = (tl: Timeline, g: Geometry) => {
+  const buildLanding = (run: Run, g: Geometry, lite: boolean) => {
+    const tl = run.timeline;
     const {star, disc: red, pad} = HERO_ANCHORS;
     const S = toPx(g, star.x, star.y);
     const F = toPx(g, red.x, red.y);
@@ -583,11 +657,14 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     const focusOrigin = `${n(F[0])}px ${n(F[1])}px`;
 
     // Day clip opens from the white star; cobalt wave runs ahead of it.
-    tl.add(scene('day'), [
-      {at: 0, clipPath: clip(0, S)},
-      {at: LANDING_CLIP.from, clipPath: clip(rs, S), easing: cssBezier(LANDING_CLIP.curve)},
-      {at: LANDING_CLIP.to, clipPath: clip(full, S)},
+    dayClip(run, lite, g, S, [
+      {at: 0, r: 0},
+      {at: LANDING_CLIP.from, r: rs, easing: cssBezier(LANDING_CLIP.curve)},
+      {at: LANDING_CLIP.to, r: full},
     ]);
+    // Lite: incoming day background plates as cached bitmaps.
+    const oceanPlate = lite ? usePlate(run, 'd-ocean') : null;
+    const tilesPlate = lite ? usePlate(run, 'd-tiles') : null;
     tl.add(q('[data-hero-colour]'), [
       {at: 350, opacity: 1, transform: disc(rs, S), backgroundColor: '#245dcc', easing: 'cubic-bezier(.4,0,.8,.5)'},
       {at: 750, opacity: 1, transform: disc(full, S), backgroundColor: '#e4ecf8'},
@@ -626,14 +703,15 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     ]);
 
     // Day layers return once the clip covers the hero (short rise).
-    tl.add(layer('d-ocean'), [
+    tl.add(oceanPlate ?? layer('d-ocean'), [
       {at: 910, opacity: 0, transform: 'translateY(4px)', easing: 'ease-out'},
       {at: 1200, opacity: 1, transform: 'translateY(0px)'},
     ]);
     tl.add(layer('d-lines'), [{at: 910, opacity: 0, easing: 'ease-out'}, {at: 1200, opacity: 1}]);
     tl.add(layer('d-guide'), [{at: 910, opacity: 0, easing: 'ease-out'}, {at: 1200, opacity: 1}]);
-    // Tiles land just behind the opening clip edge, near bands first.
-    tl.each(tiles(), (_i, el) => {
+    // Tiles land just behind the opening clip edge, near bands first. The
+    // lite bitmap is simply uncovered by the clip (no per-band steps).
+    if (!tilesPlate) tl.each(tiles(), (_i, el) => {
       const dist = Number((el as HTMLElement).dataset.tileDist ?? 0) * g.s;
       const t = dist <= rs ? LANDING_CLIP.from : timeAtRadius(Math.min(dist, full), rs, full, LANDING_CLIP);
       const at = Math.round(Math.min(1150, t + 60));
@@ -751,8 +829,9 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     const run = begin('desktop', total, flip, target);
     const g = measure(art);
     setupAxis(g);
-    if (launch) buildLaunch(run.timeline, g);
-    else buildLanding(run.timeline, g);
+    const lite = isLite();
+    if (launch) buildLaunch(run, g, lite);
+    else buildLanding(run, g, lite);
     animateAltimeter(run, launch ? 'launch' : 'landing', 'desktop');
     flipAt(run, flipTime(g, launch));
     Promise.all(run.timeline.anims.map((anim) => anim.finished)).then(
@@ -847,5 +926,8 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     releaseEvents.forEach((type) => document.removeEventListener(type, release, true));
     if (current) finish(current);
     unprime();
+    liteObserver.disconnect();
+    plates?.dispose();
+    plates = null;
   };
 }
