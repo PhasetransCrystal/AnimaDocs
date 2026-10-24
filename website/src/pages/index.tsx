@@ -17,44 +17,48 @@ const thirdPartyToolCount = 0;
 
 function DirectoryPanel({tutorialCount}: {tutorialCount: number}): ReactNode {
   return (
-    <aside className={styles.signalPanel} aria-label="文档目录">
-      <div className={styles.panelHeader}>
-        <span className={styles.panelEyebrow}>目录索引 / 01</span>
-        <span className={styles.panelStatus}>LIVE</span>
-      </div>
-      <div className={styles.panelBody}>
-        <div className={styles.panelTitleRow}>
-          <p className={styles.panelTitle}>ComfyUI / Anima</p>
-          <span className={styles.panelPage}>01—03</span>
+    /* signalFrame carries the soft drop shadows on two fixed layers so the
+       day/night flip cross-fades them instead of re-rastering a 60px blur. */
+    <div className={styles.signalFrame}>
+      <aside className={styles.signalPanel} aria-label="文档目录">
+        <div className={styles.panelHeader}>
+          <span className={styles.panelEyebrow}>目录索引 / 01</span>
+          <span className={styles.panelStatus}>LIVE</span>
         </div>
-        <ol className={styles.indexList}>
-          <li className={styles.indexItemActive}>
-            <span>01</span>
-            <span>基础教程</span>
-            <span aria-hidden="true">↗</span>
-          </li>
-          <li>
-            <span>02</span>
-            <span>原理讲解</span>
-            <span aria-hidden="true">—</span>
-          </li>
-          <li>
-            <span>03</span>
-            <span>第三方工具</span>
-            <span aria-hidden="true">—</span>
-          </li>
-        </ol>
-        <div className={styles.panelStats} aria-label="项目统计">
-          <span><strong>{tutorialCount}</strong><small>教程篇数</small></span>
-          <span><strong>{contributorCount}</strong><small>贡献人数</small></span>
-          <span><strong>{thirdPartyToolCount}</strong><small>工具收录</small></span>
+        <div className={styles.panelBody}>
+          <div className={styles.panelTitleRow}>
+            <p className={styles.panelTitle}>ComfyUI / Anima</p>
+            <span className={styles.panelPage}>01—03</span>
+          </div>
+          <ol className={styles.indexList}>
+            <li className={styles.indexItemActive}>
+              <span>01</span>
+              <span>基础教程</span>
+              <span aria-hidden="true">↗</span>
+            </li>
+            <li>
+              <span>02</span>
+              <span>原理讲解</span>
+              <span aria-hidden="true">—</span>
+            </li>
+            <li>
+              <span>03</span>
+              <span>第三方工具</span>
+              <span aria-hidden="true">—</span>
+            </li>
+          </ol>
+          <div className={styles.panelStats} aria-label="项目统计">
+            <span><strong>{tutorialCount}</strong><small>教程篇数</small></span>
+            <span><strong>{contributorCount}</strong><small>贡献人数</small></span>
+            <span><strong>{thirdPartyToolCount}</strong><small>工具收录</small></span>
+          </div>
+          <div className={styles.panelFooter}>
+            <span>状态 / 文档维护</span>
+            <strong>持续更新</strong>
+          </div>
         </div>
-        <div className={styles.panelFooter}>
-          <span>状态 / 文档维护</span>
-          <strong>持续更新</strong>
-        </div>
-      </div>
-    </aside>
+      </aside>
+    </div>
   );
 }
 

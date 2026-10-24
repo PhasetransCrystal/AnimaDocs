@@ -108,8 +108,12 @@
 :global(html[data-hero-switching='desktop']) :is(.scene, .colourLayer, .actorLayer, .axisLayer) { display: block; }
 :global(html[data-hero-switching='desktop']) [data-hero-layer] { will-change: opacity, transform; }
 :global(html[data-hero-switching='desktop']) .dayScene { will-change: clip-path; }
-/* Grain + terrace blur are off while the night core is invisible. */
-[data-hero-filters='off'] [data-hero-layer='n-core'] * { filter: none; }
+/* Pre-mount (heroThemeSwitch.ts prime): night plate rasterised under the
+ * opaque day plate and its layers promoted before the click. Day layers are
+ * left alone: promoting the visible plate re-rasterises it with slightly
+ * different anti-aliasing, which would show as a change on hover. */
+[data-hero-primed] .nightScene { display: block; }
+[data-hero-primed] .nightScene [data-hero-layer] { will-change: opacity, transform; }
 
 /* Actor overlay: flat stand-ins, fixed colours (lives across the flip). */
 .actorLayer :is(path, circle, ellipse, line, rect) { vector-effect: none; }
@@ -332,8 +336,9 @@
 
 .nightGridLine { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.07; stroke-width: 1; }
 /* Quiet furniture: background-only, never above ~0.3 opacity. */
-.nightStars circle { fill: var(--anima-ink); }
 .nightStars path { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.3; stroke-width: 0.8; }
+/* Merged star discs (one path per opacity bucket); fill-opacity comes from the attribute. */
+.nightStars .starFill { fill: var(--anima-ink); stroke: none; }
 .nightStars .nightLinks { stroke-dasharray: 2 6; stroke-opacity: 0.16; stroke-width: 0.7; }
 .satTrail path { fill: none; stroke: var(--anima-ink); stroke-linecap: round; stroke-width: 1.4; }
 .nightLimb path { fill: none; stroke: var(--anima-ink); stroke-opacity: 0.16; stroke-width: 1; }

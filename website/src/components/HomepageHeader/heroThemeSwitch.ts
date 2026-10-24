@@ -21,14 +21,14 @@ const LAUNCH_MS = 1200;
 const LANDING_MS = 1200;
 const LAUNCH_FLIP_MS = 700;
 const LANDING_FLIP_MS = 600;
-const LAUNCH_FILTERS_ON_MS = 950;
 /** Altimeter number lands (and the axis ladder stops) at these times. */
 const LAUNCH_LAND_MS = 1060;
 const LANDING_LAND_MS = 1000;
 /** Ladder travel from 325 m to 799,000 km in decade units. */
 const LADDER_SPAN = AXIS_DECADE * Math.log10(799_000_000 / 325);
 const REST_READING_OPACITY = 0.42;
-const FILTERS_OFF_DURING_LAUNCH = true;
+/** Night plate stays pre-mounted this long after the pointer/focus leaves. */
+const PRIME_RELEASE_MS = 1500;
 const MOBILE_FADE_MS = 180;
 const MOBILE_REVEAL_MS = 600;
 const WATCHDOG_PAD_MS = 400;
@@ -179,6 +179,35 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
   const alt = (sel: string) => altimeter?.querySelector<HTMLElement>(sel) ?? null;
   const toggles = () => document.querySelectorAll(TOGGLE_SELECTOR);
 
+  /* Pre-mount: when a pointer or focus reaches the toggle in light mode, mount
+   * the night plate (with its filters) under the opaque day plate and promote
+   * the hero layers, so the click does not pay for first raster + layer
+   * creation on frame 1. Purely a warm-up: nothing visible changes. */
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let releaseTimer = 0;
+  const unprime = () => {
+    window.clearTimeout(releaseTimer);
+    delete art.dataset.heroPrimed;
+  };
+  const prime = (event: Event) => {
+    const target = event.target;
+    if (!(target instanceof Element) || !target.closest(TOGGLE_SELECTOR)) return;
+    window.clearTimeout(releaseTimer);
+    if (current || reducedMotion.matches || root.dataset.theme === 'dark') return;
+    if (window.innerWidth <= MOBILE_MAX_WIDTH) return;
+    art.dataset.heroPrimed = '';
+  };
+  const release = (event: Event) => {
+    const target = event.target;
+    if (!(target instanceof Element) || !target.closest(TOGGLE_SELECTOR)) return;
+    window.clearTimeout(releaseTimer);
+    releaseTimer = window.setTimeout(() => {
+      if (!current) unprime();
+    }, PRIME_RELEASE_MS);
+  };
+  const primeEvents = ['pointerover', 'pointerdown', 'focusin'] as const;
+  const releaseEvents = ['pointerout', 'focusout'] as const;
+
   const finish = (run: Run) => {
     if (run.done) return;
     run.done = true;
@@ -193,7 +222,7 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     run.extra.forEach((anim) => anim.cancel());
     delete root.dataset.heroSwitching;
     root.classList.remove('hero-vt');
-    delete art.dataset.heroFilters;
+    unprime();
     toggles().forEach((button) => button.removeAttribute('aria-disabled'));
     if (altimeter) {
       delete altimeter.dataset.live;
@@ -722,15 +751,8 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     const run = begin('desktop', total, flip, target);
     const g = measure(art);
     setupAxis(g);
-    if (launch) {
-      if (FILTERS_OFF_DURING_LAUNCH) {
-        art.dataset.heroFilters = 'off';
-        run.timers.push(window.setTimeout(() => delete art.dataset.heroFilters, LAUNCH_FILTERS_ON_MS));
-      }
-      buildLaunch(run.timeline, g);
-    } else {
-      buildLanding(run.timeline, g);
-    }
+    if (launch) buildLaunch(run.timeline, g);
+    else buildLanding(run.timeline, g);
     animateAltimeter(run, launch ? 'launch' : 'landing', 'desktop');
     flipAt(run, flipTime(g, launch));
     Promise.all(run.timeline.anims.map((anim) => anim.finished)).then(
@@ -813,12 +835,17 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     if (document.hidden && current) finish(current);
   };
   document.addEventListener('visibilitychange', onVisibility);
+  primeEvents.forEach((type) => document.addEventListener(type, prime, true));
+  releaseEvents.forEach((type) => document.addEventListener(type, release, true));
   const unregister = setHeroSwitchHandler(handler);
 
   return () => {
     unregister();
     observer.disconnect();
     document.removeEventListener('visibilitychange', onVisibility);
+    primeEvents.forEach((type) => document.removeEventListener(type, prime, true));
+    releaseEvents.forEach((type) => document.removeEventListener(type, release, true));
     if (current) finish(current);
+    unprime();
   };
 }

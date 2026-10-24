@@ -175,6 +175,32 @@ const starBand = ({x, y}: {x: number; y: number}) => {
   const d = Math.hypot(x - 611.2, y - 310.8);
   return d < 300 ? 0 : d < 560 ? 1 : 2;
 };
+
+/* Static batching: homogeneous marks that never animate on their own are
+ * drawn as one <path> per (band, opacity bucket) instead of one element each.
+ * Fewer nodes means less style recalc on the theme flip and less paint
+ * recording; the GPU still rasters one layer per svg either way. */
+const circleD = (x: number, y: number, r: number) =>
+  `M${x - r} ${y}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0`;
+const rectD = (x: number, y: number, w: number, h: number) => `M${x} ${y}h${w}v${h}h${-w}Z`;
+/** Rounds opacity to 0.05 steps so a band collapses into a few paths. */
+const bucket = (o: number) => Math.round(o * 20) / 20;
+const STAR_BANDS = [0, 1, 2].map((band) => {
+  const stars = NIGHT_STARS.filter((star) => starBand(star) === band);
+  const fills = new Map<number, string>();
+  for (const {x, y, r, o} of stars) {
+    const key = bucket(o);
+    fills.set(key, (fills.get(key) ?? '') + circleD(x, y, r));
+  }
+  return {
+    band,
+    fills: [...fills.entries()].sort(([a], [b]) => a - b),
+    crosses: stars
+      .filter((star) => star.bright)
+      .map(({x, y}) => `M${x - 5} ${y}H${x + 5}M${x} ${y - 5}V${y + 5}`)
+      .join(''),
+  };
+});
 const LIMB = {cx: 720, cy: 2300, r: 1720};
 const LIMB_PATH = `M0 ${(LIMB.cy - Math.sqrt(LIMB.r ** 2 - LIMB.cx ** 2)).toFixed(1)}A${LIMB.r} ${LIMB.r} 0 0 1 1440 ${(LIMB.cy - Math.sqrt(LIMB.r ** 2 - LIMB.cx ** 2)).toFixed(1)}`;
 const LIMB_TICKS = (() => {
@@ -475,36 +501,51 @@ function NightMarks(): ReactNode {
       <g className={styles.nightStars} data-night-stars="">
         {/* Three distance bands from the pad: stars come on as an outward
             wave during launch and go out near-first under the day clip. */}
-        {[0, 1, 2].map((band) => (
+        {STAR_BANDS.map(({band, fills, crosses}) => (
           <g data-star-group={band} key={band}>
             {band === 2 ? <path className={styles.nightLinks} d={NIGHT_LINKS} /> : null}
-            {NIGHT_STARS.filter((star) => starBand(star) === band).map(({x, y, r, o, bright}) => (
-              <g key={`${x}-${y}`}>
-                <circle cx={x} cy={y} r={r} fillOpacity={o} />
-                {bright ? <path d={`M${x - 5} ${y}H${x + 5}M${x} ${y - 5}V${y + 5}`} /> : null}
-              </g>
+            {/* One filled path per opacity bucket (stars never overlap). */}
+            {fills.map(([o, d]) => (
+              <path className={styles.starFill} d={d} fillOpacity={o} key={o} />
             ))}
+            {crosses ? <path d={crosses} /> : null}
           </g>
         ))}
       </g>
       <g className={styles.pixels}>
-        {Array.from({length: NIGHT_PIXEL_GROUPS}, (_v, group) => (
-          <g key={group} data-pixel-group={group}>
-            {PIXELS.map(([x, y, s, tone], index) =>
-              index % NIGHT_PIXEL_GROUPS !== group ? null : (
-                <rect
-                  key={`${x}-${y}`}
-                  x={FOCUS.x + x}
-                  y={FOCUS.y + y}
-                  width={s}
-                  height={s}
-                  className={`${tone === 'light' ? styles.pixelLight : styles.pixelDark} ${index % 3 === 0 ? styles.flicker : ''}`}
-                  style={{animationDelay: `${(index * 0.7) % 5}s`}}
-                />
-              ),
-            )}
-          </g>
-        ))}
+        {Array.from({length: NIGHT_PIXEL_GROUPS}, (_v, group) => {
+          const members = PIXELS.map((pixel, index) => ({pixel, index})).filter(
+            ({index}) => index % NIGHT_PIXEL_GROUPS === group,
+          );
+          // Static squares merge per tone; flickering ones keep their own
+          // element because each runs the loop with its own delay.
+          const merged = (tone: 'light' | 'dark') =>
+            members
+              .filter(({pixel, index}) => pixel[3] === tone && index % 3 !== 0)
+              .map(({pixel: [x, y, s]}) => rectD(FOCUS.x + x, FOCUS.y + y, s, s))
+              .join('');
+          const light = merged('light');
+          const dark = merged('dark');
+          return (
+            <g key={group} data-pixel-group={group}>
+              {light ? <path className={styles.pixelLight} d={light} /> : null}
+              {dark ? <path className={styles.pixelDark} d={dark} /> : null}
+              {members
+                .filter(({index}) => index % 3 === 0)
+                .map(({pixel: [x, y, s, tone], index}) => (
+                  <rect
+                    key={`${x}-${y}`}
+                    x={FOCUS.x + x}
+                    y={FOCUS.y + y}
+                    width={s}
+                    height={s}
+                    className={`${tone === 'light' ? styles.pixelLight : styles.pixelDark} ${styles.flicker}`}
+                    style={{animationDelay: `${(index * 0.7) % 5}s`}}
+                  />
+                ))}
+            </g>
+          );
+        })}
       </g>
 
       <g data-night-labels="">
@@ -513,8 +554,13 @@ function NightMarks(): ReactNode {
         </g>
 
         <g className={styles.telemetry}>
-          {NIGHT_MOSAIC.map(([x, y, tone]) => (
-            <rect key={`${x}-${y}`} className={tone === 'light' ? styles.mosaicLight : styles.mosaicDark} x={x} y={y} width="16" height="16" />
+          {/* Static and non-overlapping: one path per tone instead of one rect per cell. */}
+          {(['light', 'dark'] as const).map((tone) => (
+            <path
+              key={tone}
+              className={tone === 'light' ? styles.mosaicLight : styles.mosaicDark}
+              d={NIGHT_MOSAIC.filter(([, , t]) => t === tone).map(([x, y]) => rectD(x, y, 16, 16)).join('')}
+            />
           ))}
           <rect className={styles.telemetryPlate} x="560" y="126" width="124" height="10" fill="url(#vs-night-hatch)" />
           <path className={styles.telemetryBars} d={TELEMETRY_BARS} />
@@ -975,8 +1021,13 @@ function DayAtlas(): ReactNode {
       </g>
       <g className={styles.survey}>
         <rect fill="url(#vsDayDots)" height="340" mask="url(#vsDayDotsMask)" width="560" x={SUMMIT.x - 220} y={SUMMIT.y - 130} />
-        {MOSAIC.map(([x, y, tone]) => (
-          <rect className={tone === 'pale' ? styles.mosaicPale : styles.mosaicPaper} height="20" key={`${x}-${y}`} width="20" x={x} y={y} />
+        {/* One path per class; dashes restart per subpath, so the pale cells keep their pattern. */}
+        {(['paper', 'pale'] as const).map((tone) => (
+          <path
+            className={tone === 'pale' ? styles.mosaicPale : styles.mosaicPaper}
+            d={MOSAIC.filter(([, , t]) => t === tone).map(([x, y]) => rectD(x, y, 20, 20)).join('')}
+            key={tone}
+          />
         ))}
         <path className={styles.surveyLine} d={SURVEY.d} />
         <text
