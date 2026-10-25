@@ -1,6 +1,6 @@
-# Hero 低配机性能交接（2026-10-24，第二轮）
+# Hero 低配机性能交接（2026-10-25，第三轮）
 
-用户目标：低性能设备上首页 hero 的昼夜切换动画要流畅。静置动画已经基本解决，主要剩切换。本轮效果仍不理想，下一会话改用更激进的方案。
+用户目标：低性能设备上首页 hero 的昼夜切换动画要流畅。静置动画已经基本解决，主要剩切换。第三轮后用户在测试机上确认 lite 切换"挺流畅"，剩下的是细节修正（见"第三轮"一节），前端实际效果由用户自己测试。
 
 ## 约束（用户原话要点）
 
@@ -102,15 +102,51 @@
    - 要评估包体积（只在 lite 档动态 import）、WebGL 上下文丢失的回退、文字渲染一致性。
    - 依赖要锁定精确版本。
 
+## 第三轮（2026-10-25）
+
+提交（均未 push）：
+
+| 提交 | 内容 |
+| --- | --- |
+| `9a322d8` | clip 保持注册；所有场景图层都做位图；修 DPR 1 位图尺寸（上面"待修 bug"已解决）。 |
+| `8bd6df2` | lite 日间位图随关闭的 clip 一起离场；位图保留 SVG transform 属性。 |
+| `def2a81` | 主题翻转局部化（激进候选 3）。lite 下在 clip 边缘经过标题时（`INK_LEAD_MS = 40`），给 `[data-hero-ink]` 作用域（heroArtRule、heroToplineFrame、heroContent，临时加上 navbar）设局部 `data-theme`；整页 `data-theme` 推迟到 `finish()`。CSS：`custom.css` / `art-adapters.css` 的 light 变量块加了 `[data-hero-ink][data-theme='light']`；`index.module.css` 的 dark 规则加 `:not(:where([data-hero-ink][data-theme='light'] *))`；墨水作用域取消 200ms 颜色过渡。 |
+| `e6bc2f3` | 坐标轴 ladder 改为独立 svg（用户方向 3 的一部分）。`HeroAxis` 给每个方向多渲染一个 `svg[data-hero-ladder]`；lite 下 `art.dataset.liteLadder` 隐藏原 SVG 内 ladder，对外层 svg 做像素 transform（合成器动画）。 |
+| `e4f5bc2` | 用户指出的细节：lite 日→夜不再按冲击波逐块隐藏蓝色方块，方块随 clip 关闭离场；墨水期 navbar 背景垫一层 `--anima-paper`（navbar 是 0.94 透明度，原来会透出旧主题底色，结束时轻微跳色）；navbar logo 在墨水时刻换 src（`useHeroThemeSwitch` 传入 day/night mark URL）；高度计地名随墨水作用域切换。 |
+
+full 档全部不变（均在 `lite ? … : …` 或 `[data-art-lite]` 分支）。
+
+测量（新指标：`remote-swwin.cjs`，快相窗口内 <20ms 的帧数，launch 440-920ms、landing 350-900ms；输出 `L`=launch 亮→暗，`D`=landing 暗→亮；gap=最大帧间隔）：
+
+| 版本 | launch 快帧 / gap | landing 快帧 / gap |
+| --- | --- | --- |
+| `8bd6df2` | 14 / 170-200ms | 12 / 145ms |
+| `def2a81` | 17 / 75ms | 14-15 / 96ms |
+| `e6bc2f3` | 15 / 80-100ms | 19-20 / 55-70ms |
+
+（`def2a81` 一行在标签纠正前记录，L/D 可能对调。）
+
+第三轮归因（var54-74 探针）：
+
+- 主线程已不是瓶颈：切换期间主线程任务都在 13-20ms，翻转长帧移到了结束时（约 86ms）。GPU 整段饱和。
+- landing 的成本几乎全在 art：ladder 滚动（已解决），退场夜景活体层 n-core/n-marks/n-ticks/n-orbits 合计约 +6 快帧（与循环动画、transform、淡出后残留都无关，是这些全视口层本身）。
+- launch 的成本分散：活体 SVG 层、轴、actors、场景背景渐变和 `::after`、noise 层各 +1~4。noise 和 `::after` 换成纯色也同样贵，说明是全视口合成四边形的数量（带宽）而不是光栅内容；切换中途绘制层面积约 74 个视口（静置 22）。
+- 上限探针：两个场景各只保留一张静态位图、去掉背景/::after/noise（var69 `two`）可到 launch 21-22、landing 33（≈60fps）；保留背景和 noise 时 launch 回到 16。只合并进场场景几乎无收益，必须退场场景也是位图。
+- 无效：CSS 缩放降采样（更差）、will-change 提升、暂停 CSS 循环、取整 clip 盒坐标、只合并进场场景。
+
+未做（用户已确认当前效果可接受，属于可选的下一步）：每个场景整张位图（含背景渐变、::after、noise，循环元素保留活体），切换时退场和进场都只显示位图 + clip。退场场景要在点击时按当前相位处理（现有缓存按相位 0 烘焙）。
+
+坑：`git worktree remove --force` 会跟随 node_modules junction 删掉真实依赖，先 `cmd /c rmdir` 掉 junction；测量脚本会把最后一个变体留在标签页里，测完要重新加载干净页面；测试机窗口经常被最小化（rAF 降到 1fps），每次测量前 `remote-winprobe.cjs <cdp> maximize`。
+
 ## 测量工具
 
 脚本都在 `%TEMP%\opencode`，不在仓库里，可能被清理。依赖 playwright-core，CDP 地址从命令行参数传入。
 
-- `remote-swvar.cjs <cdp> <site> <variants.json> [reps]`：切换帧数对比，变体可以注入 CSS/JS。环境变量：FORCE=lite|full（写入 sessionStorage 结论）、WAITPLATES=1（等位图画好再点）、SEQ=1（打印帧序列）。
+- `remote-swwin.cjs <cdp> <site> <variants.json> [reps]`（第三轮主用，替代旧的 `remote-swvar.cjs`）：快相窗口帧数对比，变体可以注入 CSS/JS。环境变量：FORCE=lite|full（写入 sessionStorage 结论）、WAITPLATES=1（等位图画好再点）、SEQ=1（打印帧序列）。`remote-showvar.cjs <cdp> <site> <variants.json> <name>`：把某个变体留在标签页里给用户手测。`remote-tshots.cjs <cdp> <site> <outDir> <launch|landing>` + `sheet.cjs`：切换过程连拍和拼图。
 - `remote-swattr.cjs <cdp> <site> [launch|landing]`：trace 后按图层统计光栅化耗时和 DOM 归属，并按进程汇总。另有 MAIN=1、INVAL=1、NOCLICK=1、PAINTS=1。
 - `remote-midshot.cjs`（切换中途冻结截图）、`remote-platecmp.cjs`（位图与 SVG 对比截图）、`remote-idle.cjs` / `remote-lite.cjs`（静置帧率）、`remote-layers.cjs`（静置图层与 paint 计数）。
 - `gen-var*.cjs`：生成探针变体。常用 hook：用 `Element.prototype.animate` 去掉某个属性或丢掉某组动画。
-- `remote-quiet.cjs <cdp> pause|resume`：暂停/恢复测试机上其他标签页的动画。`remote-winstate.cjs <cdp> list|minimize|restore|maximize`：开发标签页窗口原本是 maximized。测量前 pause，结束后 resume 并 maximize。
+- `remote-quiet.cjs <cdp> pause|resume`：暂停/恢复测试机上其他标签页的动画。`remote-winprobe.cjs <cdp> list|maximize|normal`（原 `remote-winstate.cjs`）：开发标签页窗口原本是 maximized。测量前 pause，结束后 resume 并 maximize。
 
 ## 环境状态
 
