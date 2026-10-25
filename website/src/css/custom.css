@@ -783,6 +783,15 @@ a:focus-visible {
   background: var(--anima-red);
 }
 
+/* The navbar fill is 94% opaque; during the ink the document behind it still
+ * has the old paper, so the bar would settle a shade off when the global flip
+ * lands. The inked bar lays its fill over the target paper itself. */
+.navbar[data-hero-ink][data-theme] {
+  background:
+    linear-gradient(var(--ifm-navbar-background-color) 0 0),
+    var(--anima-paper);
+}
+
 [data-theme='dark'] .theme-doc-sidebar-container::before {
   background-image:
     radial-gradient(circle, color-mix(in srgb, var(--anima-red) 42%, transparent) 0 1px, transparent 1.4px),

@@ -140,6 +140,18 @@
   display: inline;
 }
 
+/* Lite hero ink (heroThemeSwitch.ts): the hero copy takes the target theme
+ * locally before the document flips, so the labels follow the local value. */
+:global([data-hero-ink][data-theme='dark']) .day,
+:global([data-hero-ink][data-theme='light']) .night {
+  display: none;
+}
+
+:global([data-hero-ink][data-theme='dark']) .night,
+:global([data-hero-ink][data-theme='light']) .day {
+  display: inline;
+}
+
 /* Screen readers keep the pre-switch reading until the switch has ended. */
 .altimeter[data-hold='day'] .srOnly.day,
 .altimeter[data-hold='night'] .srOnly.night {

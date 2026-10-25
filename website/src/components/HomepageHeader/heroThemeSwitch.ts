@@ -168,7 +168,11 @@ type Run = {
  * Wire the hero choreography into themeTransition.ts. `art` is the
  * [data-hero-art] element, `altimeter` the [data-altimeter] block.
  */
-export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement | null): () => void {
+export function installHeroThemeSwitch(
+  art: HTMLElement,
+  altimeter: HTMLElement | null,
+  logo?: {light: string; dark: string},
+): () => void {
   const root = document.documentElement;
   let current: Run | null = null;
 
@@ -367,7 +371,13 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
   const inkScopes = () => document.querySelectorAll<HTMLElement>('[data-hero-ink]');
   /* The Docusaurus navbar is not ours to mark up; it joins the ink scope only
    * for the duration of the run (data-hero-ink-temp marks the borrowed attr). */
-  const clearInk = () =>
+  /* The logo <img> belongs to React (ThemedImage keyed by colour mode): after
+   * the document flip React mounts a fresh <img> for the new mode, so the
+   * borrowed source is only put back when the run ends without a flip. */
+  let borrowedLogo: {img: HTMLImageElement; src: string; target: string} | null = null;
+  // Warm both marks so the swap never shows an empty frame while loading.
+  if (logo) [logo.light, logo.dark].forEach((src) => { new Image().src = src; });
+  const clearInk = () => {
     inkScopes().forEach((el) => {
       el.removeAttribute('data-theme');
       if (el.hasAttribute('data-hero-ink-temp')) {
@@ -375,6 +385,11 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
         el.removeAttribute('data-hero-ink-temp');
       }
     });
+    if (borrowedLogo && root.dataset.theme !== borrowedLogo.target) {
+      borrowedLogo.img.src = borrowedLogo.src;
+    }
+    borrowedLogo = null;
+  };
   const inkAt = (run: Run, ms: number) => {
     run.timers.push(
       window.setTimeout(() => {
@@ -383,6 +398,11 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
         if (navbar && !navbar.hasAttribute('data-hero-ink')) {
           navbar.setAttribute('data-hero-ink', '');
           navbar.setAttribute('data-hero-ink-temp', '');
+        }
+        const img = navbar?.querySelector<HTMLImageElement>('.navbar__logo img');
+        if (logo && img && !borrowedLogo) {
+          borrowedLogo = {img, src: img.getAttribute('src') ?? '', target: run.target};
+          img.src = run.target === 'dark' ? logo.dark : logo.light;
         }
         inkScopes().forEach((el) => el.setAttribute('data-theme', run.target));
       }, ms),
@@ -598,7 +618,10 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
         {at: 480, opacity: 0, transform: 'scale(0.96)', transformOrigin: starOrigin},
       ]);
     // Tiles go as the ignition shock passes their distance band.
-    tl.each(tiles(), (_i, el) => {
+    // Lite: the stall after the click compresses that wave into the first
+    // frames, so the grid vanished long before the clip; there the tiles stay
+    // and leave with the closing clip.
+    if (!lite) tl.each(tiles(), (_i, el) => {
       const dist = Number((el as HTMLElement).dataset.tileDist ?? 0);
       const t = Math.round(Math.max(SHOCK.from + 20, timeAtRadius(Math.max(dist, SHOCK.r0), SHOCK.r0, SHOCK.r1, SHOCK)));
       return [{at: t, opacity: 1}, {at: t, opacity: 0}];
