@@ -209,8 +209,8 @@
   opacity: 0.004;
 }
 
-:global([data-theme='dark']) .signalFrame::before { opacity: 0.004; }
-:global([data-theme='dark']) .signalFrame::after { opacity: 1; }
+:global([data-theme='dark']) .signalFrame:not(:where([data-hero-ink][data-theme='light'] *))::before { opacity: 0.004; }
+:global([data-theme='dark']) .signalFrame:not(:where([data-hero-ink][data-theme='light'] *))::after { opacity: 1; }
 
 .signalPanel {
   background: color-mix(in srgb, var(--anima-surface) 96%, transparent);
@@ -343,19 +343,24 @@
   background: var(--anima-art-night);
 }
 
-:global([data-theme='dark']) .heroArtRule { background: var(--anima-red); }
-:global([data-theme='dark']) .panelStatus { background: var(--anima-red); color: #171a20; }
-:global([data-theme='dark']) .panelHeader { border-color: #44484f; }
-:global([data-theme='dark']) .heroTopline { border-color: var(--anima-line); }
-:global([data-theme='dark']) .heroSubtitle { color: #b7b5af; }
-:global([data-theme='dark']) .secondaryAction { border-color: #6d7075; color: var(--anima-ink); }
-:global([data-theme='dark']) .secondaryAction:hover,
-:global([data-theme='dark']) .secondaryAction:focus-visible {
+:global([data-theme='dark']) .heroArtRule:not(:where([data-hero-ink][data-theme='light'])) { background: var(--anima-red); }
+:global([data-theme='dark']) .panelStatus:not(:where([data-hero-ink][data-theme='light'] *)) { background: var(--anima-red); color: #171a20; }
+:global([data-theme='dark']) .panelHeader:not(:where([data-hero-ink][data-theme='light'] *)) { border-color: #44484f; }
+:global([data-theme='dark']) .heroTopline:not(:where([data-hero-ink][data-theme='light'] *)) { border-color: var(--anima-line); }
+:global([data-theme='dark']) .heroSubtitle:not(:where([data-hero-ink][data-theme='light'] *)) { color: #b7b5af; }
+:global([data-theme='dark']) .secondaryAction:not(:where([data-hero-ink][data-theme='light'] *)) { border-color: #6d7075; color: var(--anima-ink); }
+:global([data-theme='dark']) .secondaryAction:not(:where([data-hero-ink][data-theme='light'] *)):hover,
+:global([data-theme='dark']) .secondaryAction:not(:where([data-hero-ink][data-theme='light'] *)):focus-visible {
   border-color: var(--anima-interactive);
   color: var(--anima-interactive);
 }
 
 :global([data-theme='light']) .heroBanner { --hero-accent: var(--anima-blue); }
+
+/* Lite hero switch ink scopes (heroThemeSwitch.ts inkAt). --hero-accent and
+   colour resolve on .heroBanner, so an inked scope re-declares them. */
+:global([data-hero-ink][data-theme='dark']) { --hero-accent: var(--anima-red); color: var(--anima-ink); }
+:global([data-hero-ink][data-theme='light']) { --hero-accent: var(--anima-blue); color: var(--anima-ink); }
 
 @media screen and (min-width: 1600px) {
   .heroLayout { gap: 8rem; min-height: 0; }
@@ -399,16 +404,16 @@
 .heroCopy h1 span:last-child { letter-spacing: -0.035em; }
 .primaryAction > span:last-child { border-left: 1px solid color-mix(in srgb, #ffffff 30%, transparent); padding-left: 1rem; }
 .primaryAction:focus-visible, .secondaryAction:focus-visible { outline: 2px solid var(--anima-focus); outline-offset: 4px; }
-:global([data-theme='dark']) .primaryAction { color: var(--anima-paper); }
-:global([data-theme='dark']) .primaryAction:hover { background: var(--anima-interactive); color: var(--anima-paper); }
-:global([data-theme='dark']) .primaryAction > span:last-child { border-color: color-mix(in srgb, var(--anima-paper) 25%, transparent); }
-:global([data-theme='dark']) .kicker::before { border-radius: 50%; }
+:global([data-theme='dark']) .primaryAction:not(:where([data-hero-ink][data-theme='light'] *)) { color: var(--anima-paper); }
+:global([data-theme='dark']) .primaryAction:not(:where([data-hero-ink][data-theme='light'] *)):hover { background: var(--anima-interactive); color: var(--anima-paper); }
+:global([data-theme='dark']) .primaryAction:not(:where([data-hero-ink][data-theme='light'] *)) > span:last-child { border-color: color-mix(in srgb, var(--anima-paper) 25%, transparent); }
+:global([data-theme='dark']) .kicker:not(:where([data-hero-ink][data-theme='light'] *))::before { border-radius: 50%; }
 
 /* Hero art round 1: panel frames per mode (art adapter only) ------------- */
 
 :global([data-theme='dark']) .heroArt::after { display: none; }
 
-:global([data-theme='dark']) .signalPanel::before {
+:global([data-theme='dark']) .signalPanel:not(:where([data-hero-ink][data-theme='light'] *))::before {
   /* Corner registration marks; decorative, sits above panel content edges. */
   background:
     linear-gradient(var(--hero-accent), var(--hero-accent)) 0 0 / 14px 1.5px,
@@ -423,22 +428,22 @@
   z-index: 1;
 }
 
-:global([data-theme='dark']) .signalPanel {
+:global([data-theme='dark']) .signalPanel:not(:where([data-hero-ink][data-theme='light'] *)) {
   backdrop-filter: blur(8px);
   background: color-mix(in srgb, #111318 80%, transparent);
   border: 1px solid color-mix(in srgb, var(--anima-ink) 14%, transparent);
   border-radius: 24px 24px 12px 12px;
   box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 8%, transparent);
 }
-:global([data-theme='dark']) .panelHeader,
-:global([data-theme='dark']) .panelBody,
-:global([data-theme='dark']) .panelStats { background: transparent; }
+:global([data-theme='dark']) .panelHeader:not(:where([data-hero-ink][data-theme='light'] *)),
+:global([data-theme='dark']) .panelBody:not(:where([data-hero-ink][data-theme='light'] *)),
+:global([data-theme='dark']) .panelStats:not(:where([data-hero-ink][data-theme='light'] *)) { background: transparent; }
 
 /* Scroll performance: the art loops pause through [data-art-paused] on
    .heroArt (rules in VisualStudy/styles.module.css, scoped to the animated
    nodes only). Drop the panel blur during scroll so it does not re-sample the
    art per frame. */
-:global([data-theme='dark']) .heroBanner[data-scrolling='true'] .signalPanel {
+:global([data-theme='dark']) .heroBanner[data-scrolling='true'] .signalPanel:not(:where([data-hero-ink][data-theme='light'] *)) {
   backdrop-filter: none;
   background: color-mix(in srgb, #111318 92%, transparent);
 }

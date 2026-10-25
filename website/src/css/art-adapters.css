@@ -1,4 +1,5 @@
-﻿:root {
+﻿:root,
+[data-hero-ink][data-theme='light'] {
   --anima-art-accent: var(--anima-blue);
   --anima-art-rule: color-mix(in srgb, var(--anima-blue) 22%, var(--anima-line));
   --anima-art-wash: color-mix(in srgb, var(--anima-blue) 4%, var(--anima-surface));
@@ -459,6 +460,12 @@ html[data-hero-switching='desktop'] :is(.navbar, .navbar__brand, .navbar__title,
     background-color 200ms ease,
     border-color 200ms ease,
     fill 200ms ease !important;
+}
+/* Lite switch inks hero scopes locally at the clip edge (heroThemeSwitch.ts
+ * inkAt); a 200ms fade there left the title dark-on-dark behind the new art,
+ * so inked scopes cut over with the edge. Only inkAt sets data-theme here. */
+html[data-hero-switching='desktop'] :is([data-hero-ink][data-theme], [data-hero-ink][data-theme] *) {
+  transition: none !important;
 }
 
 @media screen and (max-width: 996px) {

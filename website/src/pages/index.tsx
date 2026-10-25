@@ -74,10 +74,10 @@ function HomepageHeader(): ReactNode {
     <header className={styles.heroBanner} ref={sectionRef}>
       <div className={styles.heroArt} aria-hidden="true" ref={artRef}>
         <VisualStudy />
-        <span className={styles.heroArtRule} />
+        <span className={styles.heroArtRule} data-hero-ink="" />
       </div>
 
-      <div className={styles.heroToplineFrame}>
+      <div className={styles.heroToplineFrame} data-hero-ink="">
         <div className="container">
           <div className={styles.heroTopline}>
             <span>ANIMA DOCUMENTATION SYSTEM</span>
@@ -85,7 +85,7 @@ function HomepageHeader(): ReactNode {
           </div>
         </div>
       </div>
-      <div className={styles.heroContent}>
+      <div className={styles.heroContent} data-hero-ink="">
         <div className="container" ref={contentRef}>
           <div className={styles.heroLayout}>
             <div className={styles.heroCopy} ref={copyRef}>

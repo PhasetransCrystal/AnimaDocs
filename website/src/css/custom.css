@@ -4,7 +4,10 @@
  * Night: graphite, warm gray, and vermilion for observation and replay.
  */
 
-:root {
+/* [data-hero-ink] scopes: lite hero switch inks the hero text locally ahead of
+ * the global flip (heroThemeSwitch.ts), so the light set must apply there. */
+:root,
+[data-hero-ink][data-theme='light'] {
   color-scheme: light;
 
   --anima-ink: #111820;
@@ -742,7 +745,8 @@ a:focus-visible {
 }
 
 /* Night mode softens the same framework into observation panels. */
-[data-theme='dark'] .navbar,
+[data-theme='dark'] .navbar:not(:where([data-hero-ink][data-theme='light'])),
+.navbar[data-hero-ink][data-theme='dark'],
 [data-theme='dark'] .theme-doc-sidebar-container,
 [data-theme='dark'] .pagination-nav__link,
 [data-theme='dark'] .theme-code-block,
@@ -772,7 +776,10 @@ a:focus-visible {
   background: var(--anima-red);
 }
 
-[data-theme='dark'] .navbar::before {
+/* Lite hero ink (heroThemeSwitch.ts) lends the navbar a local data-theme
+ * during a run; the local value must win over the document one. */
+[data-theme='dark'] .navbar:not(:where([data-hero-ink][data-theme='light']))::before,
+.navbar[data-hero-ink][data-theme='dark']::before {
   background: var(--anima-red);
 }
 

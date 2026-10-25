@@ -120,6 +120,7 @@ const cssBezier = (c: readonly number[]) => `cubic-bezier(${c.join(',')})`;
 /** Half of the 200ms page colour transition: flip this early so the colour
  * change is half done when the clip edge crosses the title. */
 const FLIP_LEAD_MS = 100;
+const INK_LEAD_MS = 40;
 
 /** Time at which an eased radius r0 -> r1 over [from, to] reaches `r`. */
 function timeAtRadius(r: number, r0: number, r1: number, seg: {from: number; to: number; curve: readonly number[]}): number {
@@ -318,6 +319,9 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
       run.flipped = true;
       run.flip();
     }
+    // Same task as the global flip, so the inked scopes never show a frame of
+    // the old theme in between.
+    clearInk();
     // Cancelling drops every layer back to its static styles = end state.
     run.timeline.cancel();
     run.extra.forEach((anim) => anim.cancel());
@@ -353,6 +357,36 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     }
     run.timers.push(window.setTimeout(() => finish(run), total + WATCHDOG_PAD_MS));
     return run;
+  };
+
+  /* Lite ink: at the visual flip time only the hero text scopes
+   * ([data-hero-ink], index.tsx) take the target theme through a local
+   * data-theme; the document flip waits for finish(), when the motion has
+   * settled. The global flip restyles and repaints the whole page (art
+   * included) and was the longest frame of the fast phase on low-end GPUs. */
+  const inkScopes = () => document.querySelectorAll<HTMLElement>('[data-hero-ink]');
+  /* The Docusaurus navbar is not ours to mark up; it joins the ink scope only
+   * for the duration of the run (data-hero-ink-temp marks the borrowed attr). */
+  const clearInk = () =>
+    inkScopes().forEach((el) => {
+      el.removeAttribute('data-theme');
+      if (el.hasAttribute('data-hero-ink-temp')) {
+        el.removeAttribute('data-hero-ink');
+        el.removeAttribute('data-hero-ink-temp');
+      }
+    });
+  const inkAt = (run: Run, ms: number) => {
+    run.timers.push(
+      window.setTimeout(() => {
+        if (run.done || run.flipped) return;
+        const navbar = document.querySelector<HTMLElement>('.navbar');
+        if (navbar && !navbar.hasAttribute('data-hero-ink')) {
+          navbar.setAttribute('data-hero-ink', '');
+          navbar.setAttribute('data-hero-ink-temp', '');
+        }
+        inkScopes().forEach((el) => el.setAttribute('data-theme', run.target));
+      }, ms),
+    );
   };
 
   const flipAt = (run: Run, ms: number) => {
@@ -870,7 +904,7 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
 
   /* Theme flip: timed to the clip edge passing the title, so the page text
    * changes colour while the matching backdrop is under it. */
-  const flipTime = (g: Geometry, launch: boolean): number => {
+  const flipTime = (g: Geometry, launch: boolean, lead = FLIP_LEAD_MS): number => {
     const {star} = HERO_ANCHORS;
     const S = toPx(g, star.x, star.y);
     const rs = star.r * g.s;
@@ -883,7 +917,7 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     const [lo, hi] = launch
       ? [LAUNCH_CLIP.from + 60, LAUNCH_CLIP.to]
       : [LANDING_CLIP.from + 40, LANDING_CLIP.to - 60];
-    return Math.round(Math.min(hi, Math.max(lo, at - FLIP_LEAD_MS)));
+    return Math.round(Math.min(hi, Math.max(lo, at - lead)));
   };
 
   /* Desktop run: both plates mounted, shared clock, flip mid-way. */
@@ -897,7 +931,11 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     if (launch) buildLaunch(run, g, lite);
     else buildLanding(run, g, lite);
     animateAltimeter(run, launch ? 'launch' : 'landing', 'desktop');
-    flipAt(run, flipTime(g, launch));
+    /* Lite inks only the hero scopes (cheap, no fade), so it needs less lead
+     * than the global flip: 100ms lead inked the title while it was still on
+     * the old backdrop. */
+    if (lite) inkAt(run, flipTime(g, launch, INK_LEAD_MS));
+    else flipAt(run, flipTime(g, launch));
     Promise.all(run.timeline.anims.map((anim) => anim.finished)).then(
       () => finish(run),
       () => finish(run),
