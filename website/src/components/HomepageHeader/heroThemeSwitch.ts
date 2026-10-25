@@ -523,14 +523,26 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     const focusOrigin = `${n(F[0])}px ${n(F[1])}px`;
 
     // Day scenery peels off as whole layers.
+    // Lite only: the click's first-frame stall swallows a 0-200ms fade, so
+    // the plate would vanish before the clip moves; there the fades run with
+    // the closing clip (440-840ms) instead. Full keeps the original timing.
     // Lite: the static ocean leaves as its bitmap (no loops, so no phase jump).
     const oceanOut = lite ? usePlate(run, 'd-ocean', false) : null;
-    tl.add(oceanOut ?? layer('d-ocean'), [{at: 0, opacity: 1, easing: 'ease-out'}, {at: 200, opacity: 0}]);
-    tl.add(layer('d-guide'), [{at: 0, opacity: 1, easing: 'ease-out'}, {at: 180, opacity: 0}]);
-    tl.add(layer('d-lines'), [
-      {at: 150, opacity: 1, transform: 'scale(1)', transformOrigin: starOrigin, easing: 'ease-in'},
-      {at: 480, opacity: 0, transform: 'scale(0.96)', transformOrigin: starOrigin},
-    ]);
+    tl.add(oceanOut ?? layer('d-ocean'), lite
+      ? [{at: 360, opacity: 1, easing: 'ease-in'}, {at: 800, opacity: 0}]
+      : [{at: 0, opacity: 1, easing: 'ease-out'}, {at: 200, opacity: 0}]);
+    tl.add(layer('d-guide'), lite
+      ? [{at: 260, opacity: 1, easing: 'ease-in'}, {at: 680, opacity: 0}]
+      : [{at: 0, opacity: 1, easing: 'ease-out'}, {at: 180, opacity: 0}]);
+    tl.add(layer('d-lines'), lite
+      ? [
+        {at: 420, opacity: 1, transform: 'scale(1)', transformOrigin: starOrigin, easing: 'ease-in'},
+        {at: 800, opacity: 0, transform: 'scale(0.96)', transformOrigin: starOrigin},
+      ]
+      : [
+        {at: 150, opacity: 1, transform: 'scale(1)', transformOrigin: starOrigin, easing: 'ease-in'},
+        {at: 480, opacity: 0, transform: 'scale(0.96)', transformOrigin: starOrigin},
+      ]);
     // Tiles go as the ignition shock passes their distance band.
     tl.each(tiles(), (_i, el) => {
       const dist = Number((el as HTMLElement).dataset.tileDist ?? 0);

@@ -45,6 +45,10 @@ function styledClone(live: Element, win: Window, omitDefs = false): Element | nu
   const computed = win.getComputedStyle(live);
   for (const property of SVG_STYLES) {
     const value = computed.getPropertyValue(property);
+    // The inactive scene is baked while display:none, where Chrome reports
+    // `none` for an SVG transform attribute; an inline `transform: none`
+    // would then override the attribute (e.g. the orbit group's rotation).
+    if (property === 'transform' && value === 'none' && live.hasAttribute('transform')) continue;
     if (value) clone.style.setProperty(property, localUrls(value));
   }
   for (const child of Array.from(live.childNodes)) {
