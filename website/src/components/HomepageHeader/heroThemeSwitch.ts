@@ -499,24 +499,44 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
    * origin, ruler scrolled so the current altitude sits on the origin.
    * Launch: horizontal double rail, ruler runs right-to-left. Landing:
    * vertical axis, ruler drops back to the pad. */
-  const animateAxis = (tl: Timeline, launch: boolean) => {
+  const animateAxis = (tl: Timeline, launch: boolean, liteRun?: {run: Run; g: Geometry}) => {
     const landAt = launch ? LAUNCH_LAND_MS : LANDING_LAND_MS;
     const set = launch ? 'h' : 'v';
     const shift = (pos: number) => (launch ? `translateX(${n(-pos)}px)` : `translateY(${n(pos)}px)`);
     const [from, to] = launch ? [0, LADDER_SPAN] : [LADDER_SPAN, 0];
+    const setKeys: Key[] = launch
+      ? [{at: 220, opacity: 0}, {at: 320, opacity: 1}, {at: 1000, opacity: 1}, {at: 1140, opacity: 0}]
+      : [{at: 0, opacity: 0}, {at: 120, opacity: 1}, ...blink(910)];
+    /* Lite: the rulers scroll as separate svg elements (compositor
+     * transform, px = viewBox units * scale); CSS drops the in-SVG ladders. */
+    if (liteRun) {
+      const {run, g} = liteRun;
+      art.dataset.liteLadder = set;
+      run.stops.push(() => {
+        delete art.dataset.liteLadder;
+      });
+      const px = (pos: number) => shift(pos * g.s);
+      art.querySelectorAll(`[data-hero-ladder="${set}"]`).forEach((svg) => {
+        tl.add(svg, setKeys);
+        tl.add(svg, [
+          {at: 0, transform: px(from), easing: ALT_EASE},
+          {at: landAt, transform: px(to)},
+        ]);
+      });
+    }
     art.querySelectorAll('[data-hero-axis]').forEach((svg) => {
-      tl.add(svg.querySelector(`[data-axis-set="${set}"]`), launch
-        ? [{at: 220, opacity: 0}, {at: 320, opacity: 1}, {at: 1000, opacity: 1}, {at: 1140, opacity: 0}]
-        : [{at: 0, opacity: 0}, {at: 120, opacity: 1}, ...blink(910)]);
+      tl.add(svg.querySelector(`[data-axis-set="${set}"]`), setKeys);
       const start = launch ? 240 : 0;
       tl.each(svg.querySelectorAll(`[data-axis-set="${set}"] [data-axis-arm]`), (i) => [
         {at: start + (i >> 1) * 30, strokeDashoffset: 1, easing: 'cubic-bezier(.2,.7,.2,1)'},
         {at: start + 380 + (i >> 1) * 30, strokeDashoffset: 0},
       ]);
-      tl.add(svg.querySelector(`[data-axis-ladder="${set}"]`), [
-        {at: 0, transform: shift(from), easing: ALT_EASE},
-        {at: landAt, transform: shift(to)},
-      ]);
+      if (!liteRun) {
+        tl.add(svg.querySelector(`[data-axis-ladder="${set}"]`), [
+          {at: 0, transform: shift(from), easing: ALT_EASE},
+          {at: landAt, transform: shift(to)},
+        ]);
+      }
     });
   };
 
@@ -735,7 +755,7 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
     const trace = strokeKeys([[260, 1, 'cubic-bezier(.5,0,.2,1)'], [980, 0]]).slice(0, -1);
     trace[trace.length - 1].easing = 'ease-in-out';
     tl.add(actor('trace'), [...trace, {at: 1180, opacity: 0, strokeDashoffset: 0}]);
-    animateAxis(tl, true);
+    animateAxis(tl, true, lite ? {run, g} : undefined);
   };
 
   /* Night -> day: landing (1200ms). The orbit winds back into the satellite
@@ -899,7 +919,7 @@ export function installHeroThemeSwitch(art: HTMLElement, altimeter: HTMLElement 
         {at: t + 260, opacity: 0, transform: 'scale(1.6)'},
       ];
     });
-    animateAxis(tl, false);
+    animateAxis(tl, false, lite ? {run, g} : undefined);
   };
 
   /* Theme flip: timed to the clip edge passing the title, so the page text

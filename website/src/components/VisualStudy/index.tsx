@@ -1259,12 +1259,56 @@ const LADDER_NAMES: Array<[number, string]> = [
   [GROUND_M, 'PAD'], [1e5, 'KÁRMÁN'], [3.6e7, 'GEO'], [3.844e8, 'MOON'], [7.99e8, 'ORBIT'],
 ];
 
+/** Launch ruler (set "h"): ticks plus decade labels, scrolled sideways. */
+function LadderH(): ReactNode {
+  return (
+    <g data-axis-ladder="h">
+      <path className={styles.axisMinor} d={H_TICKS} />
+      {LADDER_DECADES.map(([m, label]) => (
+        <text key={label} x={(axisPos(m) + 3).toFixed(1)} y="24">
+          {label}
+        </text>
+      ))}
+      {/* Two rows so close names (MOON / ORBIT) don't collide. */}
+      {LADDER_NAMES.map(([m, name], index) => (
+        <text key={name} className={styles.axisName} x={(axisPos(m) + 3).toFixed(1)} y={index % 2 ? -29 : -16}>
+          {name}
+        </text>
+      ))}
+    </g>
+  );
+}
+
+/** Landing ruler (set "v"): drops back to the pad. */
+function LadderV(): ReactNode {
+  return (
+    <g data-axis-ladder="v">
+      <path className={styles.axisMinor} d={V_TICKS} />
+      {LADDER_DECADES.map(([m, label]) => (
+        <text key={label} x="14" y={(-axisPos(m) + 4).toFixed(1)}>
+          {label}
+        </text>
+      ))}
+      {LADDER_NAMES.map(([m, name]) => (
+        <text key={name} className={styles.axisName} x="-14" y={(-axisPos(m) + 4).toFixed(1)} textAnchor="end">
+          {name}
+        </text>
+      ))}
+    </g>
+  );
+}
+
 /** Full-bleed axes + scrolling altitude ruler. Rendered once per scene (dark
  * ink in the clipped day scene, light in the night scene) so it reads on
  * both sides of the clip edge. Launch uses set "h", landing set "v". Arm
- * lengths are written by the controller. */
+ * lengths are written by the controller.
+ *
+ * The lite switch scrolls a second copy of the rulers in their own outer
+ * svg: a transform on the svg element is a compositor move, whereas the
+ * in-SVG ladder repaints the whole full-bleed axis svg every frame. */
 function HeroAxis({scene}: {scene: 'day' | 'night'}): ReactNode {
   return (
+    <>
     <svg className={`${styles.diagramArt} ${styles.axisLayer}`} data-hero-axis={scene} {...SVG_PROPS}>
       <g transform={`translate(${PAD.x} ${PAD.y})`} data-axis="" className={styles.axis}>
         {/* Launch: double horizontal rail, ruler scrolls sideways, square origin. */}
@@ -1272,20 +1316,7 @@ function HeroAxis({scene}: {scene: 'day' | 'night'}): ReactNode {
           {['l-3', 'l3', 'r-3', 'r3'].map((arm) => (
             <path key={arm} data-axis-arm={arm} pathLength="1" />
           ))}
-          <g data-axis-ladder="h">
-            <path className={styles.axisMinor} d={H_TICKS} />
-            {LADDER_DECADES.map(([m, label]) => (
-              <text key={label} x={(axisPos(m) + 3).toFixed(1)} y="24">
-                {label}
-              </text>
-            ))}
-            {/* Two rows so close names (MOON / ORBIT) don't collide. */}
-            {LADDER_NAMES.map(([m, name], index) => (
-              <text key={name} className={styles.axisName} x={(axisPos(m) + 3).toFixed(1)} y={index % 2 ? -29 : -16}>
-                {name}
-              </text>
-            ))}
-          </g>
+          <LadderH />
           <rect className={styles.axisOrigin} x="-6" y="-6" width="12" height="12" />
         </g>
         {/* Landing: vertical ruler axis plus a plain horizontal axis (no
@@ -1294,23 +1325,19 @@ function HeroAxis({scene}: {scene: 'day' | 'night'}): ReactNode {
           {['u', 'd', 'hl', 'hr'].map((arm) => (
             <path key={arm} data-axis-arm={arm} pathLength="1" />
           ))}
-          <g data-axis-ladder="v">
-            <path className={styles.axisMinor} d={V_TICKS} />
-            {LADDER_DECADES.map(([m, label]) => (
-              <text key={label} x="14" y={(-axisPos(m) + 4).toFixed(1)}>
-                {label}
-              </text>
-            ))}
-            {LADDER_NAMES.map(([m, name]) => (
-              <text key={name} className={styles.axisName} x="-14" y={(-axisPos(m) + 4).toFixed(1)} textAnchor="end">
-                {name}
-              </text>
-            ))}
-          </g>
+          <LadderV />
           <path className={styles.axisCross} d="M-10 0H10M0 -10V10" />
         </g>
       </g>
     </svg>
+    {(['h', 'v'] as const).map((set) => (
+      <svg key={set} className={`${styles.diagramArt} ${styles.ladderLayer}`} data-hero-ladder={set} data-ladder-scene={scene} {...SVG_PROPS}>
+        <g transform={`translate(${PAD.x} ${PAD.y})`} className={styles.axis}>
+          {set === 'h' ? <LadderH /> : <LadderV />}
+        </g>
+      </svg>
+    ))}
+    </>
   );
 }
 

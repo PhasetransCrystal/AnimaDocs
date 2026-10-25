@@ -225,6 +225,21 @@
 .axisLayer [data-axis],
 .axisLayer [data-axis] * { transform-box: view-box; transform-origin: 0 0; }
 .axisLayer :is(path, rect) { vector-effect: none; }
+/* Lite ruler copy (see HeroAxis): own composited svg, moved by a transform
+ * on the svg element; only the copy of the running set is mounted. The
+ * in-SVG ladders are dropped for the run so nothing paints twice. */
+.ladderLayer { display: none; opacity: 0; overflow: visible; }
+.ladderLayer path { vector-effect: none; }
+.ladderLayer[data-ladder-scene='day'] .axis { stroke: #111820; stroke-opacity: 0.55; }
+.ladderLayer[data-ladder-scene='day'] .axis text { fill: #111820; fill-opacity: 0.7; }
+.ladderLayer[data-ladder-scene='night'] .axis { stroke: #ece9e3; stroke-opacity: 0.6; }
+.ladderLayer[data-ladder-scene='night'] .axis text { fill: #ece9e3; fill-opacity: 0.75; }
+:global(html[data-hero-switching='desktop']) [data-lite-ladder='h'] .ladderLayer[data-hero-ladder='h'],
+:global(html[data-hero-switching='desktop']) [data-lite-ladder='v'] .ladderLayer[data-hero-ladder='v'] {
+  display: block;
+  will-change: transform, opacity;
+}
+[data-lite-ladder] [data-hero-axis] [data-axis-ladder] { display: none; }
 .actorDisc circle { fill: #d93f43; }
 
 /* Day: tiled atlas plate (restored from 3e7732b) ---------------------------- */
