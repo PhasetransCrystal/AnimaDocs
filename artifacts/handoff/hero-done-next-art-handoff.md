@@ -33,12 +33,13 @@
 ## 验证
 
 - 构建在 `website/` 下：`npx.cmd tsc --noEmit`、`npm.cmd run build`。
-- 本机生产预览在 3100 端口（服务 `website/build`，rebuild 后不用重启）。前端实际效果由用户自己测，我们只负责编译验证。
-- 远程测试机链路和真实 IP 只记在本地 `hero-switch-perf-handoff.md`，那个文件不提交。测试机上的 portproxy、"CDP 9223" 和本机 "AnimaDocs prod 3100" 防火墙规则还开着，hero 不再测量后需要用户自己清理。
+- 前端实际效果由用户自己测，我们只负责编译验证。
+- 远程测试机的地址和网络配置已从仓库清理。需要再测时由用户重新提供，不写进仓库。
+- 已用过的性能优化手段汇总见 `perf-techniques.md`（手机端优化可复用）。
 
 ## 规则
 
 - 每轮做检查点提交。推送要用户要求（部署只从 main 触发）。
-- 不提交 `website/docs/**`、`website/static/**`、`website/sidebars.ts`、`artifacts/handoff/hero-switch-perf-handoff.md`。
-- 提交前检查 IP：`git diff --cached | Select-String -Pattern '\b26\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'` 结果必须为空。
+- 不提交 `website/docs/**`、`website/static/**`、`website/sidebars.ts`。
+- 提交前检查 IP：`git diff --cached | Select-String -Pattern '\b\d{1,3}(\.\d{1,3}){3}\b'` 结果必须为空。
 - 不要把 node_modules 用 junction 挂进 worktree 之后再 `git worktree remove --force`，那样会删掉真实依赖。

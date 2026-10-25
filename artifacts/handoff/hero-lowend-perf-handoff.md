@@ -6,7 +6,7 @@
 
 1. 高性能机的动画效果不能受影响，视觉和美术副作用要尽量小。所有降载手段都挂在 `[data-art-lite]` 下。
 2. 需要简化动画时，优先砍背景底板相关的分层美术动画，例如相近元素合批。缩放点相关的圆、坐标系这类元素尽量不动。
-3. 必须在测试机上测，不是本机。远程链路见本地文件 `hero-switch-perf-handoff.md` 的"测试机远程测量链路"一节。那一节含真实 IP，不能提交；本文件不含 IP。
+3. 必须在测试机上测，不是本机。远程方式见 `hero-switch-perf-handoff.md` 的"测试机远程测量"一节；地址已从仓库清理，再测时由用户重新提供。
 4. 可以让 pool-astra（gpt-6-astra）参与交叉研究。用户提出的方向：降低动画部分的采样分辨率；进入主页时空闲预渲染日夜两套底板缓存，离开时释放。
 
 ## 当前状态
@@ -150,7 +150,6 @@ full 档全部不变（均在 `lite ? … : …` 或 `[data-art-lite]` 分支）
 
 ## 环境状态
 
-- 本机 3100 的生产服务和防火墙规则 "AnimaDocs prod 3100" 仍开着，只放行测试机。rebuild 后不需要重启服务。
-- 测试机上的 portproxy 和 "CDP 9223" 规则仍在，需要用户删除。
+- 远程测试链路已结束使用，地址和网络配置不再记录在仓库里。
 - 构建命令（在 `website/` 下）：`npx.cmd tsc --noEmit`、`npm.cmd run build`。
-- 每轮做一个检查点提交。不提交 `website/docs/**`、`website/static/**`、`website/sidebars.ts`。提交前跑 26.x IP 检查。
+- 每轮做一个检查点提交。不提交 `website/docs/**`、`website/static/**`、`website/sidebars.ts`。提交前跑 IP 检查（命令见 `hero-switch-perf-handoff.md` 末尾）。
