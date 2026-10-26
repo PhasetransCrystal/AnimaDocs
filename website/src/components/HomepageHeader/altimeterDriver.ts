@@ -46,6 +46,13 @@ export function bezier(x1: number, y1: number, x2: number, y2: number): (x: numb
 export const ALT_EASE = 'cubic-bezier(.45,0,.25,1)';
 const altEase = bezier(0.45, 0, 0.25, 1);
 
+/** Write a fixed reading (p = 0 ground .. 1 orbit) into the live spans. */
+export function writeAltitude(valueEl: HTMLElement, unitEl: HTMLElement, p: number): void {
+  const {value, unit} = formatAltitude(altitudeAt(p));
+  valueEl.textContent = value;
+  unitEl.textContent = unit;
+}
+
 /**
  * Roll the live number from `from` (0 ground / 1 orbit) to `to` between
  * startMs and endMs of the switch clock. Returns a stop function.

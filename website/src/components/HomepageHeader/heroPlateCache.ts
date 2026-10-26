@@ -28,7 +28,7 @@ const SVG_STYLES = [
   'transform', 'transform-origin', 'transform-box', 'shape-rendering',
 ] as const;
 
-function localUrls(value: string): string {
+export function localUrls(value: string): string {
   return value.replace(/url\(\s*(['"]?)(.*?)\1\s*\)/gi, (original, _quote, url: string) => {
     const hash = url.indexOf('#');
     return hash >= 0 && !url.startsWith('data:') ? `url(${url.slice(hash)})` : original;
@@ -36,8 +36,8 @@ function localUrls(value: string): string {
 }
 
 /** Clone and style together so omitted branches cannot misalign the live/clone walk. */
-function styledClone(live: Element, win: Window, omitDefs = false): Element | null {
-  if (live.matches('[data-plate-skip]') || (omitDefs && live.localName === 'defs')) return null;
+export function styledClone(live: Element, win: Window, omitDefs = false, keepSkipped = false): Element | null {
+  if ((!keepSkipped && live.matches('[data-plate-skip]')) || (omitDefs && live.localName === 'defs')) return null;
   const clone = live.cloneNode(false) as SVGElement;
   clone.removeAttribute('class');
   // Drop inline custom properties, animation declarations and will-change too.
@@ -53,7 +53,7 @@ function styledClone(live: Element, win: Window, omitDefs = false): Element | nu
   }
   for (const child of Array.from(live.childNodes)) {
     if (child.nodeType === 1) {
-      const copy = styledClone(child as Element, win, omitDefs);
+      const copy = styledClone(child as Element, win, omitDefs, keepSkipped);
       if (copy) clone.appendChild(copy);
     } else {
       clone.appendChild(child.cloneNode(true));

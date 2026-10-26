@@ -51,7 +51,9 @@ export default function useHeroPaging() {
     // CSS matches only the animated nodes, so toggling it restyles ~20
     // elements instead of the whole plate.
     const syncPause = () => {
-      const paused = scrolling || offscreen || switching();
+      // Hidden page: mobile browsers keep compositing a backgrounded tab for
+      // a while (and the snapshot for the tab switcher), so park the loops.
+      const paused = scrolling || offscreen || switching() || document.hidden;
       if ((art.dataset.artPaused === 'true') === paused) return;
       if (paused) art.dataset.artPaused = 'true';
       else delete art.dataset.artPaused;
@@ -292,6 +294,22 @@ export default function useHeroPaging() {
     measure();
     // Low-end GPUs get quantised art loops; see heroArtLite.ts.
     const stopLiteProbe = watchHeroArtLoad(art, () => art.dataset.artPaused === undefined && !switching());
+    const onVisibility = () => {
+      if (document.hidden) {
+        // Drop pending scroll work too: nothing paints while hidden.
+        window.cancelAnimationFrame(frame);
+        frame = 0;
+        window.clearTimeout(settleTimer);
+        window.clearTimeout(scrollIdleTimer);
+        scrolling = false;
+        delete section.dataset.scrolling;
+        finish();
+      }
+      syncPause();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', onVisibility);
+    window.addEventListener('pageshow', onVisibility);
     window.addEventListener('resize', cancelMotion);
     window.addEventListener('scroll', onScroll, {passive: true});
     window.addEventListener('scrollend', onScrollEnd);
@@ -312,6 +330,9 @@ export default function useHeroPaging() {
       window.clearTimeout(settleTimer);
       window.clearTimeout(scrollIdleTimer);
       themeObserver.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', onVisibility);
+      window.removeEventListener('pageshow', onVisibility);
       window.removeEventListener('resize', cancelMotion);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('scrollend', onScrollEnd);

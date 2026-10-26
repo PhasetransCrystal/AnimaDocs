@@ -168,6 +168,32 @@
   animation-play-state: paused !important;
 }
 
+/* Mobile plate switch (heroSceneBake.ts): the incoming scene as one baked
+ * bitmap inside a circle. The host is a 2R square scaled about the circle
+ * centre (compositor transform); the inner box is counter-scaled so the
+ * bitmap stays put. Hidden at rest; never created on wider screens. */
+.backgroundArt [data-hero-bake] {
+  border-radius: 50%;
+  display: none;
+  left: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+}
+.backgroundArt [data-hero-bake][data-live] { display: block; will-change: transform; }
+/* Inner box: art-sized, placed per run by heroThemeSwitch.ts. */
+.backgroundArt [data-hero-bake-inner] {
+  position: absolute;
+  will-change: transform;
+}
+.backgroundArt [data-hero-bake-inner] > :is(canvas, [data-hero-bake-veil]) {
+  height: 100%;
+  inset: 0;
+  position: absolute;
+  width: 100%;
+}
+
 /* Actor overlay: flat stand-ins, fixed colours (lives across the flip). */
 .actorLayer :is(path, circle, ellipse, line, rect) { vector-effect: none; }
 .actorLayer [data-actor] { opacity: 0; transform-box: view-box; transform-origin: 0 0; }
@@ -548,12 +574,13 @@
   .nightPlate {
     aspect-ratio: 1440 / 900;
     height: auto;
-    /* Drop the plate below the topline so the tick ring clears it. */
-    inset: 112px auto auto -78%;
+    /* Drop the plate below the topline so the tick ring clears it. Red star
+     * centre sits at ~72% of the hero width (focus x 1010 / 1440 of 215%). */
+    inset: 112px auto auto -79%;
     /* Render the drawing's upper bleed (grid + terraces extend to y=-240)
      * instead of fading it; .backgroundArt still clips at the hero frame. */
     overflow: visible;
-    width: 205%;
+    width: 215%;
   }
 
   .field .nightScene::after {

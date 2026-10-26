@@ -1445,7 +1445,7 @@ export default function VisualStudy({variant = 'field'}: VisualStudyProps): Reac
       </div>
       </div>
       <HeroActor />
-      <div className={styles.noiseLayer} />
+      <div className={styles.noiseLayer} data-hero-noise="" />
     </div>
   );
 }

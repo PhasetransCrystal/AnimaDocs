@@ -6,14 +6,15 @@
 import {AXIS_DECADE, CRAFT, HERO_ANCHORS} from '@site/src/components/VisualStudy';
 import {heroSwitchState, setHeroSwitchHandler} from '@site/src/utils/heroSwitchHook';
 
-import {ALT_EASE, bezier, driveAltimeter} from './altimeterDriver';
+import {ALT_EASE, bezier, driveAltimeter, writeAltitude} from './altimeterDriver';
 import {createPlateCache, type PlateCache, type PlateName} from './heroPlateCache';
+import {createSceneBake, type SceneBake} from './heroSceneBake';
 
 type Direction = 'launch' | 'landing';
 type Mode = 'desktop' | 'mobile';
 type Key = Record<string, string | number | undefined> & {at: number};
 type Target = Element | null | undefined;
-type ViewTransitionLike = {ready: Promise<void>; finished: Promise<void>};
+type ViewTransitionLike = {ready: Promise<void>; finished: Promise<void>; skipTransition?: () => void};
 type VTDocument = {startViewTransition?: (update: () => void) => ViewTransitionLike};
 
 /* Both directions share one length. Landing spends its first ~400ms winding
@@ -32,6 +33,17 @@ const REST_READING_OPACITY = 0.42;
 const PRIME_RELEASE_MS = 1500;
 const MOBILE_FADE_MS = 180;
 const MOBILE_REVEAL_MS = 600;
+/** Mobile reveal circle curve (both variants). */
+const MOBILE_CURVE = [0.6, 0, 0.3, 1] as const;
+/** Plate variant: one clock for circle, altimeter and ink. */
+const MOBILE_PLATE_MS = 760;
+/** Keyframe samples of the plate circle (scale / counter-scale pairs). */
+const MOBILE_PLATE_STEPS = 36;
+/** View Transition variant: capture + reveal can outlast the nominal clock on
+ * slow phones; ending early would cut the reveal (end-frame jump). */
+const MOBILE_VT_WATCHDOG_MS = 2600;
+/** ?heroSwitch=plate|vt picks the mobile variant (kept in localStorage). */
+const MOBILE_VARIANT_KEY = 'anima-hero-mobile-switch';
 const WATCHDOG_PAD_MS = 400;
 const MOBILE_MAX_WIDTH = 640;
 const TOGGLE_SELECTOR = '[class*="colorModeToggle"] button';
@@ -216,16 +228,30 @@ export function installHeroThemeSwitch(
    * idle time, so the switch fades bitmaps instead of re-rasterising the
    * SVG plates. Full-tier devices never build the cache. */
   const isLite = () => art.closest('[data-art-lite]') !== null;
+  const narrow = window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH}px)`);
+  /* Per-layer plates serve only the desktop choreography: phones never use
+   * them, and a hidden page must not serialise / decode SVG in idle time. */
   let plates: PlateCache | null = null;
   const syncPlates = () => {
-    if (plates || !isLite() || reducedMotion.matches) return;
+    if (plates || !isLite() || reducedMotion.matches || narrow.matches) return;
     plates = createPlateCache(art, {
-      busy: () => current !== null || art.dataset.heroPrimed !== undefined || art.closest('[data-art-paused]') !== null,
+      busy: () => document.hidden || current !== null || art.dataset.heroPrimed !== undefined || art.closest('[data-art-paused]') !== null,
     });
   };
   const liteObserver = new MutationObserver(syncPlates);
   if (art.parentElement) liteObserver.observe(art.parentElement, {attributes: true, attributeFilter: ['data-art-lite']});
   syncPlates();
+  /* Phones: one baked bitmap per scene for the plate variant of the switch. */
+  let bake: SceneBake | null = null;
+  const syncBake = () => {
+    syncPlates();
+    if (bake || reducedMotion.matches || !narrow.matches) return;
+    bake = createSceneBake(art, {
+      busy: () => current !== null || art.closest('[data-art-paused]') !== null,
+    });
+  };
+  narrow.addEventListener('change', syncBake);
+  syncBake();
 
   /** Swap a source SVG plate for its cached bitmap for this run. */
   const usePlate = (run: Run, name: PlateName, incoming = true): HTMLElement | null => {
@@ -349,7 +375,7 @@ export function installHeroThemeSwitch(
     });
   };
 
-  const begin = (mode: Mode, total: number, flip: () => void, target: Run['target']): Run => {
+  const begin = (mode: Mode, total: number, flip: () => void, target: Run['target'], watchdog = total + WATCHDOG_PAD_MS): Run => {
     const run: Run = {target, flipped: false, done: false, flip, timeline: new Timeline(total), extra: [], timers: [], stops: []};
     current = run;
     heroSwitchState.active = true;
@@ -359,7 +385,7 @@ export function installHeroThemeSwitch(
       altimeter.dataset.live = '';
       altimeter.dataset.hold = target === 'dark' ? 'day' : 'night';
     }
-    run.timers.push(window.setTimeout(() => finish(run), total + WATCHDOG_PAD_MS));
+    run.timers.push(window.setTimeout(() => finish(run), watchdog));
     return run;
   };
 
@@ -421,8 +447,10 @@ export function installHeroThemeSwitch(
 
   /* Altimeter: place out, number to the scale centre (transform only), tick
    * band scroll, speed bar, rolling number; then back. */
-  const animateAltimeter = (run: Run, dir: Direction, mode: Mode) => {
-    const tl = run.timeline;
+  /* Mobile: `start` holds everything at the start reading until then (the
+   * View Transition variant starts when the reveal circle reaches the
+   * altimeter), `tl` lets a run add a later-started timeline. */
+  const animateAltimeter = (run: Run, dir: Direction, mode: Mode, start = 0, tl = run.timeline) => {
     const launch = dir === 'launch';
     const end = tl.total;
     const landAt = mode === 'mobile' ? end : launch ? LAUNCH_LAND_MS : LANDING_LAND_MS;
@@ -430,17 +458,18 @@ export function installHeroThemeSwitch(
     const axis = mode === 'mobile' ? 'translateX' : 'translateY';
     const travel = (launch ? 1 : -1) * 120; // multiple of the 40px tick period
     tl.add(ticks, [
-      {at: 0, transform: `${axis}(0px)`, easing: ALT_EASE},
+      {at: start, transform: `${axis}(0px)`, easing: ALT_EASE},
       {at: landAt, transform: `${axis}(${travel}px)`},
     ]);
 
     const reading = alt('[data-alt-reading]');
     const rest = REST_READING_OPACITY;
     if (mode === 'mobile') {
+      const span = Math.min(150, (end - start) / 3);
       tl.add(reading, [
-        {at: 0, opacity: rest},
-        {at: 150, opacity: 1},
-        {at: end - 150, opacity: 1},
+        {at: start, opacity: rest},
+        {at: start + span, opacity: 1},
+        {at: end - span, opacity: 1},
         {at: end, opacity: rest},
       ]);
     } else {
@@ -485,7 +514,7 @@ export function installHeroThemeSwitch(
 
     const value = alt('[data-alt-value]');
     const unit = alt('[data-alt-unit]');
-    if (value && unit) run.stops.push(driveAltimeter(value, unit, launch ? 0 : 1, 0, landAt));
+    if (value && unit) run.stops.push(driveAltimeter(value, unit, launch ? 0 : 1, start, landAt));
   };
 
   /* Axis arms reach the hero edges; sized per run (resize-safe). Ticks on the
@@ -985,20 +1014,114 @@ export function installHeroThemeSwitch(
     );
   };
 
-  /* Mobile run: fade current plate, then a circle View Transition from the
-   * top centre; the new side is live so the altimeter keeps rolling. */
-  const runMobile = (flip: () => void, target: Run['target']): boolean => {
+  /* Mobile variant pick: ?heroSwitch=plate|vt (remembered), default plate. */
+  const mobileVariant = (): 'plate' | 'vt' => {
+    try {
+      const asked = new URLSearchParams(window.location.search).get('heroSwitch');
+      if (asked === 'plate' || asked === 'vt') window.localStorage.setItem(MOBILE_VARIANT_KEY, asked);
+      return window.localStorage.getItem(MOBILE_VARIANT_KEY) === 'vt' ? 'vt' : 'plate';
+    } catch {
+      return 'plate';
+    }
+  };
+
+  /* Circle keys for the plate variant: host scale s about the circle centre,
+   * inner counter-scale 1/s. Both interpolate linearly between samples, so
+   * samples are added until neighbouring radii differ by <= 20% (the product
+   * s * 1/s then stays within ~1% of 1 between samples: no visible wobble). */
+  const plateCircle = (R: number, total: number): Array<{at: number; s: number}> => {
+    const ease = bezier(...MOBILE_CURVE);
+    const r0 = 2;
+    const radius = (t: number) => r0 + (R - r0) * ease(t);
+    const times: number[] = [];
+    for (let i = 0; i <= MOBILE_PLATE_STEPS; i += 1) times.push(i / MOBILE_PLATE_STEPS);
+    const out: number[] = [times[0]];
+    for (let i = 1; i < times.length; i += 1) {
+      const split = (a: number, b: number, depth: number) => {
+        if (depth < 8 && radius(b) / radius(a) > 1.2) {
+          const m = (a + b) / 2;
+          split(a, m, depth + 1);
+          split(m, b, depth + 1);
+        } else {
+          out.push(b);
+        }
+      };
+      split(times[i - 1], times[i], 0);
+    }
+    return out.map((t) => ({at: t * total, s: radius(t) / R}));
+  };
+
+  /* Plate variant (no View Transition): base = live current scene (loops
+   * paused by useHeroPaging while switching), mask = a circle from the top
+   * centre, top = the incoming scene as one pre-baked bitmap. Circle and
+   * counter-scale are compositor transforms, so main-thread stalls (the ink
+   * restyle) do not stall the reveal. Hero copy inks as the edge passes the
+   * title; the document flips once at the end, under a fully covered art. */
+  const runMobilePlate = (flip: () => void, target: Run['target']): boolean => {
+    const to = target === 'dark' ? 'night' : 'day';
+    const host = bake?.get(to) ?? null;
+    const inner = host?.firstElementChild as HTMLElement | null;
+    if (!host || !inner) return false;
+    const total = MOBILE_PLATE_MS;
+    const run = begin('mobile', total, flip, target);
+    const g = measure(art);
+    const a = art.getBoundingClientRect();
+    // Top centre of the viewport, in art-local px.
+    const c: Point = [window.innerWidth / 2 - a.left, -a.top];
+    const R = Math.hypot(Math.max(c[0], g.w - c[0]), Math.max(c[1], g.h - c[1])) + 2;
+    host.style.left = `${n(c[0] - R)}px`;
+    host.style.top = `${n(c[1] - R)}px`;
+    host.style.width = host.style.height = `${n(2 * R)}px`;
+    inner.style.left = `${n(R - c[0])}px`;
+    inner.style.top = `${n(R - c[1])}px`;
+    inner.style.width = `${g.w}px`;
+    inner.style.height = `${g.h}px`;
+    host.dataset.live = '';
+    run.stops.push(() => {
+      delete host.dataset.live;
+      ['left', 'top', 'width', 'height'].forEach((p) => {
+        host.style.removeProperty(p);
+        inner.style.removeProperty(p);
+      });
+    });
+    const keys = plateCircle(R, total);
+    run.timeline.add(host, keys.map(({at, s}) => ({at, transform: `scale(${s.toFixed(5)})`, transformOrigin: '50% 50%'})));
+    run.timeline.add(inner, keys.map(({at, s}) => ({
+      at, transform: `scale(${(1 / s).toFixed(5)})`, transformOrigin: `${n(c[0])}px ${n(c[1])}px`,
+    })));
+    animateAltimeter(run, target === 'dark' ? 'launch' : 'landing', 'mobile');
+    const d = titleDistance(art, c);
+    const inkTime = d === null || d >= R
+      ? total / 2
+      : timeAtRadius(d, 2, R, {from: 0, to: total, curve: MOBILE_CURVE});
+    inkAt(run, Math.round(Math.min(total - 60, inkTime)));
+    Promise.all(run.timeline.anims.map((anim) => anim.finished)).then(
+      () => finish(run),
+      () => finish(run),
+    );
+    return true;
+  };
+
+  /* View Transition variant: fade current plate, then a circle View
+   * Transition from the top centre; the new side is live. */
+  const runMobileVT = (flip: () => void, target: Run['target']): boolean => {
     const doc = document as Document & VTDocument;
     if (typeof doc.startViewTransition !== 'function') return false;
     const total = MOBILE_FADE_MS + MOBILE_REVEAL_MS;
-    const run = begin('mobile', total, flip, target);
+    const run = begin('mobile', total, flip, target, MOBILE_VT_WATCHDOG_MS);
     const from = target === 'dark' ? 'day' : 'night';
     const to = target === 'dark' ? 'night' : 'day';
     run.timeline.add(scene(from), [
       {at: 0, opacity: 1, easing: 'ease-out'},
       {at: MOBILE_FADE_MS, opacity: 0},
     ]);
-    animateAltimeter(run, target === 'dark' ? 'launch' : 'landing', 'mobile');
+    const launch = target === 'dark';
+    // The old snapshot freezes whatever the altimeter shows at capture time,
+    // so it holds the start reading until the reveal; the live (new) side
+    // starts rolling as the circle edge reaches it (see vt.ready below).
+    const value = alt('[data-alt-value]');
+    const unit = alt('[data-alt-unit]');
+    if (value && unit) writeAltitude(value, unit, launch ? 0 : 1);
     run.timers.push(
       window.setTimeout(() => {
         if (run.done) return;
@@ -1020,16 +1143,41 @@ export function installHeroThemeSwitch(
           finish(run);
           return;
         }
+        // A run ended early (hidden page, watchdog) must not leave the
+        // browser holding and compositing full-page snapshots.
+        run.stops.push(() => {
+          try { vt.skipTransition?.(); } catch { /* already finished */ }
+        });
         vt.ready
           .then(() => {
             if (run.done) return;
-            const radius = Math.hypot(window.innerWidth / 2, window.innerHeight);
+            /* The snapshot box is the "snapshot containing block" (largest
+             * viewport incl. collapsed browser bars), not innerHeight. A
+             * percentage radius refers to that box: r% = r * hypot(w, h) /
+             * sqrt(2), and the farthest corner from the top centre is
+             * hypot(w / 2, h) <= sqrt(2) * hypot(w, h) / sqrt(2) for every
+             * aspect ratio, so 142% always covers the whole box. */
             run.extra.push(
               root.animate(
-                {clipPath: ['circle(0px at 50% 0px)', `circle(${n(radius)}px at 50% 0px)`]},
-                {duration: MOBILE_REVEAL_MS, easing: 'cubic-bezier(.6,0,.3,1)', pseudoElement: '::view-transition-new(root)'},
+                {clipPath: ['circle(0% at 50% 0%)', 'circle(142% at 50% 0%)']},
+                {duration: MOBILE_REVEAL_MS, easing: cssBezier(MOBILE_CURVE), pseudoElement: '::view-transition-new(root)', fill: 'both'},
               ),
             );
+            // Altimeter on the reveal clock, from the moment the edge
+            // reaches it (radius is measured in the same box estimate).
+            const box = Math.max(window.innerHeight, window.screen?.height ?? 0, document.documentElement.clientHeight);
+            const w = document.documentElement.clientWidth || window.innerWidth;
+            const fullR = 1.42 * Math.hypot(w, box) / Math.SQRT2;
+            const rect = altimeter?.getBoundingClientRect();
+            let start = 0;
+            if (rect) {
+              const nx = Math.max(rect.left, Math.min(w / 2, rect.right));
+              const reach = Math.hypot(nx - w / 2, Math.max(0, rect.top));
+              start = Math.round(timeAtRadius(Math.min(reach, fullR), 0, fullR, {from: 0, to: MOBILE_REVEAL_MS, curve: MOBILE_CURVE}));
+            }
+            const altTl = new Timeline(MOBILE_REVEAL_MS);
+            run.stops.push(() => altTl.cancel());
+            animateAltimeter(run, launch ? 'launch' : 'landing', 'mobile', Math.min(start, MOBILE_REVEAL_MS - 200), altTl);
           })
           .catch(() => undefined);
         vt.finished.then(
@@ -1045,7 +1193,11 @@ export function installHeroThemeSwitch(
     if (current) return true;
     if (typeof art.animate !== 'function' || !heroVisible(art)) return false;
     const target: Run['target'] = root.dataset.theme === 'dark' ? 'light' : 'dark';
-    if (window.innerWidth <= MOBILE_MAX_WIDTH) return runMobile(flip, target);
+    if (window.innerWidth <= MOBILE_MAX_WIDTH) {
+      // Plate variant falls back to the View Transition until its bake is ready.
+      if (mobileVariant() === 'plate' && runMobilePlate(flip, target)) return true;
+      return runMobileVT(flip, target);
+    }
     runDesktop(flip, target);
     return true;
   };
@@ -1072,7 +1224,10 @@ export function installHeroThemeSwitch(
     if (current) finish(current);
     unprime();
     liteObserver.disconnect();
+    narrow.removeEventListener('change', syncBake);
     plates?.dispose();
     plates = null;
+    bake?.dispose();
+    bake = null;
   };
 }
