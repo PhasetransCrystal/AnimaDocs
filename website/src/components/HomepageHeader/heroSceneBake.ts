@@ -20,6 +20,8 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 /** Only phones use the plate switch; wider screens never bake. */
 const MAX_WIDTH = 640;
 const px = (v: number) => v.toFixed(2);
+/** Height drift (CSS px) tolerated without re-baking. */
+const HEIGHT_SLACK = 16;
 
 type Paint = {color: string; image: string};
 type Serialized = {xml: string; back: Paint; veil: Paint | null};
@@ -42,7 +44,10 @@ function serializeScene(art: HTMLElement, scene: HTMLElement, w: number, h: numb
   const win = doc.defaultView!;
   const hidden = win.getComputedStyle(scene).display === 'none';
   if (hidden) {
-    scene.style.visibility = 'hidden';
+    // Opacity, not visibility: visibility inherits, so styledClone would
+    // inline `hidden` into every cloned node and the bitmap came out empty.
+    // Opacity stays on the scene box, which is never cloned.
+    scene.style.opacity = '0';
     scene.style.display = 'block';
   }
   try {
@@ -91,7 +96,7 @@ function serializeScene(art: HTMLElement, scene: HTMLElement, w: number, h: numb
   } finally {
     if (hidden) {
       scene.style.removeProperty('display');
-      scene.style.removeProperty('visibility');
+      scene.style.removeProperty('opacity');
     }
   }
 }
@@ -152,11 +157,30 @@ export function createSceneBake(art: HTMLElement, options: {busy?: () => boolean
         : win!.setTimeout(work, 32);
     }, delay);
   }
+  /* A canvas drawn while display:none is uploaded on its first visible
+   * frame, which made the first switch after load open with a ~250ms stall
+   * (4x CPU). Show the host for two idle frames, nearly transparent and
+   * clipped to one pixel, so that upload happens before any click. */
+  function warm(host: HTMLElement): void {
+    if (host.dataset.live !== undefined) return;
+    host.dataset.warm = '';
+    let frames = 0;
+    const step = () => {
+      frames += 1;
+      if (frames < 3 && !disposed && host.dataset.live === undefined) win!.requestAnimationFrame(step);
+      else delete host.dataset.warm;
+    };
+    win!.requestAnimationFrame(step);
+  }
   function checkSize(): boolean {
     const w = art.clientWidth;
     const h = art.clientHeight;
     const d = win!.devicePixelRatio || 1;
-    if (w === width && h === height && d === dpr) return false;
+    // The art is a few px taller in one theme than the other (hero copy
+    // metrics). Re-baking for that would drop both bitmaps on every switch
+    // and send the next quick switch to the View Transition fallback; the
+    // bitmap is stretched to the live box instead (<1.5% here, invisible).
+    if (w === width && d === dpr && Math.abs(h - height) <= HEIGHT_SLACK) return false;
     width = w;
     height = h;
     dpr = d;
@@ -173,12 +197,18 @@ export function createSceneBake(art: HTMLElement, options: {busy?: () => boolean
     if (disposed) return;
     if (!canWork()) { schedule(800); return; }
     if (checkSize() || width <= 0 || height <= 0) return;
-    // Only the inactive scene is baked: mounted fresh for the bake, its loops
-    // sit at phase 0, where they restart when the switch mounts it. The
-    // other scene waits until a theme change unmounts it.
-    const name: SceneName = doc.documentElement.dataset.theme === 'dark' ? 'day' : 'night';
+    // Both scenes are baked (inactive first), so the switch never has to fall
+    // back to the View Transition variant on the way back. styledClone rewinds
+    // loops to phase 0 for the clone only (restored in the same task), which
+    // is where they restart when the switch mounts the scene for real.
+    const inactive: SceneName = doc.documentElement.dataset.theme === 'dark' ? 'day' : 'night';
+    const order: SceneName[] = inactive === 'day' ? ['day', 'night'] : ['night', 'day'];
+    const name = order.find((s) => bakes.get(s)!.state === 'pending');
+    if (!name) return;
     const bake = bakes.get(name)!;
-    if (bake.state !== 'pending') return;
+    const next = () => {
+      if (Array.from(bakes.values()).some((b) => b.state === 'pending')) schedule(400);
+    };
     const source = art.querySelector<HTMLElement>(`[data-hero-scene="${name}"]`);
     if (!source) { bake.state = 'failed'; return; }
     const ratio = Math.max(1, Math.min(dpr, 2) * (art.closest('[data-art-lite]') ? 0.5 : 1));
@@ -189,6 +219,7 @@ export function createSceneBake(art: HTMLElement, options: {busy?: () => boolean
       if (mine !== generation) return;
       bake.state = 'failed';
       drop();
+      next();
     };
     try {
       const {xml, back, veil} = serializeScene(art, source, width, height);
@@ -211,11 +242,13 @@ export function createSceneBake(art: HTMLElement, options: {busy?: () => boolean
             applyPaint(bake.canvas.parentElement as HTMLElement, back);
             applyPaint(bake.veil, veil);
             bake.state = 'ready';
+            warm(bake.host);
           } catch {
             bake.state = 'failed';
           }
           image.removeAttribute('src');
           drop();
+          next();
         };
         draw();
       }, fail);

@@ -182,6 +182,9 @@
   top: 0;
 }
 .backgroundArt [data-hero-bake][data-live] { display: block; will-change: transform; }
+/* One-off upload warm-up after a bake (heroSceneBake.ts): 1px, near-zero alpha. */
+.backgroundArt [data-hero-bake][data-warm]:not([data-live]) { display: block; height: 1px; opacity: 0.004; width: 1px; }
+.backgroundArt [data-hero-bake][data-warm]:not([data-live]) [data-hero-bake-inner] { height: 100%; width: 100%; }
 /* Inner box: art-sized, placed per run by heroThemeSwitch.ts. */
 .backgroundArt [data-hero-bake-inner] {
   position: absolute;

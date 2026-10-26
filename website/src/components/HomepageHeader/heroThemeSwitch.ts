@@ -1163,21 +1163,12 @@ export function installHeroThemeSwitch(
                 {duration: MOBILE_REVEAL_MS, easing: cssBezier(MOBILE_CURVE), pseudoElement: '::view-transition-new(root)', fill: 'both'},
               ),
             );
-            // Altimeter on the reveal clock, from the moment the edge
-            // reaches it (radius is measured in the same box estimate).
-            const box = Math.max(window.innerHeight, window.screen?.height ?? 0, document.documentElement.clientHeight);
-            const w = document.documentElement.clientWidth || window.innerWidth;
-            const fullR = 1.42 * Math.hypot(w, box) / Math.SQRT2;
-            const rect = altimeter?.getBoundingClientRect();
-            let start = 0;
-            if (rect) {
-              const nx = Math.max(rect.left, Math.min(w / 2, rect.right));
-              const reach = Math.hypot(nx - w / 2, Math.max(0, rect.top));
-              start = Math.round(timeAtRadius(Math.min(reach, fullR), 0, fullR, {from: 0, to: MOBILE_REVEAL_MS, curve: MOBILE_CURVE}));
-            }
+            // Altimeter on the reveal clock from its first frame, like the
+            // plate variant: waiting for the edge to reach the altimeter read
+            // as a stalled number.
             const altTl = new Timeline(MOBILE_REVEAL_MS);
             run.stops.push(() => altTl.cancel());
-            animateAltimeter(run, launch ? 'launch' : 'landing', 'mobile', Math.min(start, MOBILE_REVEAL_MS - 200), altTl);
+            animateAltimeter(run, launch ? 'launch' : 'landing', 'mobile', 0, altTl);
           })
           .catch(() => undefined);
         vt.finished.then(
