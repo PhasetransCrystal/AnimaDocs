@@ -386,6 +386,10 @@
   .signalBar { flex-wrap: wrap; gap: 0.6rem 0.95rem; }
   .signalBarLine { flex-basis: 100%; order: 4; }
   .signalBarMeta { order: 5; }
+  /* Dark panel has a 1px top border, light a 4px accent: without this the
+     hero (and the art box) is 3px shorter in dark, so the full-height day
+     plate rescaled under the switch and the art shifted at the flip. */
+  :global([data-theme='dark']) .signalPanel:not(:where([data-hero-ink][data-theme='light'] *)) { padding-top: 3px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

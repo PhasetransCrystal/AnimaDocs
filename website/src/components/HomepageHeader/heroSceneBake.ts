@@ -50,6 +50,19 @@ function serializeScene(art: HTMLElement, scene: HTMLElement, w: number, h: numb
     scene.style.opacity = '0';
     scene.style.display = 'block';
   }
+  // Loops are read at phase 0, where a scene restarts when it mounts at the
+  // end of a switch. The active scene has been running since load, so without
+  // the rewind its bake showed e.g. the tick ring a few degrees off and the
+  // plate visibly jumped on the swap. Seek only (no pause/play): play state
+  // stays CSS-driven, so [data-art-paused] keeps working. Same task restore.
+  const seeks = new Set(scene.getAnimations({subtree: true}));
+  for (const def of Array.from(art.querySelectorAll('defs'))) {
+    for (const animation of def.getAnimations({subtree: true})) seeks.add(animation);
+  }
+  const saved = Array.from(seeks, (animation) => ({animation, time: animation.currentTime}));
+  for (const {animation} of saved) {
+    try { animation.currentTime = 0; } catch { /* detached timeline */ }
+  }
   try {
     const a = art.getBoundingClientRect();
     const out = doc.createElementNS(SVG_NS, 'svg');
@@ -94,6 +107,9 @@ function serializeScene(art: HTMLElement, scene: HTMLElement, w: number, h: numb
       veil: after.content && after.content !== 'none' ? paintOf(after) : null,
     };
   } finally {
+    for (const {animation, time} of saved) {
+      try { animation.currentTime = time; } catch { /* detached timeline */ }
+    }
     if (hidden) {
       scene.style.removeProperty('display');
       scene.style.removeProperty('opacity');

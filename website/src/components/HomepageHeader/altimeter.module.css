@@ -203,8 +203,10 @@
     width: 300%;
   }
 
-  /* High orbit: the lower half of the bar reads as filled. */
-  :global(html[data-theme='dark']) .ticks {
+  /* High orbit: the lower half of the bar reads as filled. Follows the hero
+   * ink scope, so during a phone switch the fill changes when the reveal
+   * passes the copy instead of popping in at the document flip. */
+  :global([data-theme='dark']) .ticks:not(:where([data-hero-ink][data-theme='light'] *)) {
     background:
       linear-gradient(0deg, currentColor 50%, transparent 50%) 0 0 / 100% 100% no-repeat,
       repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 8px);
