@@ -224,8 +224,13 @@ export function createSceneBake(art: HTMLElement, options: {busy?: () => boolean
     }
   }
 
-  const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => { checkSize(); });
-  observer?.observe(art);
+  /* No ResizeObserver on the art: useHeroPaging's observer re-measures the
+   * section inside its callback after the theme flip, which resizes the art
+   * in the same frame ("ResizeObserver loop completed with undelivered
+   * notifications"). Size is re-checked lazily instead: before every bake,
+   * on get() and on window resize. */
+  const onResize = () => { checkSize(); };
+  win.addEventListener('resize', onResize);
   const onVisible = () => { if (!doc.hidden) schedule(600); };
   doc.addEventListener('visibilitychange', onVisible);
   // A theme change unmounts the other scene, which may still need its bake.
@@ -245,7 +250,7 @@ export function createSceneBake(art: HTMLElement, options: {busy?: () => boolean
       generation += 1;
       cancel();
       drop();
-      observer?.disconnect();
+      win.removeEventListener('resize', onResize);
       themeObserver.disconnect();
       doc.removeEventListener('visibilitychange', onVisible);
       for (const {host, canvas} of bakes.values()) {
