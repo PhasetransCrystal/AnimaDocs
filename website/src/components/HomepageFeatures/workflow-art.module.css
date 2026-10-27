@@ -10,54 +10,40 @@
 
 .backgroundArt { z-index: 0; }
 .dayArt { background: var(--anima-art-grain), #f7f9f9; }
-.nightArt {
-  --plate-ink: #ece9e3;
-  background: var(--anima-art-grain), radial-gradient(ellipse 60% 120% at 96% 50%, #1c1d22, #16191f 58%, #14171d);
-  display: none;
-}
+.nightArt { background: var(--anima-art-grain), radial-gradient(ellipse at 76% 0%, #23262c, #181b21 60%, #14171d); display: none; }
 :global([data-theme='dark']) .dayArt { display: none; }
 :global([data-theme='dark']) .nightArt { display: block; }
 
+.polarGrid,
+.orbitStudy,
+.registrationStudy,
 .draftingRules {
   inset: 0;
   position: absolute;
 }
 
-/* Night: one observation plate, cropped at the right edge like the day construction study.
-   A dim red disc framed by a tick ring, crosshair and tilted orbits; a single satellite on the
-   main orbit carries the only leader. Static on purpose: no loops, nothing to rasterise per frame. */
-.plateWide,
-.plateTall {
-  fill: none;
-  height: 100%;
-  inset: 0;
-  overflow: visible;
-  position: absolute;
-  width: 100%;
-}
-/* Tall plate scales by height so the disc keeps its size behind 06 on any tablet width. */
-.plateTall { aspect-ratio: 400 / 780; display: none; inset: 0 auto auto 50%; transform: translateX(-50%); width: auto; }
+.polarGrid { fill: none; stroke: #d44d54; stroke-opacity: 0.12; stroke-width: 0.7; }
+.orbitStudy { fill: none; }
+.orbitBands { stroke: #f3f0e7; --orbit-narrow-opacity: 0.07; --orbit-wide-opacity: 0.045; }
+.orbitBandNarrow { stroke-opacity: var(--orbit-narrow-opacity, 1); stroke-width: clamp(16px, 1.4vw, 30px); }
+.orbitBandWide { stroke-opacity: var(--orbit-wide-opacity, 1); stroke-width: clamp(42px, 4.5vw, 88px); }
+.orbitArcs { stroke: #f3f0e7; stroke-opacity: 0.3; stroke-width: 2.2; }
+.registrationStudy { fill: none; stroke: #f3f0e7; stroke-opacity: 0.22; stroke-width: 1; }
+.registrationMark path { stroke-width: 1.4; }
 
-/* Background strength matches the day construction study (~.15–.25 effective line opacity):
-   the disc is a dim red wash, not a lit signal, so nodes and connectors stay on top. */
-.stars { fill: var(--plate-ink); opacity: 0.55; }
-.plusMarks { stroke: var(--plate-ink); stroke-opacity: 0.18; stroke-width: 0.8; }
+/* Star: centred on the arc group (same --star-x / --star-y as the circles), sized by board
+   width. Values match the previous observation plate so it stays a background wash. */
+.nightArt { --star-x: 80%; --star-y: -17%; }
+.orbitStudy circle { cx: var(--star-x); cy: var(--star-y); }
+.starSystem { aspect-ratio: 1; left: var(--star-x); position: absolute; top: var(--star-y); transform: translate(-50%, -50%); width: 100%; }
 .haloStop { stop-color: var(--anima-red); }
 .disc { fill: var(--anima-red); fill-opacity: 0.16; }
 .lensShade { fill: #0d1014; fill-opacity: 0.18; }
-.lensTwin { stroke: var(--plate-ink); stroke-opacity: 0.07; stroke-width: 0.8; }
-.tickMinor { stroke: var(--plate-ink); stroke-opacity: 0.12; stroke-width: 5; }
-.tickMajor { stroke: var(--plate-ink); stroke-opacity: 0.24; stroke-width: 11; }
-.crosshair { stroke: var(--plate-ink); stroke-opacity: 0.16; stroke-width: 0.8; }
-.rangeArc { stroke: var(--anima-red); stroke-dasharray: 2 4; stroke-opacity: 0.32; stroke-width: 1; }
-.orbitMain { stroke: var(--plate-ink); stroke-opacity: 0.16; stroke-width: 1; }
-.orbitDash { stroke: var(--plate-ink); stroke-dasharray: 3 7; stroke-opacity: 0.1; stroke-width: 0.8; }
-.orbitFaint { stroke: var(--plate-ink); stroke-opacity: 0.06; stroke-width: 0.7; }
-.comet { stroke: var(--plate-ink); stroke-linecap: round; stroke-opacity: 0.34; stroke-width: 1.4; }
-.leader { stroke: var(--plate-ink); stroke-opacity: 0.2; stroke-width: 0.8; }
-.leaderText { fill: var(--plate-ink); fill-opacity: 0.26; font-family: var(--ifm-font-family-monospace); font-size: 9px; letter-spacing: 0.12em; }
-.satRing { stroke: var(--plate-ink); stroke-opacity: 0.18; stroke-width: 0.8; }
-.sat { fill: var(--plate-ink); fill-opacity: 0.55; }
+.lensTwin { fill: none; stroke: #f3f0e7; stroke-opacity: 0.07; stroke-width: 0.8; }
+.planetOrbit { fill: none; stroke: #f3f0e7; stroke-opacity: 0.16; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.comet { fill: none; stroke: #f3f0e7; stroke-linecap: round; stroke-opacity: 0.34; stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+.planetRing { fill: none; stroke: #f3f0e7; stroke-opacity: 0.18; stroke-width: 0.8; vector-effect: non-scaling-stroke; }
+.planet { fill: #f3f0e7; fill-opacity: 0.55; }
 
 .decorativeCopy {
   display: flex;
@@ -72,7 +58,10 @@
   white-space: nowrap;
 }
 
-.nightLogSecondary { color: #d65b61; font-size: 7.5px; gap: 1px; line-height: 1.2; opacity: 0.38; right: 7%; top: 17%; }
+.nightLogPrimary,
+.nightLogSecondary { color: #f3f0e7; font-size: 7.5px; gap: 1px; line-height: 1.2; opacity: 0.13; }
+.nightLogPrimary { left: 44%; top: 65%; }
+.nightLogSecondary { right: 7%; top: 17%; }
 
 .draftingGrid {
   background-image:
@@ -124,6 +113,7 @@
 .dayMeasurement i { border-bottom: 1px solid currentColor; border-inline: 1px solid currentColor; flex: 1; height: 5px; }
 
 @media screen and (max-width: 1200px) {
+  .nightLogPrimary { font-size: 7px; }
   .nightLogSecondary, .dayAnnotation { font-size: 7px; }
 }
 
@@ -132,10 +122,16 @@
 }
 
 @media screen and (max-width: 996px) {
-  .nightLogSecondary, .dayAnnotation, .dayMeasurement { display: none; }
-  /* Stacked node grid: swap to the tall plate so the disc stays behind 06. */
-  .plateWide { display: none; }
-  .plateTall { display: block; }
+  .nightLogPrimary, .nightLogSecondary, .dayAnnotation, .dayMeasurement { display: none; }
+  .registrationMark:nth-child(2), .registrationMark:nth-child(4) { display: none; }
+  .polarGrid circle:nth-child(even) { display: none; }
+  .polarGrid { stroke-opacity: 0.075; }
+  .nightArt { --star-x: 82%; --star-y: -8%; }
+  .orbitBands { --orbit-narrow-opacity: 0.05; --orbit-wide-opacity: 0.035; }
+  .orbitBandNarrow { stroke-width: 16px; }
+  .orbitBandWide { stroke-width: 32px; }
+  .orbitArcs { stroke-width: 2; stroke-opacity: 0.18; }
+  .registrationStudy { stroke-opacity: 0.16; }
   .constructionStudy { opacity: 0.45; right: -160px; top: 32%; width: 420px; }
   .daySwatches { left: 42%; top: 25px; }
   .daySwatches span { display: none; }

@@ -2,187 +2,155 @@ import {useId, type ReactNode} from 'react';
 
 import styles from './workflow-art.module.css';
 
-type Pt = {x: number; y: number};
+const registrationPositions = [12, 31, 50, 69, 88];
+const polarRadii = [8, 14, 20, 26, 32, 38, 44, 50, 56, 62, 68, 74, 80, 86, 92, 98];
+const rayAngles = Array.from({length: 19}, (_value, index) => index * 10 - 90);
+// Star centre in board percentages (x of width, y of height). CSS mirrors these as
+// --star-x / --star-y so the stacked layout can move arcs and star together; the
+// attributes are the no-CSS fallback.
+const STAR_CX = '80%';
+const STAR_CY = '-17%';
+// Concentric arcs around the star (SVG % of the normalised diagonal). The gap widens
+// slowly (8 → 12) instead of the original even 13% steps.
+const orbitArcs = [
+  {radius: 24, opacity: 1},
+  {radius: 31, opacity: 0.76},
+  {radius: 38.5, opacity: 0.56},
+  {radius: 46.5, opacity: 0.4},
+  {radius: 55, opacity: 0.27},
+  {radius: 64, opacity: 0.16},
+  {radius: 73.5, opacity: 0.08},
+];
+const bandRadii = {narrow: '27.5%', wide: '50.5%'};
 
-type Orbit = {rx: number; ry?: number; rot: number; tone: 'main' | 'dash' | 'faint'};
+// Star system SVG: 1 unit = board width / 1000, origin = star centre.
+const DISC_R = 135;
+/** Planet orbit: a narrow ellipse whose long axis runs from past the star down-left to the core node. */
+const ORBIT = {cx: -65, cy: 69, rx: 270, ry: 85, rot: -34};
+/** Planet position on the orbit (deg). 0 = upper-right apex, 180 = lower-left apex near the core node;
+ *  0–180 is the near (lower) branch, 180–360 the far (upper) branch hidden behind the disc. */
+const PLANET_DEG = 200;
 
-/** One observation plate. Every orbit is centred on the disc. */
-type Plate = {
-  w: number;
-  h: number;
-  c: Pt;
-  r: number;
-  /** orbits[0] is solved to pass through the satellite. */
-  orbits: Orbit[];
-  sat: Pt;
-  /** Leader direction from the satellite: 1 = right, -1 = left. */
-  lead: 1 | -1;
-  plus: Pt[];
-  stars: number;
-  seed: number;
-  /** Draw the leader + caption (skipped where the node grid leaves no free cell). */
-  label: boolean;
-  fit: 'slice' | 'meet';
-};
+const fx = (v: number) => Math.round(v * 10) / 10;
 
-// Background placement: the disc is anchored at the right edge (like the day construction
-// study), half cropped and mostly hidden behind the output nodes, so it frames the board
-// instead of competing with the 06 core node.
-const WIDE: Plate = {
-  w: 1200,
-  h: 360,
-  c: {x: 1150, y: 180},
-  r: 150,
-  orbits: [
-    {rx: 520, rot: -12, tone: 'main'},
-    {rx: 380, ry: 120, rot: 14, tone: 'dash'},
-    {rx: 260, ry: 64, rot: -30, tone: 'faint'},
-  ],
-  // Free top-row cell above 08 (image encode).
-  sat: {x: 850, y: 108},
-  lead: 1,
-  plus: [{x: 96, y: 60}, {x: 318, y: 52}, {x: 70, y: 300}, {x: 560, y: 304}],
-  stars: 40,
-  seed: 61,
-  label: true,
-  fit: 'slice',
-};
-
-const TALL: Plate = {
-  w: 400,
-  h: 780,
-  c: {x: 400, y: 250},
-  r: 150,
-  orbits: [
-    {rx: 320, rot: 10, tone: 'main'},
-    {rx: 300, ry: 110, rot: -24, tone: 'dash'},
-    {rx: 220, ry: 60, rot: 36, tone: 'faint'},
-  ],
-  // Centre gutter between 01 and 02, above the canvas connector.
-  sat: {x: 200, y: 150},
-  lead: -1,
-  plus: [{x: 34, y: 34}, {x: 26, y: 612}, {x: 378, y: 706}],
-  stars: 24,
-  seed: 23,
-  label: false,
-  fit: 'meet',
-};
-
-const f = (v: number) => Math.round(v * 10) / 10;
-const rad = (deg: number) => (deg * Math.PI) / 180;
-
-function rotate(p: Pt, deg: number): Pt {
-  const a = rad(deg);
-  return {x: p.x * Math.cos(a) - p.y * Math.sin(a), y: p.x * Math.sin(a) + p.y * Math.cos(a)};
+function orbitXY(deg: number): [number, number] {
+  const t = (deg * Math.PI) / 180;
+  const r = (ORBIT.rot * Math.PI) / 180;
+  const x = ORBIT.rx * Math.cos(t);
+  const y = ORBIT.ry * Math.sin(t);
+  return [fx(ORBIT.cx + x * Math.cos(r) - y * Math.sin(r)), fx(ORBIT.cy + x * Math.sin(r) + y * Math.cos(r))];
 }
 
-/** Point on a centred, rotated ellipse at parameter theta (radians). */
-function onOrbit(c: Pt, rx: number, ry: number, rot: number, theta: number): Pt {
-  const p = rotate({x: rx * Math.cos(theta), y: ry * Math.sin(theta)}, rot);
-  return {x: c.x + p.x, y: c.y + p.y};
+/** Clockwise orbit arc from `from` to `to` degrees, split into ≤90° segments so flags stay unambiguous. */
+function orbitArc(from: number, to: number): string {
+  const steps = Math.max(1, Math.ceil((to - from) / 90));
+  let d = `M${orbitXY(from).join(' ')}`;
+  for (let i = 1; i <= steps; i += 1) {
+    d += ` A${ORBIT.rx} ${ORBIT.ry} ${ORBIT.rot} 0 1 ${orbitXY(from + ((to - from) * i) / steps).join(' ')}`;
+  }
+  return d;
 }
 
-function seeded(seed: number): () => number {
-  let s = seed;
-  return () => {
-    s = (s * 16807) % 2147483647;
-    return s / 2147483647;
-  };
-}
-
-function ObservationPlate({plate, className, uid}: {plate: Plate; className: string; uid: string}): ReactNode {
-  const {w, h, c, r, sat, lead} = plate;
+function StarSystem({uid}: {uid: string}): ReactNode {
   const clipId = `${uid}-disc`;
   const haloId = `${uid}-halo`;
-
-  // Solve the main orbit's ry so the satellite sits exactly on it.
-  const [main, ...rest] = plate.orbits;
-  const local = rotate({x: sat.x - c.x, y: sat.y - c.y}, -main.rot);
-  const mainRy = Math.abs(local.y) / Math.sqrt(Math.max(0.05, 1 - (local.x / main.rx) ** 2));
-  const theta = Math.atan2(local.y / mainRy, local.x / main.rx);
-  const tail = onOrbit(c, main.rx, mainRy, main.rot, theta - 0.55 * lead);
-  const head = onOrbit(c, main.rx, mainRy, main.rot, theta - 0.06 * lead);
-  const comet = `M${f(tail.x)} ${f(tail.y)} A${f(main.rx)} ${f(mainRy)} ${main.rot} 0 ${lead > 0 ? 1 : 0} ${f(head.x)} ${f(head.y)}`;
-
-  const rand = seeded(plate.seed);
-  const stars = Array.from({length: plate.stars}, () => ({x: f(rand() * w), y: f(rand() * h), s: rand()}))
-    // Keep the disc and its tick ring clear of dust.
-    .filter((s) => Math.hypot(s.x - c.x, s.y - c.y) > r + 40);
-
-  const tickR = r + 24;
-  const tickCirc = 2 * Math.PI * tickR;
-  const arm = r + 46;
-  const gap = 10;
-  const rangeR = r + 62;
-  const ra = onOrbit(c, rangeR, rangeR, 0, rad(198));
-  const rb = onOrbit(c, rangeR, rangeR, 0, rad(246));
-  const jog = {x: sat.x + 16 * lead, y: sat.y + 16};
-  const leadEnd = jog.x + 92 * lead;
+  const behindId = `${uid}-behind`;
+  const planet = orbitXY(PLANET_DEG);
 
   return (
-    <svg className={className} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio={`xMidYMid ${plate.fit}`} focusable="false">
+    <svg className={styles.starSystem} viewBox="-500 -500 1000 1000" focusable="false">
       <defs>
         <clipPath id={clipId}>
-          <circle cx={c.x} cy={c.y} r={r} />
+          <circle r={DISC_R} />
         </clipPath>
-        <radialGradient id={haloId} cx={c.x} cy={c.y} r={r * 1.9} gradientUnits="userSpaceOnUse">
+        <radialGradient id={haloId}>
           <stop className={styles.haloStop} offset="0.5" stopOpacity="0.07" />
           <stop className={styles.haloStop} offset="1" stopOpacity="0" />
         </radialGradient>
+        {/* The far half of the orbit passes behind the star. */}
+        <mask id={behindId} maskUnits="userSpaceOnUse" x="-1000" y="-1000" width="2000" height="2000">
+          <rect x="-1000" y="-1000" width="2000" height="2000" fill="white" />
+          <circle r={DISC_R + 3} fill="black" />
+        </mask>
       </defs>
-      <g className={styles.stars}>
-        {stars.map((s, i) => (
-          <circle key={i} cx={s.x} cy={s.y} r={s.s > 0.86 ? 1.3 : 0.75} opacity={f(0.25 + s.s * 0.4)} />
-        ))}
-      </g>
-      <g className={styles.plusMarks}>
-        {plate.plus.map((p) => <path key={`${p.x}-${p.y}`} d={`M${p.x - 4} ${p.y} H${p.x + 4} M${p.x} ${p.y - 4} V${p.y + 4}`} />)}
-      </g>
-      <circle cx={c.x} cy={c.y} r={r * 1.9} fill={`url(#${haloId})`} />
-      <circle className={styles.disc} cx={c.x} cy={c.y} r={r} />
-      <circle className={styles.lensShade} clipPath={`url(#${clipId})`} cx={c.x + r * 0.3} cy={c.y - r * 0.2} r={r * 0.96} />
-      <circle className={styles.lensTwin} cx={c.x + r * 0.3} cy={c.y - r * 0.2} r={r * 0.96} />
-      <circle className={styles.tickMinor} cx={c.x} cy={c.y} r={tickR} strokeDasharray={`1 ${f(tickCirc / 120 - 1)}`} />
-      <circle className={styles.tickMajor} cx={c.x} cy={c.y} r={tickR} strokeDasharray={`1.6 ${f(tickCirc / 12 - 1.6)}`} />
-      <path
-        className={styles.crosshair}
-        d={`M${c.x - arm} ${c.y} H${c.x - gap} M${c.x + gap} ${c.y} H${c.x + arm} M${c.x} ${c.y - arm} V${c.y - gap} M${c.x} ${c.y + gap} V${c.y + arm}`}
-      />
-      <path className={styles.rangeArc} d={`M${f(ra.x)} ${f(ra.y)} A${rangeR} ${rangeR} 0 0 1 ${f(rb.x)} ${f(rb.y)}`} />
-      <g className={styles.orbits}>
-        <ellipse className={styles.orbitMain} cx={c.x} cy={c.y} rx={main.rx} ry={f(mainRy)} transform={`rotate(${main.rot} ${c.x} ${c.y})`} />
-        {rest.map((o) => (
-          <ellipse
-            key={`${o.rx}-${o.rot}`}
-            className={o.tone === 'dash' ? styles.orbitDash : styles.orbitFaint}
-            cx={c.x}
-            cy={c.y}
-            rx={o.rx}
-            ry={o.ry}
-            transform={`rotate(${o.rot} ${c.x} ${c.y})`}
-          />
-        ))}
-      </g>
-      <path className={styles.comet} d={comet} />
-      {plate.label && (
-        <>
-          <path className={styles.leader} d={`M${sat.x + 5 * lead} ${sat.y + 5} L${jog.x} ${jog.y} H${leadEnd}`} />
-          <text className={styles.leaderText} x={leadEnd} y={jog.y - 5} textAnchor={lead > 0 ? 'end' : 'start'}>SIGNAL / 06</text>
-        </>
-      )}
-      <circle className={styles.satRing} cx={sat.x} cy={sat.y} r="8" />
-      <circle className={styles.sat} cx={sat.x} cy={sat.y} r="3.2" />
+      <circle r={fx(DISC_R * 1.9)} fill={`url(#${haloId})`} />
+      <circle className={styles.disc} data-star-disc="" r={DISC_R} />
+      <circle className={styles.lensShade} clipPath={`url(#${clipId})`} cx={fx(DISC_R * 0.3)} cy={fx(DISC_R * -0.2)} r={fx(DISC_R * 0.96)} />
+      <circle className={styles.lensTwin} cx={fx(DISC_R * 0.3)} cy={fx(DISC_R * -0.2)} r={fx(DISC_R * 0.96)} />
+      <path className={styles.planetOrbit} data-orbit-side="near" d={orbitArc(0, 180)} />
+      <path className={styles.planetOrbit} data-orbit-side="far" d={orbitArc(180, 360)} mask={`url(#${behindId})`} />
+      <path className={styles.comet} d={orbitArc(PLANET_DEG - 46, PLANET_DEG - 4)} />
+      <circle className={styles.planetRing} cx={planet[0]} cy={planet[1]} r="4.6" />
+      <circle className={styles.planet} data-planet="" cx={planet[0]} cy={planet[1]} r="1.8" />
     </svg>
   );
 }
 
 function NightStudy(): ReactNode {
-  const uid = `workflow-night-${useId().replace(/:/g, '')}`;
+  const maskId = `workflow-orbit-${useId().replace(/:/g, '')}`;
+  const bandsId = `${maskId}-bands`;
+  const marksId = `${maskId}-marks`;
+  const marksMaskId = `${maskId}-marks-mask`;
 
   return (
     <div className={styles.nightArt} data-workflow-art="night" data-art-mode="night">
-      <ObservationPlate plate={WIDE} className={styles.plateWide} uid={`${uid}-w`} />
-      <ObservationPlate plate={TALL} className={styles.plateTall} uid={`${uid}-t`} />
+      <svg className={styles.polarGrid} width="100%" height="100%" focusable="false">
+        {polarRadii.map((radius) => <circle key={radius} cx="-8%" cy="78%" r={`${radius}%`} />)}
+        <svg data-polar-origin="true" x="-8%" y="78%" width="1" height="1" overflow="visible" focusable="false">
+          {rayAngles.map((angle) => (
+            <line key={angle} data-polar-angle={angle} x1="0" y1="0" x2="4096" y2="0" transform={`rotate(${angle})`} />
+          ))}
+        </svg>
+      </svg>
+      <StarSystem uid={maskId} />
+      <svg className={styles.orbitStudy} width="100%" height="100%" focusable="false">
+        <defs>
+          <g id={bandsId}>
+            <circle className={styles.orbitBandNarrow} data-orbit-band="narrow" cx={STAR_CX} cy={STAR_CY} r={bandRadii.narrow} />
+            <circle className={styles.orbitBandWide} data-orbit-band="wide" cx={STAR_CX} cy={STAR_CY} r={bandRadii.wide} />
+          </g>
+          <g id={marksId}>
+            {registrationPositions.map((position) => (
+              <g key={position} className={styles.registrationMark}>
+                <line x1={`${position}%`} x2={`${position}%`} y1="0" y2="18" />
+                <line x1={`${position}%`} x2={`${position}%`} y1="46" y2="100%" />
+                <svg x={`${position}%`} y="26" width="14" height="12" overflow="visible">
+                  <path d="M-6 6 H6 M0 0 V12" />
+                </svg>
+              </g>
+            ))}
+          </g>
+          <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%">
+            <rect width="100%" height="100%" fill="white" />
+            <use href={`#${marksId}`} stroke="black" strokeWidth="1" />
+          </mask>
+          <mask id={marksMaskId} maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%">
+            <rect width="100%" height="100%" fill="white" />
+            <use href={`#${bandsId}`} stroke="black" />
+          </mask>
+        </defs>
+        <g mask={`url(#${maskId})`}>
+          <g className={styles.orbitBands}>
+            <use href={`#${bandsId}`} />
+          </g>
+          <g className={styles.orbitArcs}>
+            {orbitArcs.map(({radius, opacity}) => (
+              <circle key={radius} data-orbit-radius={radius} cx={STAR_CX} cy={STAR_CY} r={`${radius}%`} opacity={opacity} />
+            ))}
+          </g>
+        </g>
+        <g className={styles.registrationStudy} mask={`url(#${marksMaskId})`}>
+          <use href={`#${marksId}`} />
+        </g>
+      </svg>
+      <div className={`${styles.decorativeCopy} ${styles.nightLogPrimary}`}>
+        <span>0000: 7F 45 4C 46 / 02 01 00 00</span>
+        <span>0010: 00 00 00 00 / 28 C0 7F FF</span>
+        <span>0020: 10 00 A8 3E / 00 00 00 00</span>
+        <span>0030: 03 FF 00 00 / 7E 18 40 00</span>
+        <span>0040: .... .... .... ....</span>
+        <span>0x00007ff0 :: [0000] / &lt;null&gt;</span>
+      </div>
       <div className={`${styles.decorativeCopy} ${styles.nightLogSecondary}`}>
         <span>R00 00000000 / R01 7FF03C18</span>
         <span>R02 00001000 / R03 00000000</span>
