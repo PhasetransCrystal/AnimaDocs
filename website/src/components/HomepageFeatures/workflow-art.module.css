@@ -12,7 +12,7 @@
 .dayArt { background: var(--anima-art-grain), #f7f9f9; }
 .nightArt {
   --plate-ink: #ece9e3;
-  background: var(--anima-art-grain), radial-gradient(ellipse 70% 90% at 50% 47%, #1b1e24, #111419 62%, #0d1014);
+  background: var(--anima-art-grain), radial-gradient(ellipse 60% 120% at 96% 50%, #1c1d22, #16191f 58%, #14171d);
   display: none;
 }
 :global([data-theme='dark']) .dayArt { display: none; }
@@ -23,9 +23,9 @@
   position: absolute;
 }
 
-/* Night: one observation plate. A flat red disc sits behind the 06 core node, framed by a
-   tick ring, crosshair and tilted orbits; a single satellite on the main orbit carries the
-   only leader. Static on purpose: no loops to pause, nothing to rasterise per frame. */
+/* Night: one observation plate, cropped at the right edge like the day construction study.
+   A dim red disc framed by a tick ring, crosshair and tilted orbits; a single satellite on the
+   main orbit carries the only leader. Static on purpose: no loops, nothing to rasterise per frame. */
 .plateWide,
 .plateTall {
   fill: none;
@@ -38,24 +38,26 @@
 /* Tall plate scales by height so the disc keeps its size behind 06 on any tablet width. */
 .plateTall { aspect-ratio: 400 / 780; display: none; inset: 0 auto auto 50%; transform: translateX(-50%); width: auto; }
 
-.stars { fill: var(--plate-ink); }
-.plusMarks { stroke: var(--plate-ink); stroke-opacity: 0.32; stroke-width: 0.8; }
+/* Background strength matches the day construction study (~.15–.25 effective line opacity):
+   the disc is a dim red wash, not a lit signal, so nodes and connectors stay on top. */
+.stars { fill: var(--plate-ink); opacity: 0.55; }
+.plusMarks { stroke: var(--plate-ink); stroke-opacity: 0.18; stroke-width: 0.8; }
 .haloStop { stop-color: var(--anima-red); }
-.disc { fill: var(--anima-red); fill-opacity: 0.86; }
-.lensShade { fill: #0d1014; fill-opacity: 0.16; }
-.lensTwin { stroke: var(--plate-ink); stroke-opacity: 0.14; stroke-width: 0.8; }
-.tickMinor { stroke: var(--plate-ink); stroke-opacity: 0.3; stroke-width: 5; }
-.tickMajor { stroke: var(--plate-ink); stroke-opacity: 0.55; stroke-width: 11; }
-.crosshair { stroke: var(--plate-ink); stroke-opacity: 0.4; stroke-width: 0.8; }
-.rangeArc { stroke: var(--anima-red); stroke-dasharray: 2 4; stroke-opacity: 0.55; stroke-width: 1; }
-.orbitMain { stroke: var(--plate-ink); stroke-opacity: 0.34; stroke-width: 1; }
-.orbitDash { stroke: var(--plate-ink); stroke-dasharray: 3 7; stroke-opacity: 0.2; stroke-width: 0.8; }
-.orbitFaint { stroke: var(--plate-ink); stroke-opacity: 0.12; stroke-width: 0.7; }
-.comet { stroke: var(--plate-ink); stroke-linecap: round; stroke-opacity: 0.75; stroke-width: 1.6; }
-.leader { stroke: var(--plate-ink); stroke-opacity: 0.4; stroke-width: 0.8; }
-.leaderText { fill: var(--plate-ink); fill-opacity: 0.45; font-family: var(--ifm-font-family-monospace); font-size: 9px; letter-spacing: 0.12em; }
-.satRing { stroke: var(--plate-ink); stroke-opacity: 0.35; stroke-width: 0.8; }
-.sat { fill: var(--plate-ink); }
+.disc { fill: var(--anima-red); fill-opacity: 0.16; }
+.lensShade { fill: #0d1014; fill-opacity: 0.18; }
+.lensTwin { stroke: var(--plate-ink); stroke-opacity: 0.07; stroke-width: 0.8; }
+.tickMinor { stroke: var(--plate-ink); stroke-opacity: 0.12; stroke-width: 5; }
+.tickMajor { stroke: var(--plate-ink); stroke-opacity: 0.24; stroke-width: 11; }
+.crosshair { stroke: var(--plate-ink); stroke-opacity: 0.16; stroke-width: 0.8; }
+.rangeArc { stroke: var(--anima-red); stroke-dasharray: 2 4; stroke-opacity: 0.32; stroke-width: 1; }
+.orbitMain { stroke: var(--plate-ink); stroke-opacity: 0.16; stroke-width: 1; }
+.orbitDash { stroke: var(--plate-ink); stroke-dasharray: 3 7; stroke-opacity: 0.1; stroke-width: 0.8; }
+.orbitFaint { stroke: var(--plate-ink); stroke-opacity: 0.06; stroke-width: 0.7; }
+.comet { stroke: var(--plate-ink); stroke-linecap: round; stroke-opacity: 0.34; stroke-width: 1.4; }
+.leader { stroke: var(--plate-ink); stroke-opacity: 0.2; stroke-width: 0.8; }
+.leaderText { fill: var(--plate-ink); fill-opacity: 0.26; font-family: var(--ifm-font-family-monospace); font-size: 9px; letter-spacing: 0.12em; }
+.satRing { stroke: var(--plate-ink); stroke-opacity: 0.18; stroke-width: 0.8; }
+.sat { fill: var(--plate-ink); fill-opacity: 0.55; }
 
 .decorativeCopy {
   display: flex;

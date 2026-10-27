@@ -6,7 +6,7 @@ type Pt = {x: number; y: number};
 
 type Orbit = {rx: number; ry?: number; rot: number; tone: 'main' | 'dash' | 'faint'};
 
-/** One observation plate. The disc sits behind the 06 core node; every orbit is centred on it. */
+/** One observation plate. Every orbit is centred on the disc. */
 type Plate = {
   w: number;
   h: number;
@@ -25,21 +25,24 @@ type Plate = {
   fit: 'slice' | 'meet';
 };
 
+// Background placement: the disc is anchored at the right edge (like the day construction
+// study), half cropped and mostly hidden behind the output nodes, so it frames the board
+// instead of competing with the 06 core node.
 const WIDE: Plate = {
   w: 1200,
   h: 360,
-  c: {x: 600, y: 170},
-  r: 124,
+  c: {x: 1150, y: 180},
+  r: 150,
   orbits: [
-    {rx: 580, rot: 8, tone: 'main'},
-    {rx: 440, ry: 150, rot: -14, tone: 'dash'},
-    {rx: 300, ry: 60, rot: 30, tone: 'faint'},
+    {rx: 520, rot: -12, tone: 'main'},
+    {rx: 380, ry: 120, rot: 14, tone: 'dash'},
+    {rx: 260, ry: 64, rot: -30, tone: 'faint'},
   ],
   // Free top-row cell above 08 (image encode).
-  sat: {x: 830, y: 100},
+  sat: {x: 850, y: 108},
   lead: 1,
-  plus: [{x: 96, y: 52}, {x: 318, y: 44}, {x: 1104, y: 56}, {x: 70, y: 306}, {x: 872, y: 312}, {x: 1142, y: 292}],
-  stars: 64,
+  plus: [{x: 96, y: 60}, {x: 318, y: 52}, {x: 70, y: 300}, {x: 560, y: 304}],
+  stars: 40,
   seed: 61,
   label: true,
   fit: 'slice',
@@ -48,18 +51,18 @@ const WIDE: Plate = {
 const TALL: Plate = {
   w: 400,
   h: 780,
-  c: {x: 200, y: 416},
-  r: 128,
+  c: {x: 400, y: 250},
+  r: 150,
   orbits: [
-    {rx: 420, rot: -64, tone: 'main'},
-    {rx: 360, ry: 120, rot: -118, tone: 'dash'},
-    {rx: 250, ry: 54, rot: -36, tone: 'faint'},
+    {rx: 320, rot: 10, tone: 'main'},
+    {rx: 300, ry: 110, rot: -24, tone: 'dash'},
+    {rx: 220, ry: 60, rot: 36, tone: 'faint'},
   ],
   // Centre gutter between 01 and 02, above the canvas connector.
   sat: {x: 200, y: 150},
   lead: -1,
-  plus: [{x: 34, y: 34}, {x: 366, y: 42}, {x: 26, y: 612}, {x: 378, y: 706}, {x: 200, y: 24}],
-  stars: 30,
+  plus: [{x: 34, y: 34}, {x: 26, y: 612}, {x: 378, y: 706}],
+  stars: 24,
   seed: 23,
   label: false,
   fit: 'meet',
@@ -123,7 +126,7 @@ function ObservationPlate({plate, className, uid}: {plate: Plate; className: str
           <circle cx={c.x} cy={c.y} r={r} />
         </clipPath>
         <radialGradient id={haloId} cx={c.x} cy={c.y} r={r * 1.9} gradientUnits="userSpaceOnUse">
-          <stop className={styles.haloStop} offset="0.5" stopOpacity="0.2" />
+          <stop className={styles.haloStop} offset="0.5" stopOpacity="0.07" />
           <stop className={styles.haloStop} offset="1" stopOpacity="0" />
         </radialGradient>
       </defs>
