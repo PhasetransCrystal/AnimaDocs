@@ -11,7 +11,7 @@
 | 静态合批 | `VisualStudy/index.tsx`（`991b18e`） | 星点按距离带和透明度分桶合成 path，非闪烁像素按组和色调合并；保留动画分组用的 data 属性 | DOM 1118→1049，GPU 栅格约 -30% |
 | 阴影双层 opacity 切换 | `pages/index.tsx` `.signalFrame` | 亮暗两种大模糊阴影分别放在 `::before`/`::after` 上，只切换 opacity；隐藏的一侧用 0.004，不用 0（opacity 0 的层不栅格化，翻转时仍会出尖峰） | 消除翻转时 100-135ms 的尖峰 |
 | 悬停预挂载 | `heroThemeSwitch.ts` prime | pointerover/pointerdown/focusin 时提前挂载夜间图版 | 首帧挂载间隙降低（触屏无效） |
-| 按实测分档 | `heroArtLite.ts` | 静置时测 rAF，连续两窗 <48fps 才进 lite；所有降载都挂在 `[data-art-lite]` 下，高配机不受影响 | 前提条件 |
+| 预分流 + 实测分档 | `heroArtLite.ts` | 先按 WebGL 渲染器字符串、软件光栅、核数/内存、物理像素量预分流；明确低配直接 lite，独显先给 full，其余为 `pending`（切换走 lite、静置循环不量化）再测 rAF，连续两窗 <48fps 进 lite；所有降载都挂在 `[data-art-lite]` 下 | 前提条件；判定前的切换也不卡 |
 | 慢循环量化 | `VisualStudy/styles.module.css` lite 块 | 用 `steps()` 把慢循环降到约 12Hz，漂移改为 8 段关键帧 | 静置 26→60fps |
 | clip-path 圆改圆角盒 | `dayClip()` | 用 left/top/width/height 的圆角盒加反向偏移，代替 clip-path（后者每帧栅格一张 4097² 的遮罩） | 明显 |
 | 逐层位图缓存 | `heroPlateCache.ts` | 空闲时把各 SVG 层序列化成 0.5x canvas，切换时进场层和静态的退场层显示位图；分辨率按 `max(1, min(dpr,2)*0.5)` 计算 | +2 帧左右 |

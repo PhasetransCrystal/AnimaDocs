@@ -605,21 +605,22 @@
   animation-play-state: paused !important;
 }
 
-/* Low-end tier: [data-art-lite] is set on the hero wrapper by
+/* Low-end tier: [data-art-lite='true'] is set on the hero wrapper by
  * HomepageHeader/heroArtLite.ts only when the idle hero measurably misses its
- * frame rate. Each loop below re-rasters a full-viewport SVG layer per frame
+ * frame rate ('pending' = no verdict yet, loops stay unquantised so the probe
+ * measures them). Each loop below re-rasters a full-viewport SVG layer per frame
  * (SVG children cannot be composited), so the slow loops step at ~12 updates
  * per second (comets ~20) instead of every frame. Path, amplitude and period
  * are unchanged; the eased drifts keep their ease-in-out through sampled
  * keyframes. pulse / flicker / nodeBlink are cheap and stay continuous. */
 @media (prefers-reduced-motion: no-preference) {
-  :global([data-art-lite]) .guideCircle { animation-timing-function: steps(1920); }
-  :global([data-art-lite]) .routeCrawl { animation-timing-function: steps(432); }
-  :global([data-art-lite]) .terraceDrift { animation-name: terraceDriftLite; animation-timing-function: steps(57); }
-  :global([data-art-lite]) .lensDrift { animation-name: lensDriftLite; animation-timing-function: steps(36); }
-  :global([data-art-lite]) .tickSpin { animation-timing-function: steps(2880); }
-  :global([data-art-lite]) .orbitComet { animation-timing-function: steps(440); }
-  :global([data-art-lite]) .orbitComet.orbitCometSlow { animation-timing-function: steps(680); }
+  :global([data-art-lite='true']) .guideCircle { animation-timing-function: steps(1920); }
+  :global([data-art-lite='true']) .routeCrawl { animation-timing-function: steps(432); }
+  :global([data-art-lite='true']) .terraceDrift { animation-name: terraceDriftLite; animation-timing-function: steps(57); }
+  :global([data-art-lite='true']) .lensDrift { animation-name: lensDriftLite; animation-timing-function: steps(36); }
+  :global([data-art-lite='true']) .tickSpin { animation-timing-function: steps(2880); }
+  :global([data-art-lite='true']) .orbitComet { animation-timing-function: steps(440); }
+  :global([data-art-lite='true']) .orbitComet.orbitCometSlow { animation-timing-function: steps(680); }
 }
 
 /* terraceDrift / lensDrift with cubic-bezier(.42, 0, .58, 1) sampled into 8

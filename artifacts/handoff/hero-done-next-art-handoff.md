@@ -8,9 +8,7 @@
 
 ## full / lite 档位
 
-- 前端没有可见标识，用户看不出自己是哪一档。
-- 判定：`HomepageHeader/heroArtLite.ts` 进入首页 1.8s 后测静置帧率。连续两个 1.6s 窗口低于 48fps 判为 lite，不低于 55fps 判为 full，介于两者之间不下结论。结果写在 sessionStorage `anima-hero-art-lite`（`lite` / `full`），同一标签页会话内不重测。开启"减弱动效"时不测。
-- 查看方法：DevTools 里看 hero 外层 `.heroArt` 上是否有 `data-art-lite="true"`，或者看上面那个 sessionStorage 值。手动强制某一档：把该值设成 `lite` 或 `full` 再刷新。
+已在 2026-10-28 改为"硬件预分流 + 帧率探测"两步判定，最新说明见 `docs-bg-next-handoff.md` 的"hero 档位"一节。
 
 ## 下一阶段范围（待和用户确认优先级）
 

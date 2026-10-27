@@ -227,7 +227,7 @@ export function createSceneBake(art: HTMLElement, options: {busy?: () => boolean
     };
     const source = art.querySelector<HTMLElement>(`[data-hero-scene="${name}"]`);
     if (!source) { bake.state = 'failed'; return; }
-    const ratio = Math.max(1, Math.min(dpr, 2) * (art.closest('[data-art-lite]') ? 0.5 : 1));
+    const ratio = Math.max(1, Math.min(dpr, 2) * (art.closest('[data-art-lite="true"]') ? 0.5 : 1));
     const pw = Math.max(1, Math.round(width * ratio));
     const ph = Math.max(1, Math.round(height * ratio));
     const mine = generation;

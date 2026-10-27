@@ -223,19 +223,27 @@ export function installHeroThemeSwitch(
       if (!current) unprime();
     }, PRIME_RELEASE_MS);
   };
-  /* Lite tier (heroArtLite.ts flags the art host on low-end devices). Only
-   * then are background plates pre-rendered to half-resolution bitmaps in
-   * idle time, so the switch fades bitmaps instead of re-rasterising the
-   * SVG plates. Full-tier devices never build the cache. */
+  /* Lite tier (heroArtLite.ts flags the art host on low-end devices, and as
+   * 'pending' until the probe has a verdict). Only then are background plates
+   * pre-rendered to half-resolution bitmaps in idle time, so the switch fades
+   * bitmaps instead of re-rasterising the SVG plates. A full verdict drops
+   * the cache again. */
   const isLite = () => art.closest('[data-art-lite]') !== null;
   const narrow = window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH}px)`);
   /* Per-layer plates serve only the desktop choreography: phones never use
    * them, and a hidden page must not serialise / decode SVG in idle time. */
   let plates: PlateCache | null = null;
   const syncPlates = () => {
-    if (plates || !isLite() || reducedMotion.matches || narrow.matches) return;
+    const want = isLite() && !reducedMotion.matches && !narrow.matches;
+    if (plates && !want && current === null) {
+      plates.dispose();
+      plates = null;
+    }
+    if (plates || !want) return;
     plates = createPlateCache(art, {
-      busy: () => document.hidden || current !== null || art.dataset.heroPrimed !== undefined || art.closest('[data-art-paused]') !== null,
+      // Probe windows (heroArtLite.ts) measure the idle hero; stay out of them.
+      busy: () => document.hidden || current !== null || art.dataset.heroPrimed !== undefined
+        || art.closest('[data-art-paused], [data-art-probe]') !== null,
     });
   };
   const liteObserver = new MutationObserver(syncPlates);
@@ -368,6 +376,8 @@ export function installHeroThemeSwitch(
     if (value) value.textContent = '';
     if (unit) unit.textContent = '';
     if (current === run) current = null;
+    // A tier verdict that landed mid-run was held back; apply it now.
+    syncPlates();
     // Let the data-theme MutationObserver in themeTransition.ts see `active`
     // first so it does not start the class crossfade on our own flip.
     queueMicrotask(() => {

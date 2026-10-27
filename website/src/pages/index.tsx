@@ -75,6 +75,8 @@ function HomepageHeader(): ReactNode {
       <div className={styles.heroArt} aria-hidden="true" ref={artRef}>
         <VisualStudy />
         <span className={styles.heroArtRule} data-hero-ink="" />
+        {/* Hidden animation-tier status, filled by heroArtLite.ts. */}
+        <span data-hero-tier="" hidden />
       </div>
 
       <div className={styles.heroToplineFrame} data-hero-ink="">
