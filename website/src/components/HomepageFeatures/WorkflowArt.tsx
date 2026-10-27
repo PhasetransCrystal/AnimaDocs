@@ -9,19 +9,16 @@ const rayAngles = Array.from({length: 19}, (_value, index) => index * 10 - 90);
 // --star-x / --star-y so the stacked layout can move arcs and star together; the
 // attributes are the no-CSS fallback.
 const STAR_CX = '80%';
-const STAR_CY = '-17%';
-// Concentric arcs around the star (SVG % of the normalised diagonal). The gap widens
-// slowly (8 → 12) instead of the original even 13% steps.
+const STAR_CY = '-5%';
+// Concentric arcs around the star (SVG % of the normalised diagonal). Each gap is ~1.25×
+// the previous one (9 → 11 → 14 → 17.5), so the rings spread out as they fade.
 const orbitArcs = [
   {radius: 24, opacity: 1},
-  {radius: 31, opacity: 0.76},
-  {radius: 38.5, opacity: 0.56},
-  {radius: 46.5, opacity: 0.4},
-  {radius: 55, opacity: 0.27},
-  {radius: 64, opacity: 0.16},
-  {radius: 73.5, opacity: 0.08},
+  {radius: 33, opacity: 0.62},
+  {radius: 44, opacity: 0.38},
+  {radius: 58, opacity: 0.2},
+  {radius: 75.5, opacity: 0.09},
 ];
-const bandRadii = {narrow: '27.5%', wide: '50.5%'};
 
 // Star system SVG: 1 unit = board width / 1000, origin = star centre.
 const DISC_R = 135;
@@ -75,8 +72,8 @@ function StarSystem({uid}: {uid: string}): ReactNode {
       </defs>
       <circle r={fx(DISC_R * 1.9)} fill={`url(#${haloId})`} />
       <circle className={styles.disc} data-star-disc="" r={DISC_R} />
-      <circle className={styles.lensShade} clipPath={`url(#${clipId})`} cx={fx(DISC_R * 0.3)} cy={fx(DISC_R * -0.2)} r={fx(DISC_R * 0.96)} />
-      <circle className={styles.lensTwin} cx={fx(DISC_R * 0.3)} cy={fx(DISC_R * -0.2)} r={fx(DISC_R * 0.96)} />
+      {/* Shade sits lower-right so the lit crescent faces up-left, toward the board. */}
+      <circle className={styles.lensShade} clipPath={`url(#${clipId})`} cx={fx(DISC_R * 0.72)} cy={fx(DISC_R * 0.34)} r={fx(DISC_R * 0.84)} />
       <path className={styles.planetOrbit} data-orbit-side="near" d={orbitArc(0, 180)} />
       <path className={styles.planetOrbit} data-orbit-side="far" d={orbitArc(180, 360)} mask={`url(#${behindId})`} />
       <path className={styles.comet} d={orbitArc(PLANET_DEG - 46, PLANET_DEG - 4)} />
@@ -88,9 +85,7 @@ function StarSystem({uid}: {uid: string}): ReactNode {
 
 function NightStudy(): ReactNode {
   const maskId = `workflow-orbit-${useId().replace(/:/g, '')}`;
-  const bandsId = `${maskId}-bands`;
   const marksId = `${maskId}-marks`;
-  const marksMaskId = `${maskId}-marks-mask`;
 
   return (
     <div className={styles.nightArt} data-workflow-art="night" data-art-mode="night">
@@ -105,10 +100,6 @@ function NightStudy(): ReactNode {
       <StarSystem uid={maskId} />
       <svg className={styles.orbitStudy} width="100%" height="100%" focusable="false">
         <defs>
-          <g id={bandsId}>
-            <circle className={styles.orbitBandNarrow} data-orbit-band="narrow" cx={STAR_CX} cy={STAR_CY} r={bandRadii.narrow} />
-            <circle className={styles.orbitBandWide} data-orbit-band="wide" cx={STAR_CX} cy={STAR_CY} r={bandRadii.wide} />
-          </g>
           <g id={marksId}>
             {registrationPositions.map((position) => (
               <g key={position} className={styles.registrationMark}>
@@ -124,40 +115,24 @@ function NightStudy(): ReactNode {
             <rect width="100%" height="100%" fill="white" />
             <use href={`#${marksId}`} stroke="black" strokeWidth="1" />
           </mask>
-          <mask id={marksMaskId} maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%">
-            <rect width="100%" height="100%" fill="white" />
-            <use href={`#${bandsId}`} stroke="black" />
-          </mask>
         </defs>
         <g mask={`url(#${maskId})`}>
-          <g className={styles.orbitBands}>
-            <use href={`#${bandsId}`} />
-          </g>
           <g className={styles.orbitArcs}>
             {orbitArcs.map(({radius, opacity}) => (
               <circle key={radius} data-orbit-radius={radius} cx={STAR_CX} cy={STAR_CY} r={`${radius}%`} opacity={opacity} />
             ))}
           </g>
         </g>
-        <g className={styles.registrationStudy} mask={`url(#${marksMaskId})`}>
+        <g className={styles.registrationStudy}>
           <use href={`#${marksId}`} />
         </g>
       </svg>
-      <div className={`${styles.decorativeCopy} ${styles.nightLogPrimary}`}>
-        <span>0000: 7F 45 4C 46 / 02 01 00 00</span>
-        <span>0010: 00 00 00 00 / 28 C0 7F FF</span>
-        <span>0020: 10 00 A8 3E / 00 00 00 00</span>
-        <span>0030: 03 FF 00 00 / 7E 18 40 00</span>
-        <span>0040: .... .... .... ....</span>
-        <span>0x00007ff0 :: [0000] / &lt;null&gt;</span>
-      </div>
-      <div className={`${styles.decorativeCopy} ${styles.nightLogSecondary}`}>
-        <span>R00 00000000 / R01 7FF03C18</span>
-        <span>R02 00001000 / R03 00000000</span>
-        <span>SP  00FF7A20 / IP  00003F80</span>
-        <span>[00] +0018 -&gt; 7FF0:03C0</span>
-        <span>[01] +0020 -&gt; 0000:0000</span>
-        <span>-------- / 0x00 / --------</span>
+      {/* Mirrors the day swatch strip: night palette roles (signal / ink / structure). */}
+      <div className={styles.nightSwatches}><i /><i /><i /><span>06 / CORE STUDY</span></div>
+      {/* One short observation caption beside the star, replacing the two hex dumps. */}
+      <div className={`${styles.decorativeCopy} ${styles.nightCaption}`}>
+        <span>FIG.06 — SAMPLER CORE</span>
+        <span>ORBIT 270 / 85 · −34°</span>
       </div>
     </div>
   );
